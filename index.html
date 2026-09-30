@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Abdelkrim Ghebouli</title>
+<meta name="description" content="Abdelkrim Ghebouli, SAP BPC consultant and business intelligence specialist. A real-time portfolio built from 60,000 particles.">
+<meta name="theme-color" content="#06070d">
+<meta name="author" content="Abdelkrim Ghebouli">
+<link rel="canonical" href="https://abdelkrim789.github.io/my-portfolio/">
+<meta property="og:type" content="profile">
+<meta property="og:title" content="Abdelkrim Ghebouli · SAP BPC Consultant">
+<meta property="og:description" content="SAP-certified BI and SAP BPC consultant. A portfolio you fly through: 240,000 particles rendered live.">
+<meta property="og:url" content="https://abdelkrim789.github.io/my-portfolio/">
+<meta property="og:image" content="https://abdelkrim789.github.io/my-portfolio/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://abdelkrim789.github.io/my-portfolio/og.jpg">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2306070d'/%3E%3Cg fill='none' stroke='%23e8c07a' stroke-width='3'%3E%3Crect x='17' y='17' width='30' height='30'/%3E%3Crect x='17' y='17' width='30' height='30' transform='rotate(45 32 32)'/%3E%3C/g%3E%3Ccircle cx='32' cy='32' r='4' fill='%239fd8e6'/%3E%3C/svg%3E">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Abdelkrim Ghebouli","jobTitle":"SAP BPC Consultant","url":"https://abdelkrim789.github.io/my-portfolio/","sameAs":["https://www.linkedin.com/in/abdelkrim-ghebouli"],"address":{"@type":"PostalAddress","addressLocality":"Bordj Bou Arreridj","addressCountry":"DZ"},"alumniOf":"Mohamed El Bachir El Ibrahimi University","knowsAbout":["SAP BPC","SAP BW","SAP S/4HANA","SAP Analytics Cloud","Power BI","ABAP","Business Intelligence"]}</script>
+<style>
+/* Layout: a fixed full-bleed WebGL stage; eight short chapters scroll over it; the details live on labels anchored inside the 3D objects and open in a side panel. */
+:root {
+  --ink: #07080f;
+  --ink-2: #0e1122;
+  --paper: #ece7dc;
+  --muted: #9095ab;
+  --sand: #e8c07a;
+  --ice: #9fd8e6;
+  --fault: #ec5a42;
+  --line: rgba(236, 231, 220, 0.16);
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --gutter: clamp(16px, 5vw, 72px);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { background: var(--ink); }
+body { margin: 0; background: var(--ink); color: var(--paper); font: 400 1rem/1.65 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--sand); outline-offset: 3px; }
+
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+.scrim { position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(90deg, rgba(6, 7, 13, 0.7) 0%, rgba(6, 7, 13, 0.35) 30%, rgba(6, 7, 13, 0) 50%); opacity: 0; }
+.no-webgl body, .no-webgl #stage { background: radial-gradient(ellipse at 70% 40%, #1a2240 0%, var(--ink) 60%); }
+
+/* HUD */
+.hud-top { position: fixed; z-index: 5; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: calc(env(safe-area-inset-top, 0px) + 18px) var(--gutter) 28px; pointer-events: none;
+  background: linear-gradient(180deg, rgba(7, 8, 15, 0.92) 0%, rgba(7, 8, 15, 0.6) 60%, rgba(7, 8, 15, 0) 100%); }
+.hud-top > * { pointer-events: auto; }
+.brand { display: flex; flex-direction: column; text-decoration: none; font: 600 0.95rem/1.15 var(--body); letter-spacing: 0.01em; }
+.brand span { font: 400 0.68rem/1.4 var(--mono); color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
+.hud-actions { display: flex; gap: 8px; }
+.chip { font: 500 0.7rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper); background: rgba(14, 17, 34, 0.6);
+  border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; cursor: pointer; text-decoration: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); white-space: nowrap; }
+.chip:hover { border-color: var(--sand); color: var(--sand); }
+.chip[aria-pressed="true"] { border-color: var(--ice); color: var(--ice); }
+.no-webgl #sound-toggle { display: none; }
+
+.rail { position: fixed; z-index: 5; left: calc(var(--gutter) * 0.35); top: 50%; transform: translateY(-50%); }
+.rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.rail button { all: unset; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 5px 0; font: 400 0.64rem/1 var(--mono); letter-spacing: 0.14em; color: var(--muted); }
+.rail button span { width: 18px; }
+.rail button em { font-style: normal; opacity: 0; transform: translateX(-4px); transition: opacity 0.3s, transform 0.3s; }
+.rail button::before { content: ""; width: 14px; height: 1px; background: currentColor; transition: width 0.35s; order: -1; }
+.rail button.on { color: var(--sand); }
+.rail button.on::before { width: 30px; }
+.rail button.on em, .rail button:hover em, .rail button:focus-visible em { opacity: 1; transform: none; }
+.hud-bottom { position: fixed; z-index: 5; left: var(--gutter); right: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+  display: flex; justify-content: space-between; gap: 12px; font: 400 0.66rem/1.3 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); pointer-events: none; }
+#hud-stage { color: var(--paper); }
+.hud-bottom .count { margin-left: auto; margin-right: 230px; }
+@media (max-width: 899px) { .hud-bottom .count { margin-right: 0; } }
+.progress { position: fixed; z-index: 6; left: 0; right: 0; top: 0; height: 2px; }
+.progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--sand), var(--ice)); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* Labels anchored inside the 3D scenes */
+.hotspots { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+.hs { position: absolute; left: 0; top: 0; margin: -9px 0 0 -9px; display: flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none;
+  color: var(--paper); font: 500 0.66rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; cursor: pointer; will-change: transform, opacity; }
+.hs i { position: relative; width: 18px; height: 18px; flex: none; border: 1px solid currentColor; border-radius: 50%; }
+.hs i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: currentColor; }
+.hs i::before { content: ""; position: absolute; inset: -1px; border-radius: 50%; border: 1px solid currentColor; animation: ring 2.2s ease-out infinite; }
+@keyframes ring { from { transform: scale(1); opacity: 0.7; } to { transform: scale(2.4); opacity: 0; } }
+.hs b { font-weight: 500; padding: 5px 8px; background: rgba(7, 8, 15, 0.62); border: 1px solid var(--line); border-radius: 2px; transition: border-color 0.25s, color 0.25s, background 0.25s; }
+.hs:hover b, .hs:focus-visible b, .hs.active b { border-color: var(--sand); color: var(--ink); background: var(--sand); }
+.hs.sand { color: var(--sand); } .hs.sand b { color: var(--paper); }
+.hs.fault { color: var(--fault); } .hs.fault b { border-color: rgba(236, 90, 66, 0.45); color: var(--fault); }
+.hs.flip { flex-direction: row-reverse; }
+.hs.static { cursor: default; color: var(--muted); }
+.hs.static i { width: 7px; height: 7px; margin: 0 5px; background: currentColor; border: 0; }
+.hs.static i::before, .hs.static i::after { display: none; }
+.hs.static b { background: transparent; border-color: transparent; padding-left: 0; }
+.hs.fault.static { color: var(--fault); }
+
+/* Chapters */
+main { position: relative; z-index: 2; }
+.chapter { min-height: 165vh; padding-inline: var(--gutter); position: relative; }
+.chapter.hero { min-height: 118vh; }
+.panel { max-width: 38rem; padding-block: 30vh 20vh; margin-left: clamp(0px, 4vw, 70px); transition: opacity 0.5s; }
+.focused .chapter .panel { filter: opacity(0); }
+@media (min-width: 900px) and (min-height: 640px) {
+  .chapter:not(.hero):not(.last) .panel { position: sticky; top: 0; padding-block: 88px 64px; }
+}
+.eyebrow { display: flex; align-items: center; gap: 10px; font: 500 0.72rem/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--ice); margin: 0 0 18px; }
+.eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; }
+.eyebrow.sand { color: var(--sand); } .eyebrow.fault { color: var(--fault); }
+h2 { font: 800 clamp(2.6rem, 5vw, 4.9rem)/0.88 var(--display); text-transform: uppercase; letter-spacing: 0.005em; margin: 0 0 20px; text-wrap: balance; }
+p { margin: 0 0 14px; color: rgba(236, 231, 220, 0.86); max-width: 62ch; }
+.role { font: 400 0.78rem/1.5 var(--mono); color: var(--muted); letter-spacing: 0.04em; margin-bottom: 14px; }
+.role b { color: var(--paper); font-weight: 500; }
+.hint { display: inline-flex; align-items: center; gap: 12px; margin-top: 10px; font: 500 0.68rem/1.4 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sand); }
+.hint::before { content: ""; width: 7px; height: 7px; flex: none; border-radius: 50%; background: currentColor; animation: ping 1.8s ease-out infinite; }
+@keyframes ping { from { box-shadow: 0 0 0 0 rgba(232, 192, 122, 0.6); } to { box-shadow: 0 0 0 12px rgba(232, 192, 122, 0); } }
+
+.hero .panel { padding-block: 0; position: absolute; left: var(--gutter); right: var(--gutter); bottom: 34vh; margin: 0; max-width: 40rem; }
+.hero h1 { font: 800 clamp(3rem, 9vw, 7rem)/0.88 var(--display); text-transform: uppercase; margin: 0 0 20px; }
+.webgl .hero h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.lead { font: 500 clamp(1.25rem, 2.3vw, 1.7rem)/1.3 var(--body); color: var(--paper); max-width: 26ch; text-wrap: balance; margin-bottom: 14px; }
+.meta { font: 400 0.74rem/1.7 var(--mono); color: var(--muted); letter-spacing: 0.06em; max-width: none; }
+
+/* Final chapter */
+.last .panel { max-width: 36rem; padding-block: 26vh 16vh; }
+.creds { list-style: none; margin: 22px 0 28px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.creds li { font: 400 0.8rem/1.3 var(--body); padding: 10px 12px; border: 1px solid var(--line); background: rgba(7, 8, 15, 0.6); border-radius: 2px; cursor: default; transition: border-color 0.25s; }
+.creds li:hover, .creds li:focus-visible { border-color: var(--sand); }
+.creds code { display: block; font: 500 0.7rem/1 var(--mono); color: var(--sand); letter-spacing: 0.1em; margin-bottom: 6px; }
+.contact { border-top: 1px solid var(--line); padding-top: 22px; display: grid; gap: 16px; }
+#email { font: 800 clamp(1.5rem, 4.2vw, 2.6rem)/1 var(--display); letter-spacing: 0.01em; user-select: all; overflow-wrap: anywhere; }
+.contact-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn { font: 500 0.74rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; padding: 13px 18px; border-radius: 999px; cursor: pointer; text-decoration: none;
+  border: 1px solid var(--sand); background: var(--sand); color: var(--ink); }
+.btn.ghost { background: transparent; color: var(--paper); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--ice); color: var(--ice); }
+footer { position: relative; z-index: 2; padding: 0 var(--gutter) calc(env(safe-area-inset-bottom, 0px) + 70px); font: 400 0.68rem/1.6 var(--mono); color: var(--muted); letter-spacing: 0.06em; }
+footer p { color: var(--muted); font-size: inherit; }
+
+/* Detail panel */
+#detail { position: fixed; z-index: 8; top: 0; right: 0; bottom: 0; width: min(440px, 100%); overflow-y: auto; overscroll-behavior: contain;
+  padding: calc(env(safe-area-inset-top, 0px) + 84px) 32px calc(env(safe-area-inset-bottom, 0px) + 40px);
+  background: rgba(9, 11, 22, 0.86); border-left: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  transform: translateX(104%); transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+#detail.open { transform: none; }
+#detail .close { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 22px); right: 24px; }
+.detail-body .tag { font: 500 0.68rem/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--sand); margin: 0 0 14px; }
+.detail-body h3 { font: 800 clamp(2rem, 4vw, 2.8rem)/0.92 var(--display); text-transform: uppercase; margin: 0 0 14px; text-wrap: balance; }
+.detail-body .dmeta { font: 400 0.76rem/1.5 var(--mono); color: var(--muted); margin-bottom: 18px; }
+.detail-body p { font-size: 0.96rem; }
+.detail-body ul { margin: 0 0 16px; padding-left: 1.1em; display: grid; gap: 6px; font-size: 0.94rem; color: rgba(236, 231, 220, 0.88); }
+.detail-body a.link { font: 500 0.74rem/1 var(--mono); color: var(--ice); letter-spacing: 0.08em; text-decoration: none; display: inline-block; margin-top: 6px; }
+.detail-body a.link:hover { text-decoration: underline; }
+.detail-body .tech { font: 400 0.72rem/1.4 var(--mono); color: var(--muted); letter-spacing: 0.06em; }
+.readout { margin: 18px 0 0; padding: 14px 0 0; border-top: 1px solid var(--line); display: grid; gap: 8px; font: 400 0.76rem/1.35 var(--mono); letter-spacing: 0.06em; }
+.readout div { display: flex; justify-content: space-between; gap: 16px; }
+.readout dt { color: var(--muted); text-transform: uppercase; }
+.readout dd { margin: 0; text-align: right; }
+.fault-t { color: var(--fault); } .ice-t { color: var(--ice); }
+.metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin: 6px 0 18px; }
+.metrics div { background: rgba(7, 8, 15, 0.8); padding: 14px; }
+.metrics b { display: block; font: 800 2.1rem/1 var(--display); color: var(--sand); font-variant-numeric: tabular-nums; }
+.metrics span { display: block; margin-top: 6px; font-size: 0.8rem; line-height: 1.4; color: rgba(236, 231, 220, 0.8); }
+
+
+/* Boot sequence */
+#boot { position: fixed; inset: 0; z-index: 100; background: var(--ink); display: grid; place-content: center; gap: 18px; padding: 24px;
+  font: 400 0.74rem/1.9 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); transition: opacity 0.8s, visibility 0.8s; }
+#boot p { margin: 0; color: var(--sand); font-weight: 500; }
+#boot ol { list-style: none; margin: 0; padding: 0; min-height: 9.5em; }
+#boot li::before { content: "› "; color: var(--ice); }
+#boot li:last-child { color: var(--paper); }
+.booted #boot { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* Career timeline on the data river */
+.hs.year { color: var(--sand); cursor: default; }
+.hs.year b { background: rgba(7, 8, 15, 0.5); border-color: rgba(232, 192, 122, 0.25); color: var(--paper); letter-spacing: 0.08em; }
+.hs.year em { font-style: normal; color: var(--sand); margin-right: 10px; }
+.hs.year i { width: 7px; height: 7px; margin: 0 5px; background: currentColor; border: 0; }
+.hs.year i::before, .hs.year i::after { display: none; }
+
+/* Journey minimap */
+.minimap { position: fixed; z-index: 5; right: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); width: 200px; }
+.minimap svg { display: block; width: 100%; height: auto; overflow: visible; }
+.minimap .route { fill: none; stroke: rgba(159, 216, 230, 0.35); stroke-width: 1; stroke-dasharray: 2 3; }
+.minimap .stop { cursor: pointer; }
+.minimap .stop circle { fill: var(--ink); stroke: var(--sand); stroke-width: 1; transition: fill 0.25s; }
+.minimap .stop:hover circle, .minimap .stop:focus-visible circle { fill: var(--sand); }
+.minimap .stop text { font: 500 6px var(--mono); fill: var(--muted); text-anchor: middle; letter-spacing: 0.08em; }
+.minimap .you { fill: var(--ice); filter: drop-shadow(0 0 3px var(--ice)); }
+.minimap-label { display: block; font: 400 0.6rem/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; text-align: right; }
+.no-webgl .minimap { display: none; }
+
+/* Project screen in the detail panel */
+.detail-body figure.shot { margin: 0 0 20px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; background: var(--ink-2); }
+.detail-body figure.shot img { display: block; width: 100%; height: auto; }
+
+/* Portrait and meet line */
+.detail-body figure.portrait { margin: 0 0 20px; width: 132px; aspect-ratio: 1; border-radius: 50%; overflow: hidden; border: 1px solid var(--sand); }
+.detail-body figure.portrait img { width: 100%; height: 100%; object-fit: cover; display: block; filter: grayscale(0.2) contrast(1.05); }
+.meet { font: 400 0.8rem/1.5 var(--mono); color: var(--muted); letter-spacing: 0.04em; margin: 16px 0 0; }
+.meet span { color: var(--paper); border-bottom: 1px dashed var(--sand); cursor: default; }
+.meet span:hover, .meet span:focus-visible { color: var(--sand); }
+
+/* Cursor */
+#cursor { position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; width: 0; height: 0; }
+#cursor::before { content: ""; position: absolute; width: 34px; height: 34px; left: -17px; top: -17px; border: 1px solid rgba(236, 231, 220, 0.45); border-radius: 50%;
+  transition: width 0.3s, height 0.3s, left 0.3s, top 0.3s, border-color 0.3s; }
+#cursor i { position: absolute; width: 4px; height: 4px; left: -2px; top: -2px; border-radius: 50%; background: var(--sand); }
+#cursor span { position: absolute; left: 30px; top: -5px; font: 500 0.6rem/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sand); white-space: nowrap; transition: left 0.3s; }
+#cursor.big::before { width: 58px; height: 58px; left: -29px; top: -29px; border-color: var(--sand); }
+#cursor.big span { left: 38px; }
+#cursor.down::before { width: 22px; height: 22px; left: -11px; top: -11px; }
+@media (pointer: fine) { .webgl, .webgl * { cursor: none !important; } }
+@media (pointer: coarse) { #cursor { display: none; } }
+.no-webgl #cursor, .no-webgl .hotspots { display: none; }
+
+@media (max-width: 899px) {
+  .rail { display: none; }
+  .scrim { background: linear-gradient(180deg, rgba(7, 8, 15, 0) 0%, rgba(7, 8, 15, 0.35) 100%); }
+  .chapter { min-height: 140vh; }
+  .panel { margin-left: 0; padding-block: 62vh 10vh; }
+  .chapter:not(.hero) .panel { background: linear-gradient(180deg, rgba(7, 8, 15, 0) 0, rgba(7, 8, 15, 0.8) 40vh, rgba(7, 8, 15, 0.8) 100%);
+    margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); max-width: none; }
+  .hero .panel { bottom: 24vh; }
+  .hud-bottom { display: none; }
+  .minimap { display: none; }
+  .brand span { display: none; }
+  .chip { padding: 8px 11px; letter-spacing: 0.08em; }
+  .hero .eyebrow::before { display: none; }
+  #detail { top: auto; width: 100%; max-height: 64vh; border-left: 0; border-top: 1px solid var(--line); transform: translateY(104%); padding: 64px 20px calc(env(safe-area-inset-bottom, 0px) + 28px); }
+  #detail .close { top: 16px; right: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .hint::before, .hs i::before { animation: none; } #detail { transition: none; } }
+</style>
+</head>
+<body>
+<canvas id="stage" aria-hidden="true"></canvas>
+<div class="scrim" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"><i></i></div>
+
+<header class="hud-top">
+  <a class="brand" href="#signal">Abdelkrim Ghebouli<span>SAP BPC · Business Intelligence</span></a>
+  <div class="hud-actions">
+    <button class="chip" id="sound-toggle" type="button" aria-pressed="false">Sound off</button>
+    <a class="chip" href="#decide">Contact</a>
+  </div>
+</header>
+<nav class="rail" aria-label="Chapters"><ol></ol></nav>
+<div class="hotspots"></div>
+<div class="hud-bottom" aria-hidden="true"><span id="hud-stage">00 / SIGNAL</span><span id="hud-count" class="count">real time</span></div>
+<div id="cursor" aria-hidden="true"><i></i><span></span></div>
+<div class="minimap"><span class="minimap-label">Journey</span><svg viewBox="0 0 200 70" aria-label="Journey map"></svg></div>
+<div id="boot" aria-hidden="true"><p>Abdelkrim Ghebouli · portfolio</p><ol></ol></div>
+
+<main>
+  <section class="chapter hero" id="signal" data-stage="0">
+    <div class="panel">
+      <p class="eyebrow sand">SAP BPC Consultant · Business Intelligence</p>
+      <h1>Abdelkrim Ghebouli</h1>
+      <p class="lead">I turn raw operational data into decisions teams can act on.</p>
+      <span class="hint" data-hint-touch="Scroll to dive in">Scroll to dive in · drag · click</span>
+    </div>
+  </section>
+
+  <section class="chapter" id="raw" data-stage="1">
+    <div class="panel">
+      <p class="eyebrow fault">01 · Raw</p>
+      <h2>The day the stock data broke</h2>
+      <span class="hint" data-hint-touch="Tap the red label">Move through the storm to repair it</span>
+    </div>
+  </section>
+
+  <section class="chapter" id="clean" data-stage="2">
+    <div class="panel">
+      <p class="eyebrow">02 · Clean</p>
+      <h2>Rebuilt from the movement history</h2>
+      <span class="hint">Open a restored record</span>
+    </div>
+  </section>
+
+  <section class="chapter" id="model" data-stage="3">
+    <div class="panel">
+      <p class="eyebrow sand">03 · Model</p>
+      <h2>Eight systems, one structure</h2>
+      <span class="hint">Open a point of the star</span>
+    </div>
+  </section>
+
+  <section class="chapter" id="consolidate" data-stage="4">
+    <div class="panel">
+      <p class="eyebrow">04 · Consolidate</p>
+      <h2>Many entities, one closing</h2>
+      <span class="hint">Open the core</span>
+    </div>
+  </section>
+
+  <section class="chapter" id="report" data-stage="5">
+    <div class="panel">
+      <p class="eyebrow sand">05 · Report</p>
+      <h2>Dashboards instead of manual reports</h2>
+      <span class="hint">Open a gold tower</span>
+    </div>
+  </section>
+
+  <section class="chapter" id="build" data-stage="6">
+    <div class="panel">
+      <p class="eyebrow">06 · Build</p>
+      <h2>I also write the software</h2>
+      <span class="hint">Open a project</span>
+    </div>
+  </section>
+
+  <section class="chapter last" id="decide" data-stage="7">
+    <div class="panel">
+      <p class="eyebrow sand">07 · Decide</p>
+      <h2>The next decision is yours</h2>
+      <p>Open to SAP consultant roles internationally.</p>
+      <span class="hint" data-hint-touch="Tap the home marker to meet me">Hover a credential, a contact, or my name</span>
+      <p class="meet"><span tabindex="0" data-glyph="__face">Abdelkrim Ghebouli</span> · Bordj Bou Arreridj, Algeria</p>
+      <ul class="creds" aria-label="SAP certifications">
+        <li tabindex="0" data-glyph="C_SAC"><code>C_SAC</code>Data Analyst · SAP Analytics Cloud</li>
+        <li tabindex="0" data-glyph="TS410"><code>TS410</code>Business Process Integration · S/4HANA</li>
+        <li tabindex="0" data-glyph="S4C03"><code>S4C03</code>Implementation Consultant · S/4HANA Cloud PE</li>
+        <li tabindex="0" data-glyph="ABAP"><code>C_ABAPD_2309</code>Back-End Developer · ABAP Cloud</li>
+      </ul>
+      <div class="contact">
+        <span id="email" data-glyph="@">abdelkrimghebouli.34@gmail.com</span>
+        <div class="contact-row">
+          <button class="btn" id="copy-email" type="button" data-glyph="@">Copy email</button>
+          <a class="btn ghost" href="https://www.linkedin.com/in/abdelkrim-ghebouli" target="_blank" rel="noopener" data-glyph="in">LinkedIn ↗</a>
+          <a class="btn ghost" data-cv href="./Abdelkrim-Ghebouli-CV.pdf" download data-glyph="CV">Download CV ↓</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer><p>One world, rendered live in your browser with Three.js and custom shaders. No video, no images: every shape here is computed.</p></footer>
+
+<aside id="detail" aria-label="Details">
+  <button class="chip close" type="button">Close</button>
+  <div class="detail-body"></div>
+</aside>
+
+<template id="d-raw">
+  <p class="tag">Incident · Géant Electronics</p>
+  <h3>The stock-data incident</h3>
+  <p>Network delays corrupted stock data on nearly all articles in Cegid PMI. The quantities in the system no longer matched what had actually moved through the depots, and production was blocked.</p>
+  <dl class="readout">
+    <div><dt>ERP</dt><dd>Cegid PMI</dd></div>
+    <div><dt>Cause</dt><dd>Network delays</dd></div>
+    <div><dt>Articles affected</dt><dd class="fault-t">Nearly all</dd></div>
+    <div><dt>Production</dt><dd class="fault-t">Blocked</dd></div>
+  </dl>
+</template>
+<template id="d-clean">
+  <p class="tag">Fix · Géant Electronics</p>
+  <h3>How I fixed it</h3>
+  <p>I analysed stock at depot and lot level against the full movement history to locate the records that had drifted.</p>
+  <p>Then I built an automated tool that detected and corrected the affected records, restoring accurate stock data across the company.</p>
+  <dl class="readout">
+    <div><dt>Method</dt><dd>Stock vs. movement history</dd></div>
+    <div><dt>Fix</dt><dd>Automated detect and correct</dd></div>
+    <div><dt>Status</dt><dd class="ice-t">Restored company-wide</dd></div>
+  </dl>
+</template>
+<template id="d-sys-0"><p class="tag">System 01 / 08</p><h3>SAP S/4HANA</h3>
+  <p>Certified twice: TS410, Business Process Integration, and S4C03, Implementation Consultant for S/4HANA Cloud Private Edition.</p>
+  <p>Workshops, simulations and international business-process case studies in the SAP Young Professionals Program, March to May 2025.</p></template>
+<template id="d-sys-1"><p class="tag">System 02 / 08</p><h3>SAP BPC</h3>
+  <p>My daily system on Sonatrach's SHONE project: planning, consolidation and reporting.</p>
+  <p>I configure Business Process Flows to structure and monitor the planning and consolidation cycle.</p></template>
+<template id="d-sys-2"><p class="tag">System 03 / 08</p><h3>SAP BW</h3>
+  <p>Specialised training in BW Query Design and Security Design within the BPC/BW landscape.</p></template>
+<template id="d-sys-3"><p class="tag">System 04 / 08</p><h3>SAP Analytics Cloud</h3>
+  <p>SAP Certified Associate, Data Analyst: SAP Analytics Cloud (C_SAC).</p></template>
+<template id="d-sys-4"><p class="tag">System 05 / 08</p><h3>Power BI</h3>
+  <p>Built and maintained 4–6 Power BI dashboards at Géant Electronics, used across departments. They gave leadership real-time visibility into operational and financial metrics and replaced manual reporting.</p></template>
+<template id="d-sys-5"><p class="tag">System 06 / 08</p><h3>Cegid PMI</h3>
+  <p>Primary ERP support for 30–50 users at Géant Electronics, resolving navigation and configuration issues and cutting ticket resolution time.</p>
+  <p>I led the full Cegid PMI launch in the after-sales department, driving adoption across 10–20 staff and gathering functional requirements after testing.</p></template>
+<template id="d-sys-6"><p class="tag">System 07 / 08</p><h3>ABAP</h3>
+  <p>SAP Certified Associate, Back-End Developer: ABAP Cloud (C_ABAPD_2309).</p></template>
+<template id="d-sys-7"><p class="tag">System 08 / 08</p><h3>Python</h3>
+  <p>Enhanced an internal Python Flask platform for managing Cegid PMI configurations, improving processing speed by nearly 30% and expanding its data-handling capacity.</p>
+  <p>I also automate reporting workflows with Python and optimise the SQL behind them.</p></template>
+<template id="d-shone">
+  <p class="tag">Current role</p>
+  <h3>SAP BPC Consultant</h3>
+  <p class="dmeta">CNPC / Beijing Richfit International · June 2026 to now</p>
+  <p>On Sonatrach's SHONE project I support planning, consolidation and reporting across Sonatrach's operations in Algeria. Each stream in the scene is an entity's data flowing into one consolidated view.</p>
+  <ul>
+    <li>Configure Business Process Flows to structure and monitor planning and consolidation</li>
+    <li>Build EPM Add-in and Analysis for Office reports for end users</li>
+    <li>Build and maintain reports that support business decisions</li>
+    <li>Trained in BW Query Design and Security Design</li>
+  </ul>
+</template>
+<template id="d-geant">
+  <p class="tag">Experience</p>
+  <h3>Data Analyst &amp; ERP Support Specialist</h3>
+  <p class="dmeta">Géant Electronics · January to June 2025</p>
+  <div class="metrics">
+    <div><b>4–6</b><span>Power BI dashboards used across departments</span></div>
+    <div><b>~30%</b><span>faster processing in the Flask platform for Cegid PMI</span></div>
+    <div><b>30–50</b><span>Cegid PMI users supported as primary ERP contact</span></div>
+    <div><b>10–20</b><span>after-sales staff onboarded in the Cegid PMI launch</span></div>
+  </div>
+  <p>I also worked with the commercial team on budgeting and revenue analysis, reconciling accounting entries against revenue data in the ERP to support financial reporting.</p>
+</template>
+<template id="d-olive">
+  <p class="tag">Project · Lead backend developer</p>
+  <h3>Olive Palace</h3>
+  <p>The backend for Algeria's first digital platform for the olive industry, bringing services and content for experts and users into one scalable architecture.</p>
+  <p class="tech">Laravel · React (Vite) · MySQL</p>
+  <a class="link" href="https://olivepalace.net" target="_blank" rel="noopener">olivepalace.net ↗</a>
+</template>
+<template id="d-latina">
+  <p class="tag">Project · Full-stack developer</p>
+  <h3>LatinaDZ</h3>
+  <p>An e-commerce platform for a freelance client, with a minimalist interface and responsive product browsing, cart and checkout for desktop and mobile.</p>
+  <p class="tech">Laravel · MySQL</p>
+  <a class="link" href="https://latinadz.com" target="_blank" rel="noopener">latinadz.com ↗</a>
+</template>
+<template id="d-jewelry">
+  <p class="tag">Project · Individual</p>
+  <h3>Jewelry Store Management System</h3>
+  <p>A complete retail application with inventory, point of sale and reporting modules, designed on MVC for maintainability.</p>
+  <p class="tech">Java · JavaFX · SQLite</p>
+</template>
+<template id="d-home">
+  <p class="tag">Origin · 36.07°N 4.76°E</p>
+  <h3>Based in Bordj Bou Arreridj</h3>
+  <p>Arabic (native), English (fluent), French (intermediate). Open to SAP consultant roles internationally.</p>
+  <ul>
+    <li>Master 1, Business Intelligence · Mohamed El Bachir El Ibrahimi University, 2025</li>
+    <li>Bachelor, Information Systems &amp; Software Engineering · same university, 2024</li>
+    <li>SAP Young Professionals Program · March to May 2025</li>
+    <li>Dale Carnegie Training, certified</li>
+  </ul>
+</template>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
