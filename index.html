@@ -109,6 +109,12 @@ a { color: inherit; }
 .progress { position: fixed; z-index: 6; left: 0; right: 0; top: 0; height: 2px; }
 .progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--sand), var(--ice)); transform-origin: 0 50%; transform: scaleX(0); }
 
+/* World change helpers */
+.swapping, .swapping * { transition: color 0.7s, background-color 0.7s, border-color 0.7s, fill 0.7s, stroke 0.7s !important; }
+:root:not([data-world="night"]) .minimap { display: none; }
+#world-toast.loading { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+#world-toast.loading b { opacity: 0.25; }
+
 /* Chapter dock */
 .dock { position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
   display: flex; align-items: center; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 999px;
@@ -323,8 +329,8 @@ footer p { color: var(--muted); font-size: inherit; }
   .orb[aria-pressed="true"] { gap: 0; padding: 3px; }
   .dock .now { min-width: 0; white-space: nowrap; padding: 0 6px; font-size: 0.6rem; }
   .dock button { padding: 9px 10px; }
-  .chapter:not(.hero) .panel { padding-bottom: calc(10vh + 72px); }
-  .hero .panel { bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); }
+  .chapter:not(.hero) .panel { padding-top: 50vh; padding-bottom: calc(10vh + 72px); }
+  .hero .panel { bottom: calc(18vh + env(safe-area-inset-bottom, 0px) + 92px); }
   .hs b { padding: 4px 6px; letter-spacing: 0.08em; }
   .detail-nav { margin: 22px -20px calc(-28px - env(safe-area-inset-bottom, 0px)); }
   .minimap { display: none; }

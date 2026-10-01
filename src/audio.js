@@ -58,6 +58,21 @@ export function createAudio() {
       g.gain.setValueAtTime(0.025, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.07);
       o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.08);
     },
+    crack() {
+      if (!ctx || !on) return;
+      const t = ctx.currentTime, len = 1.4;
+      const buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), d = buf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) { const k = i / d.length; d[i] = (Math.random() * 2 - 1) * Math.pow(1 - k, 2.2) * (Math.random() < 0.02 ? 3 : 1); }
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.4;
+      bp.frequency.setValueAtTime(3200, t); bp.frequency.exponentialRampToValueAtTime(240, t + len);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.32, t + 0.04); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      src.connect(bp); bp.connect(g); g.connect(master); g.connect(delay); src.start(t);
+      const o = ctx.createOscillator(), og = ctx.createGain();
+      o.type = 'sine'; o.frequency.setValueAtTime(90, t + 0.3); o.frequency.exponentialRampToValueAtTime(30, t + 1.6);
+      og.gain.setValueAtTime(0.0001, t + 0.3); og.gain.exponentialRampToValueAtTime(0.4, t + 0.42); og.gain.exponentialRampToValueAtTime(0.0001, t + 1.8);
+      o.connect(og); og.connect(master); o.start(t + 0.3); o.stop(t + 1.9);
+    },
     thump() {
       if (!ctx || !on) return;
       const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();

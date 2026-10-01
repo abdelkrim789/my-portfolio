@@ -19,9 +19,17 @@ Then connect your domain in that host's settings.
 
 ## Worlds
 
-Three worlds share one journey: **Daylight** (ink on paper, the default), **Night** and **Blueprint**.
-Switch with the orbs at the top or the `W` key; the new world opens through a portal from where you clicked.
-Palettes live in `src/worlds.js`; the page colors are the `[data-world]` token blocks in `index.html`.
+Three separate worlds tell the same story, each with its own objects, materials and way of moving:
+
+- **Daylight · The Paper Atlas** (`src/worlds/paper.js`): a pop-up book on a table. Cut-paper solids with ink
+  edges and real shadows; you slide sideways from card to card while pieces fold up, drop in and grow.
+- **Night · The Desert** (`src/worlds/night.js`): 60,000 particles; you fly along one camera path.
+- **Blueprint · The Tower** (`src/worlds/schematic.js`): eight floors of plotted linework; you spiral down
+  while each floor draws itself.
+
+Switch with the orbs at the top or the `W` key. The old world shatters from where you clicked
+(`src/transition.js`). Each world is built only when first needed, and only the active one renders.
+Shared content (points, milestones) lives in `src/content.js`.
 
 ## Add real screenshots of your projects
 
