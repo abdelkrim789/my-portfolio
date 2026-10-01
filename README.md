@@ -17,6 +17,12 @@ through GitHub Actions (Settings → Pages → Source must be set to **GitHub Ac
 
 Then connect your domain in that host's settings.
 
+## Worlds
+
+Three worlds share one journey: **Daylight** (ink on paper, the default), **Night** and **Blueprint**.
+Switch with the orbs at the top or the `W` key; the new world opens through a portal from where you clicked.
+Palettes live in `src/worlds.js`; the page colors are the `[data-world]` token blocks in `index.html`.
+
 ## Add real screenshots of your projects
 
 Put images in `src/shots/` named after the project: `olivepalace.png`, `latinadz.png` or `jewelry.png`

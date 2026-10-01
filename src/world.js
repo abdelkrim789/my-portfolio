@@ -3,18 +3,14 @@ import { NOISE } from './particles.js';
 
 // One shader drives every scene in the world; uKind picks the object.
 const VERT = /* glsl */ `
-uniform float uTime, uKind, uForm, uIntro, uPixelRatio, uSize, uMotion, uAspect, uTanHalf, uMouseStrength, uGain, uLens, uAlt, uFar;
+uniform float uTime, uKind, uForm, uIntro, uPixelRatio, uSize, uMotion, uAspect, uTanHalf, uMouseStrength, uGain, uLens, uAlt, uFar, uLight, uAdd, uPortal;
 uniform vec2 uMouse;
 uniform vec3 uShock;
 attribute vec3 aP1, aP2, aP3, aP5, aP6, aP7, aP8;
 attribute vec4 aP4, aSeed, aExtra;
 varying vec3 vColor;
-
-const vec3 SAND = vec3(0.95, 0.74, 0.46);
-const vec3 ICE = vec3(0.52, 0.82, 0.93);
-const vec3 WHITE = vec3(1.0, 0.96, 0.9);
-const vec3 FAULT = vec3(1.0, 0.26, 0.18);
-const vec3 DIM = vec3(0.32, 0.42, 0.6);
+varying float vFade;
+uniform vec3 SAND, ICE, WHITE, FAULT, DIM;
 ${NOISE}
 mat3 rotY(float a){float c=cos(a),s=sin(a);return mat3(c,0.,-s, 0.,1.,0., s,0.,c);}
 mat3 rotX(float a){float c=cos(a),s=sin(a);return mat3(1.,0.,0., 0.,c,s, 0.,-s,c);}
@@ -89,13 +85,14 @@ void main(){
 
   // scenes assemble as the camera arrives and scatter as it leaves
   vec3 dir = normalize(aSeed.xyz - 0.5 + 0.0001);
-  float fk = clamp((uForm - aSeed.x*0.35)/0.65, 0.0, 1.0);
+  float fk = clamp((uForm*(1.0 - 0.75*uPortal) - aSeed.x*0.35)/0.65, 0.0, 1.0);
   fk = fk*fk*(3.0 - 2.0*fk);
   vec3 scat = p + dir*(3.0 + aSeed.w*9.0) + vnoise(p*0.2 + uTime*0.2)*3.0;
   float mvT = sin(3.14159*fk);
   p = mix(scat, p, fk);
   p += vnoise(p*0.35 + uTime*0.3 + aSeed.w*4.0) * mvT * 1.1 * uMotion;
-  col = col*(0.2 + 0.8*fk) + mvT*vec3(0.5, 0.55, 0.65)*0.8;
+  col = mix(col*(0.2 + 0.8*fk), col, uLight) + mvT*vec3(0.5, 0.55, 0.65)*0.8*uAdd;
+  float vf = mix(1.0, 0.12 + 0.88*fk, uLight);
 
   if (k == 7) {
     float al = clamp((uAlt - aSeed.x*0.3)/0.7, 0.0, 1.0);
@@ -105,7 +102,7 @@ void main(){
     col = mix(col, mix(SAND*1.25, WHITE*1.25, aSeed.z*0.8), al);
     float am = sin(3.14159*al);
     p += vnoise(p*0.5 + uTime*0.45)*am*1.3*uMotion;
-    col += am*vec3(0.55, 0.5, 0.42);
+    col += am*vec3(0.55, 0.5, 0.42)*uAdd;
   }
 
   float it = 1.0;
@@ -140,7 +137,7 @@ void main(){
   float ms = uMouseStrength * uMotion * (1.0 - lensW);
   mv.xy += normalize(d + 1e-4) * fall * ms * (0.05 + aSeed.y*0.06) * dz;
   mv.xy += vec2(-d.y, d.x)/max(rr, 1e-3) * fall * 0.03 * ms * dz;
-  col += fall * ms * vec3(0.35, 0.45, 0.55);
+  col += fall * ms * vec3(0.35, 0.45, 0.55) * uAdd;
 
   float sT = uTime - uShock.z;
   if (sT > 0.0 && sT < 3.0) {
@@ -149,13 +146,15 @@ void main(){
     float w = 0.12*dz;
     float wave = exp(-pow((dist - sT*0.9*dz)/w, 2.0)) * exp(-sT*1.4) * uMotion;
     mv.xy += normalize(ds + 1e-4) * wave * (0.04 + aSeed.y*0.06) * dz;
-    col += wave * vec3(0.9, 0.95, 1.0) * 1.4;
+    col += wave * vec3(0.9, 0.95, 1.0) * 1.4 * uAdd;
   }
 
   // flying through: clear the space right in front of the lens
   float near = 1.0 - smoothstep(0.4, 4.0, dz);
   mv.xy += normalize(mv.xy + 1e-4) * near * 2.2;
-  col *= smoothstep(0.3, 2.0, dz) * smoothstep(uFar, uFar*0.3, dz);
+  float df = smoothstep(0.3, 2.0, dz) * smoothstep(uFar, uFar*0.3, dz);
+  col *= mix(df, 1.0, uLight);
+  vFade = vf * mix(1.0, df, uLight);
 
   gl_Position = projectionMatrix * mv;
   float size = uSize * (0.5 + aSeed.z*0.95) * (1.0 + mvT*0.4);
@@ -165,11 +164,18 @@ void main(){
 `;
 
 const FRAG = /* glsl */ `
+uniform float uLight, uAlpha;
 varying vec3 vColor;
+varying float vFade;
 void main(){
   float d = length(gl_PointCoord - 0.5);
-  float a = smoothstep(0.5, 0.0, d);
-  gl_FragColor = vec4(vColor * a * a, 1.0);
+  if (uLight > 0.5) {
+    float a = smoothstep(0.5, 0.2, d);
+    gl_FragColor = vec4(min(vColor, vec3(1.0)), a * vFade * uAlpha);
+  } else {
+    float a = smoothstep(0.5, 0.0, d);
+    gl_FragColor = vec4(vColor * a * a, 1.0);
+  }
 }
 `;
 
@@ -197,8 +203,12 @@ export function createScene(attrs, kind, count, sizeScale) {
       uAspect: { value: 1 }, uTanHalf: { value: Math.tan((45 * Math.PI) / 360) },
       uMouse: { value: new THREE.Vector2(9, 9) }, uMouseStrength: { value: 0 }, uGain: { value: 0.5 },
       uLens: { value: 0 }, uAlt: { value: 0 }, uShock: { value: new THREE.Vector3(0, 0, -99) }, uFar: { value: 150 },
+      uLight: { value: 0 }, uAdd: { value: 1 }, uAlpha: { value: 1 }, uPortal: { value: 0 },
+      SAND: { value: new THREE.Color() }, ICE: { value: new THREE.Color() }, WHITE: { value: new THREE.Color() },
+      FAULT: { value: new THREE.Color() }, DIM: { value: new THREE.Color() },
     },
   });
+  mat.uniforms.uSize.userBase = 26 * sizeScale;
   const pts = new THREE.Points(geo, mat);
   pts.frustumCulled = false;
   return pts;
@@ -221,15 +231,22 @@ export function createGround(count, bounds) {
   geo.setAttribute('aS', new THREE.BufferAttribute(s, 1));
   const mat = new THREE.ShaderMaterial({
     ...ADD,
-    uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uFar: { value: 150 }, uGain: { value: 1 } },
-    vertexShader: `attribute float aS; uniform float uTime, uPixelRatio, uFar, uGain; varying vec3 vC;
+    uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uFar: { value: 150 }, uGain: { value: 1 },
+      uLo: { value: new THREE.Color() }, uHi: { value: new THREE.Color() }, uK: { value: 1 }, uLight: { value: 0 }, uGrid: { value: 0 } },
+    vertexShader: `attribute float aS; uniform float uTime, uPixelRatio, uFar, uGain, uK, uLight, uGrid; uniform vec3 uLo, uHi; varying vec3 vC; varying float vA;
       void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); float dz = max(0.1,-mv.z);
-        gl_Position = projectionMatrix*mv; gl_PointSize = min((1.4+aS*1.8)*uPixelRatio*26.0/dz, 7.0*uPixelRatio);
+        gl_Position = projectionMatrix*mv;
+        float gx = abs(fract(position.x*0.2) - 0.5), gz = abs(fract(position.z*0.2) - 0.5);
+        float line = max(step(0.465, gx), step(0.465, gz));
+        float gm = mix(1.0, mix(0.12, 2.6, line), uGrid);
+        gl_PointSize = min((1.4+aS*1.8)*uPixelRatio*26.0/dz*mix(1.0, 0.8, uLight), 7.0*uPixelRatio);
         float h = clamp((position.y + 1.2)/3.0, 0.0, 1.0);
-        vec3 c = mix(vec3(0.18,0.22,0.36), vec3(0.62,0.5,0.34), h);
+        vec3 c = mix(uLo, uHi, h);
         float tw = 0.75 + 0.25*sin(uTime*1.3 + aS*60.0);
-        vC = c*tw*1.15*uGain*smoothstep(uFar, uFar*0.25, dz)*smoothstep(0.5, 3.0, dz); }`,
-    fragmentShader: `varying vec3 vC; void main(){ float d=length(gl_PointCoord-0.5); gl_FragColor=vec4(vC*smoothstep(0.5,0.1,d),1.0); }`,
+        float f = tw*uK*gm*smoothstep(uFar, uFar*0.25, dz)*smoothstep(0.5, 3.0, dz);
+        vC = mix(c*f*uGain, c, uLight); vA = f; }`,
+    fragmentShader: `uniform float uLight; varying vec3 vC; varying float vA; void main(){ float d=length(gl_PointCoord-0.5);
+      if (uLight > 0.5) gl_FragColor=vec4(vC, vA*smoothstep(0.5,0.2,d)); else gl_FragColor=vec4(vC*smoothstep(0.5,0.1,d),1.0); }`,
   });
   const p = new THREE.Points(geo, mat);
   p.frustumCulled = false;
@@ -254,17 +271,20 @@ export function createTrail(curve, count) {
   geo.setAttribute('aS', new THREE.BufferAttribute(s, 1));
   const mat = new THREE.ShaderMaterial({
     ...ADD,
-    uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uFar: { value: 150 }, uGain: { value: 1 } },
-    vertexShader: `attribute float aU, aS; uniform float uTime, uPixelRatio, uFar, uGain; varying vec3 vC;
+    uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uFar: { value: 150 }, uGain: { value: 1 },
+      uA: { value: new THREE.Color() }, uB: { value: new THREE.Color() }, uC: { value: new THREE.Color() }, uK: { value: 1 }, uLight: { value: 0 } },
+    vertexShader: `attribute float aU, aS; uniform float uTime, uPixelRatio, uFar, uGain, uK, uLight; uniform vec3 uA, uB, uC; varying vec3 vC; varying float vA;
       void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); float dz = max(0.1,-mv.z);
         gl_Position = projectionMatrix*mv;
         float ph = fract(aU*14.0 - uTime*0.18 + aS*0.05);
         float pulse = smoothstep(0.86, 1.0, ph);
         gl_PointSize = min((1.0 + aS + pulse*2.0)*uPixelRatio*20.0/dz, 10.0*uPixelRatio);
-        vec3 c = mix(vec3(0.95,0.5,0.35), vec3(0.52,0.82,0.93), smoothstep(0.08, 0.3, aU));
-        c = mix(c, vec3(0.95,0.74,0.46), smoothstep(0.75, 1.0, aU));
-        vC = c*(0.3 + pulse*1.5)*uGain*smoothstep(uFar, uFar*0.25, dz)*smoothstep(0.5, 3.0, dz); }`,
-    fragmentShader: `varying vec3 vC; void main(){ float d=length(gl_PointCoord-0.5); gl_FragColor=vec4(vC*smoothstep(0.5,0.0,d),1.0); }`,
+        vec3 c = mix(uA, uB, smoothstep(0.08, 0.3, aU));
+        c = mix(c, uC, smoothstep(0.75, 1.0, aU));
+        float f = (0.3 + pulse*1.5)*uK*smoothstep(uFar, uFar*0.25, dz)*smoothstep(0.5, 3.0, dz);
+        vC = mix(c*f*uGain, c, uLight); vA = f; }`,
+    fragmentShader: `uniform float uLight; varying vec3 vC; varying float vA; void main(){ float d=length(gl_PointCoord-0.5);
+      if (uLight > 0.5) gl_FragColor=vec4(vC, min(1.0, vA*0.8)*smoothstep(0.5,0.2,d)); else gl_FragColor=vec4(vC*smoothstep(0.5,0.0,d),1.0); }`,
   });
   const p = new THREE.Points(geo, mat);
   p.frustumCulled = false;
@@ -283,13 +303,66 @@ export function createSky(count) {
   geo.setAttribute('aS', new THREE.BufferAttribute(s, 1));
   const mat = new THREE.ShaderMaterial({
     ...ADD,
-    uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 } },
+    uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uColor: { value: new THREE.Color(0.7, 0.76, 0.92) } },
     vertexShader: `attribute float aS; uniform float uTime, uPixelRatio; varying float vA;
       void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0); gl_Position=projectionMatrix*mv;
         gl_PointSize=(0.8+aS*aS*2.4)*uPixelRatio; vA=(0.25+0.75*aS*aS)*(0.7+0.3*sin(uTime*0.8+aS*50.0)); }`,
-    fragmentShader: `varying float vA; void main(){ float d=length(gl_PointCoord-0.5); gl_FragColor=vec4(vec3(0.7,0.76,0.92)*smoothstep(0.5,0.0,d)*vA,1.0); }`,
+    fragmentShader: `uniform vec3 uColor; varying float vA; void main(){ float d=length(gl_PointCoord-0.5); gl_FragColor=vec4(uColor*smoothstep(0.5,0.0,d)*vA,1.0); }`,
   });
   const p = new THREE.Points(geo, mat);
   p.frustumCulled = false;
   return p;
+}
+
+// A celestial body in the sky: a moon at night, an engraved sun by day, a drafting circle on the blueprint.
+export function createOrb(count) {
+  const pos = new Float32Array(count * 3), kind = new Float32Array(count), s = new Float32Array(count);
+  for (let i = 0; i < count; i++) {
+    const q = Math.random(); let x, y, k;
+    if (q < 0.3) { const a = Math.random() * Math.PI * 2, r = 1 + (Math.random() - 0.5) * 0.012; x = Math.cos(a) * r; y = Math.sin(a) * r; k = 0; }
+    else if (q < 0.48) { const a = Math.random() * Math.PI * 2, rs = [0.86, 0.7, 0.52]; const r = rs[Math.floor(Math.random() * 3)]; x = Math.cos(a) * r; y = Math.sin(a) * r; k = 1; }
+    else if (q < 0.58) { const t = Math.random() * 2.8 - 1.4; if (Math.random() < 0.5) { x = t; y = 0; } else { x = 0; y = t; } k = 2; }
+    else { const a = Math.random() * Math.PI * 2, r = Math.sqrt(Math.random()); x = Math.cos(a) * r; y = Math.sin(a) * r;
+      if (Math.abs((x + y) * 4.0 - Math.round((x + y) * 4.0)) < 0.12 && Math.random() < 0.7) k = 4; else k = 3; }
+    pos.set([x, y, 0], i * 3); kind[i] = k; s[i] = Math.random();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('aK', new THREE.BufferAttribute(kind, 1));
+  geo.setAttribute('aS', new THREE.BufferAttribute(s, 1));
+  const mat = new THREE.ShaderMaterial({
+    ...ADD,
+    uniforms: { uTime: { value: 0 }, uPixelRatio: { value: 1 }, uColor: { value: new THREE.Color() }, uLight: { value: 0 },
+      uFill: { value: 0.3 }, uRim: { value: 1 }, uCross: { value: 0 }, uAlpha: { value: 1 } },
+    vertexShader: `attribute float aK, aS; uniform float uTime, uPixelRatio, uFill, uRim, uCross, uLight; varying float vA;
+      void main(){ vec3 p = position; vec4 mv = modelViewMatrix*vec4(p,1.0); gl_Position = projectionMatrix*mv;
+        gl_PointSize = (aK < 0.5 ? 2.2 : 1.6)*uPixelRatio;
+        float w = aK < 0.5 ? uRim : aK < 1.5 ? uRim*0.55 : aK < 2.5 ? uCross : aK < 3.5 ? uFill*(0.6 + 0.4*sin(uTime*0.3 + aS*20.0)) : max(uFill, uLight*0.5);
+        vA = w; }`,
+    fragmentShader: `uniform vec3 uColor; uniform float uLight, uAlpha; varying float vA; void main(){ float d=length(gl_PointCoord-0.5);
+      if (uLight > 0.5) gl_FragColor=vec4(uColor, vA*uAlpha*smoothstep(0.5,0.2,d)); else gl_FragColor=vec4(uColor*vA*uAlpha*smoothstep(0.5,0.0,d),1.0); }`,
+  });
+  const p = new THREE.Points(geo, mat);
+  p.frustumCulled = false;
+  return p;
+}
+
+// Re-ink every material for a world.
+export function applyWorldToMaterials(W, { scenes, ground, trail, sky, orb }, gainFor) {
+  const blend = W.light ? THREE.NormalBlending : THREE.AdditiveBlending;
+  const setBlend = (m) => { if (m.blending !== blend) { m.blending = blend; m.needsUpdate = true; } };
+  scenes.forEach((o, k) => {
+    const u = o.material.uniforms; setBlend(o.material);
+    for (const [key, v] of Object.entries(W.pal)) u[key].value.setRGB(...v);
+    u.uLight.value = W.light; u.uAdd.value = W.add; u.uAlpha.value = W.alpha;
+    u.uGain.value = W.light ? W.gain : gainFor(k) * W.gain;
+    u.uSize.value = u.uSize.userBase * W.size;
+  });
+  { const u = ground.material.uniforms; setBlend(ground.material);
+    u.uLo.value.setRGB(...W.ground.lo); u.uHi.value.setRGB(...W.ground.hi); u.uK.value = W.ground.k; u.uLight.value = W.light; u.uGrid.value = W.ground.grid; }
+  { const u = trail.material.uniforms; setBlend(trail.material);
+    u.uA.value.setRGB(...W.trail.a); u.uB.value.setRGB(...W.trail.b); u.uC.value.setRGB(...W.trail.c); u.uK.value = W.trail.k; u.uLight.value = W.light; }
+  sky.visible = W.sky.show; sky.material.uniforms.uColor.value.setRGB(...W.sky.color);
+  { const u = orb.material.uniforms; setBlend(orb.material);
+    u.uColor.value.setRGB(...W.orb.color); u.uFill.value = W.orb.fill; u.uRim.value = W.orb.rim; u.uCross.value = W.orb.cross; u.uAlpha.value = W.orb.alpha; u.uLight.value = W.light; }
 }

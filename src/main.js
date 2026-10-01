@@ -13,7 +13,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { buildShapes, buildName, buildText, buildPortrait, starTips } from './shapes.js';
 import { FINAL_SHADER } from './particles.js';
-import { sharedGeometry, createScene, createGround, createTrail, createSky } from './world.js';
+import { sharedGeometry, createScene, createGround, createTrail, createSky, createOrb, applyWorldToMaterials } from './world.js';
+import { WORLDS, WORLD_ORDER, savedWorld, saveWorld } from './worlds.js';
 import { createAudio } from './audio.js';
 import { PROJECTS, projectCanvas, createScreen } from './screens.js';
 
@@ -23,6 +24,63 @@ const coarse = matchMedia('(pointer: coarse)').matches;
 const root = document.documentElement;
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
 const ease = (x) => { const t = clamp(x, 0, 1); return t * t * (3 - 2 * t); };
+
+// ---------- worlds ----------
+let world = savedWorld();
+const themeMeta = document.querySelector('meta[name="theme-color"]');
+function applyWorldCSS(w) {
+  root.dataset.world = w;
+  themeMeta?.setAttribute('content', WORLDS[w].theme);
+  document.querySelectorAll('.worlds button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.world === w)));
+}
+const worldsBox = document.querySelector('.worlds');
+WORLD_ORDER.forEach((w) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'orb'; b.dataset.world = w;
+  b.innerHTML = `<i aria-hidden="true"></i><span>${WORLDS[w].name}</span>`;
+  b.setAttribute('aria-label', `Enter the ${WORLDS[w].name} world: ${WORLDS[w].tag.toLowerCase()}`);
+  b.title = `${WORLDS[w].name} · ${WORLDS[w].tag}`;
+  b.addEventListener('click', () => { const r = b.getBoundingClientRect(); travelTo(w, r.left + r.width / 2, r.top + r.height / 2); });
+  worldsBox?.appendChild(b);
+});
+applyWorldCSS(world);
+let worldGL = null; // set once WebGL is up
+const toast = document.getElementById('world-toast');
+let toastT;
+function showToast(w) {
+  if (!toast) return;
+  const tb = toast.querySelector('b'); tb.textContent = WORLDS[w].name; tb.dataset.final = WORLDS[w].name;
+  toast.querySelector('span').textContent = WORLDS[w].tag;
+  toast.classList.add('on');
+  scramble(toast.querySelector('b'), 650);
+  clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('on'), 1900);
+}
+// cubic-bezier(0.65, 0, 0.25, 1): the same curve drives the CSS reveal and the WebGL ring
+function bezier(x1, y1, x2, y2) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+  const X = (t) => ((ax * t + bx) * t + cx) * t, Y = (t) => ((ay * t + by) * t + cy) * t, dX = (t) => (3 * ax * t + 2 * bx) * t + cx;
+  return (x) => { let t = x; for (let i = 0; i < 6; i++) { const d = dX(t); if (Math.abs(d) < 1e-6) break; t -= (X(t) - x) / d; } return Y(clamp(t, 0, 1)); };
+}
+const portalEase = bezier(0.65, 0, 0.25, 1);
+const PORTAL_MS = reduced ? 1 : 1500;
+let portalBusy = false;
+function travelTo(w, x = innerWidth / 2, y = innerHeight / 2) {
+  if (w === world || portalBusy) return;
+  portalBusy = true;
+  world = w; saveWorld(w);
+  const R = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const swap = () => { applyWorldCSS(w); worldGL?.apply(w); showToast(w); };
+  worldGL?.portal(x, y, R, PORTAL_MS);
+  const done = () => { portalBusy = false; };
+  if (document.startViewTransition && !reduced) {
+    const vt = document.startViewTransition(swap);
+    vt.ready.then(() => root.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${R}px at ${x}px ${y}px)`] },
+      { duration: PORTAL_MS, easing: 'cubic-bezier(0.65, 0, 0.25, 1)', pseudoElement: '::view-transition-new(root)' },
+    )).catch(() => {});
+    vt.finished.finally(done);
+  } else { swap(); setTimeout(done, PORTAL_MS); }
+}
 
 // ---------- chapter UI (works with or without WebGL) ----------
 const sections = [...document.querySelectorAll('[data-stage]')];
@@ -36,7 +94,7 @@ sections.forEach((s, i) => {
   const li = document.createElement('li');
   const b = document.createElement('button');
   b.type = 'button';
-  b.innerHTML = `<span>${String(i).padStart(2, '0')}</span><em>${STAGES[i]}</em>`;
+  b.innerHTML = `<span>${String(i).padStart(2, '0')}</span><em>${STAGES[i]}</em><small class="tally" data-chapter="${i}"></small>`;
   b.setAttribute('aria-label', `Go to chapter ${i}: ${STAGES[i].toLowerCase()}`);
   b.addEventListener('click', () => s.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' }));
   li.appendChild(b); rail.appendChild(li);
@@ -99,10 +157,25 @@ function setActive(i) {
   if (i === activeIdx) return;
   activeIdx = i;
   rail.querySelectorAll('button').forEach((b, k) => b.classList.toggle('on', k === i));
-  hudStage.textContent = `${String(i).padStart(2, '0')} / ${STAGES[i]}`;
+  hudStage.textContent = `${String(i).padStart(2, '0')} · ${STAGES[i]}`;
+  dockPrev.disabled = i === 0; dockNext.disabled = i === sections.length - 1;
+  dockNext.querySelector('span').textContent = i < sections.length - 1 ? `Next · ${STAGES[i + 1].toLowerCase()}` : 'The end';
   scramble(sections[i].querySelector('h2'));
   listeners.forEach((fn) => fn(i));
 }
+
+const dockPrev = document.querySelector('.dock .prev'), dockNext = document.querySelector('.dock .next');
+const goChapter = (i) => sections[clamp(i, 0, sections.length - 1)].scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+dockPrev?.addEventListener('click', () => goChapter(activeIdx - 1));
+dockNext?.addEventListener('click', () => goChapter(activeIdx + 1));
+
+// controls guide
+const guide = document.getElementById('guide');
+const guideBtn = document.getElementById('guide-toggle');
+function setGuide(on) { guide.hidden = !on; guideBtn.setAttribute('aria-expanded', String(on)); if (on) guide.querySelector('button').focus(); }
+guideBtn?.addEventListener('click', () => setGuide(guide.hidden));
+guide?.querySelector('button').addEventListener('click', () => { setGuide(false); guideBtn.focus(); });
+guide?.addEventListener('click', (e) => { if (e.target === guide) setGuide(false); });
 
 const copyBtn = document.getElementById('copy-email');
 copyBtn?.addEventListener('click', async () => {
@@ -129,18 +202,54 @@ document.fonts?.ready.then(placePanels);
 const detail = document.getElementById('detail');
 const detailBody = detail.querySelector('.detail-body');
 let focusHS = null;
+let HS_ALL = [];
 const detailListeners = { open: [] };
+const seen = new Set();
+try { JSON.parse(localStorage.getItem('ag-seen') || '[]').forEach((d) => seen.add(d)); } catch {}
+const detailPrev = detail.querySelector('.detail-nav .prev'), detailNext = detail.querySelector('.detail-nav .next'), detailPos = detail.querySelector('.detail-nav .pos');
+const chapterPoints = (k) => HS_ALL.filter((h) => h.k === k && h.d);
+function updateTallies() {
+  for (let k = 0; k < sections.length; k++) {
+    const pts = chapterPoints(k);
+    const n = pts.filter((h) => seen.has(h.d)).length;
+    document.querySelectorAll(`.tally[data-chapter="${k}"]`).forEach((el) => {
+      el.textContent = pts.length ? `${n}/${pts.length}` : '';
+      el.classList.toggle('done', pts.length > 0 && n === pts.length);
+    });
+  }
+  HS_ALL.forEach((h) => h.el?.classList.toggle('seen', !!h.d && seen.has(h.d)));
+}
 function openDetail(hs) {
   const tpl = document.getElementById(hs.d);
   if (!tpl) return;
   detailBody.replaceChildren(tpl.content.cloneNode(true));
   detail.classList.add('open'); detail.inert = false;
   root.classList.add('focused');
+  const switching = !!focusHS;
   focusHS = hs;
+  seen.add(hs.d);
+  try { localStorage.setItem('ag-seen', JSON.stringify([...seen])); } catch {}
+  updateTallies();
+  const pts = chapterPoints(hs.k), i = pts.indexOf(hs);
+  detailPos.textContent = `${i + 1} / ${pts.length}`;
+  const many = pts.length > 1;
+  detailPrev.hidden = detailNext.hidden = !many;
+  if (many) {
+    detailPrev.querySelector('span').textContent = pts[(i - 1 + pts.length) % pts.length].label;
+    detailNext.querySelector('span').textContent = pts[(i + 1) % pts.length].label;
+  }
+  detailBody.scrollTop = 0; detail.scrollTop = 0;
   scramble(detailBody.querySelector('h3'), 500);
-  detail.querySelector('.close').focus({ preventScroll: true });
+  if (!switching) detail.querySelector('.close').focus({ preventScroll: true });
   detailListeners.open.forEach((f) => f(hs));
 }
+function stepDetail(dir) {
+  if (!focusHS) return;
+  const pts = chapterPoints(focusHS.k), i = pts.indexOf(focusHS);
+  if (pts.length > 1) openDetail(pts[(i + dir + pts.length) % pts.length]);
+}
+detailPrev.addEventListener('click', () => stepDetail(-1));
+detailNext.addEventListener('click', () => stepDetail(1));
 detailListeners.open.push((h) => {
   if (h.d !== 'd-home') return;
   const fig = document.createElement('figure'); fig.className = 'portrait';
@@ -159,7 +268,7 @@ function closeDetail() {
 }
 detail.inert = true;
 detail.querySelector('.close').addEventListener('click', closeDetail);
-addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDetail(); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (!guide.hidden) setGuide(false); else closeDetail(); } });
 
 // ---------- boot sequence ----------
 const bootList = document.querySelector('#boot ol');
@@ -168,12 +277,17 @@ function bootDone() { root.classList.add('booted'); setTimeout(() => document.ge
 setTimeout(bootDone, 9000);
 
 // keyboard: arrows travel between chapters
+// keyboard: arrows travel between chapters, or between points while a panel is open; W changes world; ? shows controls
 addEventListener('keydown', (e) => {
-  if (e.target.closest?.('input, textarea, #detail') || e.metaKey || e.ctrlKey) return;
+  if (e.target.closest?.('input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === '?') { e.preventDefault(); setGuide(guide.hidden); return; }
+  if (e.key === 'w' || e.key === 'W') { const i = WORLD_ORDER.indexOf(world); travelTo(WORLD_ORDER[(i + 1) % WORLD_ORDER.length]); return; }
+  if (focusHS && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); stepDetail(e.key === 'ArrowRight' ? 1 : -1); return; }
+  if (e.target.closest?.('#detail')) return;
   const dir = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
   if (!dir) return;
   e.preventDefault();
-  sections[clamp(activeIdx + dir, 0, sections.length - 1)].scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
+  goChapter(activeIdx + dir);
 });
 
 // ---------- WebGL ----------
@@ -292,7 +406,9 @@ async function start() {
   const ground = createGround(small || coarse ? 18000 : 42000, [-85, 45, -290, 35]);
   const trail = createTrail(buildPath(false).pos, small || coarse ? 3500 : 7000);
   const sky = createSky(small ? 1400 : 2600);
-  scene.add(ground, trail, sky);
+  const orb = createOrb(small || coarse ? 2600 : 5200);
+  orb.position.set(60, 112, -430); orb.scale.setScalar(48);
+  scene.add(orb, ground, trail, sky);
   const screen = createScreen(small || coarse ? 120 : 190, small || coarse ? 75 : 118);
   screen.setTexture('d-olive', canv['d-olive'].canvas);
   scene.add(screen.back, screen.points, screen.plane);
@@ -313,7 +429,8 @@ async function start() {
   document.getElementById('hud-count').textContent = `${(N * 5.4 + (small || coarse ? 17000 : 35000)).toLocaleString('en-US', { maximumFractionDigits: 0 })} particles · real time`;
 
   const motionScale = reduced ? 0.25 : 1;
-  objs.forEach((o, k) => { const u = o.material.uniforms; u.uMotion.value = motionScale; u.uGain.value = (F.mobile ? 0.52 : 0.62) * (k === 0 ? 0.85 : 1.15); });
+  objs.forEach((o) => { o.material.uniforms.uMotion.value = motionScale; });
+  const gainFor = (k) => (F.mobile ? 0.52 : 0.62) * (k === 0 ? 0.85 : 1.15);
   objs[0].material.uniforms.uIntro.value = 0;
 
   const composer = new EffectComposer(renderer);
@@ -324,6 +441,35 @@ async function start() {
   const finalPass = new ShaderPass(FINAL_SHADER);
   composer.addPass(finalPass);
 
+  let tier = 0;
+  function applyGL(w) {
+    const W = WORLDS[w];
+    applyWorldToMaterials(W, { scenes: objs, ground, trail, sky, orb }, gainFor);
+    const c = new THREE.Color();
+    c.setHex(W.clear);
+    renderer.setClearColor(c, 1);
+    bloom.enabled = W.bloom > 0 && tier < 2;
+    bloom.strength = F.mobile ? Math.min(W.bloom, 0.5) : W.bloom;
+    bloom.threshold = W.bloomThreshold ?? 0.12;
+    const fu = finalPass.uniforms;
+    fu.uLight.value = W.light; fu.uGrain.value = W.grain; fu.uRing.value.setRGB(...W.ring);
+    screen.back.material.color.setHex(W.back);
+  }
+  const portalState = { t0: -1, x: 0.5, y: 0.5, R: 0, dur: 1500 };
+  worldGL = {
+    apply: applyGL,
+    portal(x, y, R, dur) {
+      Object.assign(portalState, { t0: performance.now(), x: x / innerWidth, y: 1 - y / innerHeight, R, dur });
+      const t = objs[0].material.uniforms.uTime.value;
+      objs.forEach((o) => o.material.uniforms.uShock.value.set((x / innerWidth) * 2 - 1, -(y / innerHeight) * 2 + 1, t));
+      if (!reduced) glitch = 1;
+      audio.thump(); setTimeout(() => audio.chime(activeIdx + 4), 380);
+    },
+  };
+  applyGL(world);
+
+  let glitch = 0;
+  const audio = createAudio();
   // ---- glyph morphs on the globe ----
   const glyphCache = new Map();
   let altKey = null, wantKey = null, altAmt = 0;
@@ -344,7 +490,7 @@ async function start() {
     composer.setSize(innerWidth, innerHeight);
     bloom.resolution.set(innerWidth / 2, innerHeight / 2);
     setAll('uAspect', F.aspect); setAll('uPixelRatio', dpr);
-    [ground, trail, sky].forEach((o) => (o.material.uniforms.uPixelRatio.value = dpr));
+    [ground, trail, sky, orb].forEach((o) => (o.material.uniforms.uPixelRatio.value = dpr));
     finalPass.uniforms.uResolution.value.set(innerWidth * dpr, innerHeight * dpr);
     if (oldM !== F.mobile) path = buildPath(F.mobile);
     if (Math.abs(oldW - F.nameW) / oldW > 0.08) {
@@ -354,7 +500,6 @@ async function start() {
   let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(resize, 150); });
 
   // ---- audio ----
-  const audio = createAudio();
   const soundBtn = document.getElementById('sound-toggle');
   soundBtn.addEventListener('click', () => {
     const on = audio.toggle();
@@ -362,7 +507,6 @@ async function start() {
     soundBtn.textContent = on ? 'Sound on' : 'Sound off';
     if (on) audio.chime(activeIdx);
   });
-  let glitch = 0;
   listeners.push((i) => { if (!reduced) glitch = 0.8; audio.chime(i); });
 
   document.querySelectorAll('[data-glyph]').forEach((el) => {
@@ -387,23 +531,31 @@ async function start() {
   // ---- labels that live inside the objects ----
   const meta = shapes.meta;
   const SYSTEMS = ['SAP S/4HANA', 'SAP BPC', 'SAP BW', 'SAP Analytics Cloud', 'Power BI', 'Cegid PMI', 'ABAP', 'Python'];
-  const METRICS = ['4–6 dashboards', '~30% faster', '30–50 users', '10–20 onboarded'];
+  const TASKS = [['Business Process Flows', 'd-bpf'], ['EPM Add-in', 'd-epm'], ['Analysis for Office', 'd-afo'], ['BW Query Design', 'd-bwq'], ['Security Design', 'd-sec'], ['Decision reports', 'd-rep']];
+  const entity = (e) => { const ea = (e / 6) * Math.PI * 2 + 0.4; return [Math.cos(ea) * 4.6, Math.sin(e * 1.7) * 1.3, Math.sin(ea) * 4.6]; };
+  const METRICS = [['4–6 Power BI dashboards', 'd-m-dash'], ['~30% faster platform', 'd-m-flask'], ['30–50 ERP users', 'd-m-users'], ['10–20 staff onboarded', 'd-m-launch']];
+  const cells = [...meta.goldCells, [-1.2, 0.6, 0.9], [1.4, -0.8, 0.9]];
   const HS = [
-    { k: 1, p: [0.4, 1.7, 1.2], label: 'Read the incident', d: 'd-raw', kind: 'fault' },
-    { k: 1, p: [2.3, -0.3, 1.0], label: 'Stock ≠ movements', kind: 'fault static', desk: true },
-    { k: 1, p: [0.1, -1.8, 1.2], label: 'Production blocked', kind: 'fault static', desk: true },
-    ...meta.goldCells.map((p, i) => ({ k: 2, p, label: i ? 'Stock accurate' : 'Record restored', d: 'd-clean', kind: 'sand' })),
+    { k: 1, p: [0.4, 1.7, 1.2], label: 'The incident', d: 'd-raw', kind: 'fault' },
+    { k: 1, p: [2.3, -0.3, 1.0], label: 'Stock ≠ movements', d: 'd-raw-mismatch', kind: 'fault', desk: true },
+    { k: 1, p: [0.1, -1.8, 1.2], label: 'Production blocked', d: 'd-raw-blocked', kind: 'fault', desk: true },
+    { k: 2, p: cells[0], label: 'Drift analysis', d: 'd-clean-method', kind: 'sand' },
+    { k: 2, p: cells[1], label: 'Auto-correction tool', d: 'd-clean-tool', kind: 'sand' },
     ...starTips().map((t, i) => ({ k: 3, p: t.map((v) => v * 1.14), label: SYSTEMS[i], d: `d-sys-${i}` })),
     { k: 4, p: [0, 0.95, 0], label: 'SHONE · consolidated view', d: 'd-shone', kind: 'sand' },
-    ...meta.goldBars.map((p, i) => ({ k: 5, p, label: METRICS[i], d: 'd-geant', kind: 'sand' })),
-    { k: 6, p: [-1.25, 0, -1.25], label: 'Olive Palace', d: 'd-olive' },
-    { k: 6, p: [1.25, 1.7, 0.625], label: 'LatinaDZ', d: 'd-latina' },
-    { k: 6, p: [0.625, -1.7, -1.875], label: 'Jewelry Store System', d: 'd-jewelry' },
-    { k: 6, p: [-2.5, 1.7, 2.5], label: 'Interface', kind: 'static' },
-    { k: 6, p: [-2.5, 0, 2.5], label: 'Logic', kind: 'static' },
-    { k: 6, p: [-2.5, -1.7, 2.5], label: 'Data', kind: 'static' },
+    ...TASKS.map(([label, d], e) => ({ k: 4, p: entity(e), label, d })),
+    { k: 5, p: [0, -1.8, 2.3], label: 'Géant Electronics · 2025', d: 'd-geant' },
+    ...meta.goldBars.map((p, i) => ({ k: 5, p, label: METRICS[i][0], d: METRICS[i][1], kind: 'sand' })),
+    { k: 6, p: [-1.25, 0, -1.25], label: 'Olive Palace', d: 'd-olive', kind: 'sand' },
+    { k: 6, p: [1.25, 1.7, 0.625], label: 'LatinaDZ', d: 'd-latina', kind: 'sand' },
+    { k: 6, p: [0.625, -1.7, -1.875], label: 'Jewelry Store System', d: 'd-jewelry', kind: 'sand' },
+    { k: 6, p: [-2.5, 1.7, 2.5], label: 'Interface layer', d: 'd-layer-ui' },
+    { k: 6, p: [-2.5, 0, 2.5], label: 'Logic layer', d: 'd-layer-logic' },
+    { k: 6, p: [-2.5, -1.7, 2.5], label: 'Data layer', d: 'd-layer-data' },
+    { k: 6, p: [0, 2.7, 0], label: 'Team · 4–6 developers', d: 'd-team' },
     { k: 7, p: meta.home, label: 'Bordj Bou Arreridj · 36.07°N 4.76°E', d: 'd-home', kind: 'sand' },
   ];
+  HS_ALL = HS;
   const hsLayer = document.querySelector('.hotspots');
   HS.forEach((h) => {
     const el = document.createElement(h.d ? 'button' : 'span');
@@ -419,6 +571,7 @@ async function start() {
     h.el = el; h.w = 0; h.v = new THREE.Vector3(); h.world = new THREE.Vector3();
     hsLayer.appendChild(el);
   });
+  updateTallies();
   const hsWorld = (h, t, out) => out.set(...h.p).applyMatrix4(xform(h.k, t)).applyMatrix4(objs[h.k].matrixWorld);
   detailListeners.open.push(() => { glitch = reduced ? 0 : 0.7; audio.chime(activeIdx + 2); });
 
@@ -510,7 +663,7 @@ async function start() {
   try { renderer.compile(scene, camera); } catch {}
   bootLog('World ready');
   const t0 = performance.now();
-  let stage = targetStage(), prevStage = stage, last = t0, frames = 0, slowAcc = 0, tier = 0, focusAmt = 0;
+  let stage = targetStage(), prevStage = stage, last = t0, frames = 0, slowAcc = 0, focusAmt = 0;
   const introDur = reduced ? 0.8 : 3.8;
   const scrim = document.querySelector('.scrim');
   const P = new THREE.Vector3(), L = new THREE.Vector3(), off = new THREE.Vector3(), tmp = new THREE.Vector3();
@@ -560,7 +713,7 @@ async function start() {
     });
     objs[0].material.uniforms.uIntro.value = introT;
     objs[0].material.uniforms.uMouseStrength.value = ms;
-    [ground, trail, sky].forEach((o) => (o.material.uniforms.uTime.value = time));
+    [ground, trail, sky, orb].forEach((o) => (o.material.uniforms.uTime.value = time));
 
     // camera: follow the journey, then orbit (drag), parallax, and focus on an open label
     const u = pathParam(path, stage);
@@ -587,7 +740,19 @@ async function start() {
       P.lerp(fP, ease(focusAmt)); L.lerp(fL, ease(focusAmt));
     }
     camera.position.copy(P);
-    camera.fov = F.fov + (reduced ? 0 : motion * 9);
+    let portalW = 0;
+    if (portalState.t0 > 0) {
+      const pt = (now - portalState.t0) / portalState.dur;
+      if (pt >= 1.25) portalState.t0 = -1;
+      else {
+        const fu = finalPass.uniforms.uPortal.value;
+        fu.set(portalState.x, portalState.y, portalState.R * portalEase(Math.min(1, pt)) * dpr, clamp(pt * 8, 0, 1) * clamp((1.25 - pt) / 0.35, 0, 1));
+        portalW = Math.sin(Math.PI * clamp(pt, 0, 1));
+      }
+    }
+    if (portalState.t0 < 0) finalPass.uniforms.uPortal.value.w = 0;
+    objs.forEach((o) => (o.material.uniforms.uPortal.value = portalW * (reduced ? 0 : 1)));
+    camera.fov = F.fov + (reduced ? 0 : motion * 9 + portalW * 7);
     camera.updateProjectionMatrix();
     camera.lookAt(L);
     camera.updateMatrixWorld();
@@ -680,6 +845,7 @@ async function start() {
           tier++;
           if (tier === 1) { dpr = 1; renderer.setPixelRatio(1); resize(); }
           else bloom.enabled = false;
+          applyGL(world);
         } else tier = 2;
         frames = 0; slowAcc = 0;
       }

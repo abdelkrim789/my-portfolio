@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Abdelkrim Ghebouli</title>
 <meta name="description" content="Abdelkrim Ghebouli, SAP BPC consultant and business intelligence specialist. A real-time portfolio built from 60,000 particles.">
-<meta name="theme-color" content="#06070d">
+<meta name="theme-color" content="#eceee9">
+<script>try{var w=localStorage.getItem('ag-world');document.documentElement.dataset.world=(w==='night'||w==='blueprint')?w:'day'}catch(e){document.documentElement.dataset.world='day'}</script>
 <meta name="author" content="Abdelkrim Ghebouli">
 <link rel="canonical" href="https://abdelkrim789.github.io/my-portfolio/">
 <meta property="og:type" content="profile">
@@ -29,14 +30,37 @@
   --sand: #e8c07a;
   --ice: #9fd8e6;
   --fault: #ec5a42;
-  --line: rgba(236, 231, 220, 0.16);
+  --bg-rgb: 7, 8, 15;
+  --bg2-rgb: 14, 17, 34;
+  --fg-rgb: 236, 231, 220;
+  --sand-rgb: 232, 192, 122;
+  --ice-rgb: 159, 216, 230;
+  --fault-rgb: 236, 90, 66;
+  --line: rgba(var(--fg-rgb), 0.16);
   --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
   --body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   --gutter: clamp(16px, 5vw, 72px);
   color-scheme: dark;
 }
+/* Daylight: ink on paper. A cool gesso ground, indigo ink, saffron and olive-era ochre for highlights. */
+:root[data-world="day"] {
+  --ink: #eceee9; --ink-2: #e1e4dc; --paper: #141a2e; --muted: #59616f;
+  --sand: #9a5608; --ice: #1b5a80; --fault: #b0301c;
+  --bg-rgb: 236, 238, 233; --bg2-rgb: 225, 228, 220; --fg-rgb: 20, 26, 46;
+  --sand-rgb: 154, 86, 8; --ice-rgb: 27, 90, 128; --fault-rgb: 176, 48, 28;
+  color-scheme: light;
+}
+/* Blueprint: the plan behind it. Prussian blue drafting film with white linework. */
+:root[data-world="blueprint"] {
+  --ink: #0b3157; --ink-2: #0f3d6b; --paper: #eaf3fb; --muted: #9dbcd8;
+  --sand: #ffd27a; --ice: #a6e4ff; --fault: #ff8a75;
+  --bg-rgb: 11, 49, 87; --bg2-rgb: 15, 61, 107; --fg-rgb: 234, 243, 251;
+  --sand-rgb: 255, 210, 122; --ice-rgb: 166, 228, 255; --fault-rgb: 255, 138, 117;
+  color-scheme: dark;
+}
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html { background: var(--ink); }
 body { margin: 0; background: var(--ink); color: var(--paper); font: 400 1rem/1.65 var(--body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 a { color: inherit; }
@@ -44,18 +68,18 @@ a { color: inherit; }
 
 #stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
 .scrim { position: fixed; inset: 0; z-index: 1; pointer-events: none;
-  background: linear-gradient(90deg, rgba(6, 7, 13, 0.7) 0%, rgba(6, 7, 13, 0.35) 30%, rgba(6, 7, 13, 0) 50%); opacity: 0; }
+  background: linear-gradient(90deg, rgba(var(--bg-rgb), 0.7) 0%, rgba(var(--bg-rgb), 0.35) 30%, rgba(var(--bg-rgb), 0) 50%); opacity: 0; }
 .no-webgl body, .no-webgl #stage { background: radial-gradient(ellipse at 70% 40%, #1a2240 0%, var(--ink) 60%); }
 
 /* HUD */
 .hud-top { position: fixed; z-index: 5; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px;
   padding: calc(env(safe-area-inset-top, 0px) + 18px) var(--gutter) 28px; pointer-events: none;
-  background: linear-gradient(180deg, rgba(7, 8, 15, 0.92) 0%, rgba(7, 8, 15, 0.6) 60%, rgba(7, 8, 15, 0) 100%); }
+  background: linear-gradient(180deg, rgba(var(--bg-rgb), 0.92) 0%, rgba(var(--bg-rgb), 0.6) 60%, rgba(var(--bg-rgb), 0) 100%); }
 .hud-top > * { pointer-events: auto; }
 .brand { display: flex; flex-direction: column; text-decoration: none; font: 600 0.95rem/1.15 var(--body); letter-spacing: 0.01em; }
 .brand span { font: 400 0.68rem/1.4 var(--mono); color: var(--muted); letter-spacing: 0.14em; text-transform: uppercase; }
 .hud-actions { display: flex; gap: 8px; }
-.chip { font: 500 0.7rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper); background: rgba(14, 17, 34, 0.6);
+.chip { font: 500 0.7rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper); background: rgba(var(--bg2-rgb), 0.6);
   border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; cursor: pointer; text-decoration: none; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); white-space: nowrap; }
 .chip:hover { border-color: var(--sand); color: var(--sand); }
 .chip[aria-pressed="true"] { border-color: var(--ice); color: var(--ice); }
@@ -65,18 +89,78 @@ a { color: inherit; }
 .rail ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .rail button { all: unset; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 5px 0; font: 400 0.64rem/1 var(--mono); letter-spacing: 0.14em; color: var(--muted); }
 .rail button span { width: 18px; }
-.rail button em { font-style: normal; opacity: 0; transform: translateX(-4px); transition: opacity 0.3s, transform 0.3s; }
+.rail button em { font-style: normal; opacity: 0.55; transition: opacity 0.3s; }
+.rail button:hover em, .rail button:focus-visible em { opacity: 1; }
+.tally { font: 400 0.6rem/1 var(--mono); letter-spacing: 0.06em; color: var(--muted); font-variant-numeric: tabular-nums; }
+.tally:empty { display: none; }
+.tally.done { color: var(--sand); }
+.tally.done::after { content: " ✓"; }
+.hint .tally { margin-left: 4px; padding: 3px 6px; border: 1px solid var(--line); border-radius: 999px; }
 .rail button::before { content: ""; width: 14px; height: 1px; background: currentColor; transition: width 0.35s; order: -1; }
 .rail button.on { color: var(--sand); }
 .rail button.on::before { width: 30px; }
-.rail button.on em, .rail button:hover em, .rail button:focus-visible em { opacity: 1; transform: none; }
+.rail button.on em { opacity: 1; }
 .hud-bottom { position: fixed; z-index: 5; left: var(--gutter); right: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
   display: flex; justify-content: space-between; gap: 12px; font: 400 0.66rem/1.3 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); pointer-events: none; }
 #hud-stage { color: var(--paper); }
 .hud-bottom .count { margin-left: auto; margin-right: 230px; }
+.hud-bottom .count { display: none; }
 @media (max-width: 899px) { .hud-bottom .count { margin-right: 0; } }
 .progress { position: fixed; z-index: 6; left: 0; right: 0; top: 0; height: 2px; }
 .progress i { display: block; height: 100%; background: linear-gradient(90deg, var(--sand), var(--ice)); transform-origin: 0 50%; transform: scaleX(0); }
+
+/* Chapter dock */
+.dock { position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  display: flex; align-items: center; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 999px;
+  background: rgba(var(--bg-rgb), 0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.dock button { all: unset; cursor: pointer; font: 500 0.66rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--paper);
+  padding: 9px 13px; border-radius: 999px; white-space: nowrap; }
+.dock button:hover, .dock button:focus-visible { background: rgba(var(--sand-rgb), 0.16); color: var(--sand); }
+.dock button[disabled] { opacity: 0.3; cursor: default; background: none; color: var(--paper); }
+.dock .now { font: 500 0.66rem/1 var(--mono); letter-spacing: 0.14em; color: var(--sand); padding: 0 10px; min-width: 9.5em; text-align: center; }
+.dock .next { border: 1px solid rgba(var(--sand-rgb), 0.45); }
+
+/* World switcher */
+.worlds { display: flex; align-items: center; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(var(--bg2-rgb), 0.6);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.orb { all: unset; cursor: pointer; display: flex; align-items: center; gap: 0; border-radius: 999px; padding: 3px; color: var(--paper);
+  font: 500 0.62rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; transition: gap 0.3s, padding 0.3s; }
+.orb i { width: 18px; height: 18px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(var(--fg-rgb), 0.35); }
+.orb[data-world="day"] i { background: radial-gradient(circle at 35% 35%, #fbfbf7 0 30%, #e4e1d3 31% 55%, #b98a3c 56% 60%, #eceee9 61%); }
+.orb[data-world="night"] i { background: radial-gradient(circle at 62% 38%, #e9ecf5 0 22%, #0e1122 23%), #0e1122; }
+.orb[data-world="blueprint"] i { background: linear-gradient(#0b3157, #0b3157) padding-box,
+  repeating-linear-gradient(0deg, transparent 0 4px, rgba(166, 228, 255, 0.55) 4px 5px), repeating-linear-gradient(90deg, #0b3157 0 4px, rgba(166, 228, 255, 0.55) 4px 5px); }
+.orb span { max-width: 0; overflow: hidden; white-space: nowrap; transition: max-width 0.35s; }
+.orb:hover, .orb:focus-visible, .orb[aria-pressed="true"] { gap: 7px; padding: 3px 10px 3px 3px; }
+.orb:hover span, .orb:focus-visible span, .orb[aria-pressed="true"] span { max-width: 9em; }
+.orb[aria-pressed="true"] { background: rgba(var(--sand-rgb), 0.16); color: var(--sand); cursor: default; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-new(root) { z-index: 2; }
+
+#world-toast { position: fixed; z-index: 7; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.96); text-align: center; pointer-events: none;
+  opacity: 0; transition: opacity 0.6s, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
+#world-toast.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+#world-toast b { display: block; font: 800 clamp(3.4rem, 10vw, 8rem)/0.85 var(--display); text-transform: uppercase; color: var(--paper); }
+#world-toast span { display: block; margin-top: 12px; font: 500 0.72rem/1 var(--mono); letter-spacing: 0.24em; text-transform: uppercase; color: var(--sand); }
+
+#guide { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 24px 16px; background: rgba(var(--bg-rgb), 0.55);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.guide-card { width: min(460px, 100%); padding: 26px 26px 22px; background: rgba(var(--bg-rgb), 0.94); border: 1px solid var(--line); border-radius: 6px; }
+.guide-card .tag { font: 500 0.68rem/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--sand); margin: 0 0 16px; }
+.guide-card dl { margin: 0 0 20px; display: grid; gap: 10px; }
+.guide-card dl div { display: grid; grid-template-columns: 8.5rem 1fr; gap: 12px; align-items: baseline; }
+.guide-card dt { font: 500 0.7rem/1.3 var(--mono); letter-spacing: 0.06em; color: var(--paper); }
+.guide-card dt kbd { font: inherit; padding: 2px 6px; border: 1px solid var(--line); border-radius: 3px; }
+.guide-card dd { margin: 0; font-size: 0.88rem; color: rgba(var(--fg-rgb), 0.82); }
+
+.detail-nav { position: sticky; bottom: calc(env(safe-area-inset-bottom, 0px) * -1); margin: 26px -32px calc(-40px - env(safe-area-inset-bottom, 0px)); padding: 12px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid var(--line); background: rgba(var(--bg-rgb), 0.94); }
+.detail-nav button { all: unset; cursor: pointer; display: flex; gap: 6px; align-items: center; min-width: 0; max-width: 42%; font: 500 0.66rem/1.3 var(--mono);
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--paper); padding: 8px 10px; border-radius: 4px; }
+.detail-nav button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.detail-nav button:hover, .detail-nav button:focus-visible { color: var(--sand); background: rgba(var(--sand-rgb), 0.12); }
+.detail-nav .pos { font: 400 0.66rem/1 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.detail-body .bignum { font: 800 clamp(3.6rem, 9vw, 5.4rem)/0.85 var(--display); color: var(--sand); margin: 4px 0 14px; font-variant-numeric: tabular-nums; }
 
 /* Labels anchored inside the 3D scenes */
 .hotspots { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
@@ -86,11 +170,14 @@ a { color: inherit; }
 .hs i::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: currentColor; }
 .hs i::before { content: ""; position: absolute; inset: -1px; border-radius: 50%; border: 1px solid currentColor; animation: ring 2.2s ease-out infinite; }
 @keyframes ring { from { transform: scale(1); opacity: 0.7; } to { transform: scale(2.4); opacity: 0; } }
-.hs b { font-weight: 500; padding: 5px 8px; background: rgba(7, 8, 15, 0.62); border: 1px solid var(--line); border-radius: 2px; transition: border-color 0.25s, color 0.25s, background 0.25s; }
+.hs b { font-weight: 500; padding: 5px 8px; background: rgba(var(--bg-rgb), 0.62); border: 1px solid var(--line); border-radius: 2px; transition: border-color 0.25s, color 0.25s, background 0.25s; }
 .hs:hover b, .hs:focus-visible b, .hs.active b { border-color: var(--sand); color: var(--ink); background: var(--sand); }
 .hs.sand { color: var(--sand); } .hs.sand b { color: var(--paper); }
-.hs.fault { color: var(--fault); } .hs.fault b { border-color: rgba(236, 90, 66, 0.45); color: var(--fault); }
+.hs.fault { color: var(--fault); } .hs.fault b { border-color: rgba(var(--fault-rgb), 0.45); color: var(--fault); }
 .hs.flip { flex-direction: row-reverse; }
+.hs.seen i::after { width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+.hs.seen i::before { animation: none; opacity: 0; }
+.hs.seen b::after { content: " ✓"; color: var(--sand); }
 .hs.static { cursor: default; color: var(--muted); }
 .hs.static i { width: 7px; height: 7px; margin: 0 5px; background: currentColor; border: 0; }
 .hs.static i::before, .hs.static i::after { display: none; }
@@ -106,16 +193,19 @@ main { position: relative; z-index: 2; }
 @media (min-width: 900px) and (min-height: 640px) {
   .chapter:not(.hero):not(.last) .panel { position: sticky; top: 0; padding-block: 88px 64px; }
 }
+@media (min-width: 900px) {
+  .chapter:not(.hero) .panel { margin-left: max(0px, calc(176px - var(--gutter))); }
+}
 .eyebrow { display: flex; align-items: center; gap: 10px; font: 500 0.72rem/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--ice); margin: 0 0 18px; }
 .eyebrow::before { content: ""; width: 26px; height: 1px; background: currentColor; }
 .eyebrow.sand { color: var(--sand); } .eyebrow.fault { color: var(--fault); }
 h2 { font: 800 clamp(2.6rem, 5vw, 4.9rem)/0.88 var(--display); text-transform: uppercase; letter-spacing: 0.005em; margin: 0 0 20px; text-wrap: balance; }
-p { margin: 0 0 14px; color: rgba(236, 231, 220, 0.86); max-width: 62ch; }
+p { margin: 0 0 14px; color: rgba(var(--fg-rgb), 0.86); max-width: 62ch; }
 .role { font: 400 0.78rem/1.5 var(--mono); color: var(--muted); letter-spacing: 0.04em; margin-bottom: 14px; }
 .role b { color: var(--paper); font-weight: 500; }
 .hint { display: inline-flex; align-items: center; gap: 12px; margin-top: 10px; font: 500 0.68rem/1.4 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sand); }
 .hint::before { content: ""; width: 7px; height: 7px; flex: none; border-radius: 50%; background: currentColor; animation: ping 1.8s ease-out infinite; }
-@keyframes ping { from { box-shadow: 0 0 0 0 rgba(232, 192, 122, 0.6); } to { box-shadow: 0 0 0 12px rgba(232, 192, 122, 0); } }
+@keyframes ping { from { box-shadow: 0 0 0 0 rgba(var(--sand-rgb), 0.6); } to { box-shadow: 0 0 0 12px rgba(var(--sand-rgb), 0); } }
 
 .hero .panel { padding-block: 0; position: absolute; left: var(--gutter); right: var(--gutter); bottom: 34vh; margin: 0; max-width: 40rem; }
 .hero h1 { font: 800 clamp(3rem, 9vw, 7rem)/0.88 var(--display); text-transform: uppercase; margin: 0 0 20px; }
@@ -126,7 +216,7 @@ p { margin: 0 0 14px; color: rgba(236, 231, 220, 0.86); max-width: 62ch; }
 /* Final chapter */
 .last .panel { max-width: 36rem; padding-block: 26vh 16vh; }
 .creds { list-style: none; margin: 22px 0 28px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
-.creds li { font: 400 0.8rem/1.3 var(--body); padding: 10px 12px; border: 1px solid var(--line); background: rgba(7, 8, 15, 0.6); border-radius: 2px; cursor: default; transition: border-color 0.25s; }
+.creds li { font: 400 0.8rem/1.3 var(--body); padding: 10px 12px; border: 1px solid var(--line); background: rgba(var(--bg-rgb), 0.6); border-radius: 2px; cursor: default; transition: border-color 0.25s; }
 .creds li:hover, .creds li:focus-visible { border-color: var(--sand); }
 .creds code { display: block; font: 500 0.7rem/1 var(--mono); color: var(--sand); letter-spacing: 0.1em; margin-bottom: 6px; }
 .contact { border-top: 1px solid var(--line); padding-top: 22px; display: grid; gap: 16px; }
@@ -140,9 +230,9 @@ footer { position: relative; z-index: 2; padding: 0 var(--gutter) calc(env(safe-
 footer p { color: var(--muted); font-size: inherit; }
 
 /* Detail panel */
-#detail { position: fixed; z-index: 8; top: 0; right: 0; bottom: 0; width: min(440px, 100%); overflow-y: auto; overscroll-behavior: contain;
+#detail { position: fixed; z-index: 8; display: flex; flex-direction: column; top: 0; right: 0; bottom: 0; width: min(440px, 100%); overflow-y: auto; overscroll-behavior: contain;
   padding: calc(env(safe-area-inset-top, 0px) + 84px) 32px calc(env(safe-area-inset-bottom, 0px) + 40px);
-  background: rgba(9, 11, 22, 0.86); border-left: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  background: rgba(var(--bg-rgb), 0.86); border-left: 1px solid var(--line); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
   transform: translateX(104%); transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
 #detail.open { transform: none; }
 #detail .close { position: absolute; top: calc(env(safe-area-inset-top, 0px) + 22px); right: 24px; }
@@ -150,7 +240,7 @@ footer p { color: var(--muted); font-size: inherit; }
 .detail-body h3 { font: 800 clamp(2rem, 4vw, 2.8rem)/0.92 var(--display); text-transform: uppercase; margin: 0 0 14px; text-wrap: balance; }
 .detail-body .dmeta { font: 400 0.76rem/1.5 var(--mono); color: var(--muted); margin-bottom: 18px; }
 .detail-body p { font-size: 0.96rem; }
-.detail-body ul { margin: 0 0 16px; padding-left: 1.1em; display: grid; gap: 6px; font-size: 0.94rem; color: rgba(236, 231, 220, 0.88); }
+.detail-body ul { margin: 0 0 16px; padding-left: 1.1em; display: grid; gap: 6px; font-size: 0.94rem; color: rgba(var(--fg-rgb), 0.88); }
 .detail-body a.link { font: 500 0.74rem/1 var(--mono); color: var(--ice); letter-spacing: 0.08em; text-decoration: none; display: inline-block; margin-top: 6px; }
 .detail-body a.link:hover { text-decoration: underline; }
 .detail-body .tech { font: 400 0.72rem/1.4 var(--mono); color: var(--muted); letter-spacing: 0.06em; }
@@ -160,9 +250,9 @@ footer p { color: var(--muted); font-size: inherit; }
 .readout dd { margin: 0; text-align: right; }
 .fault-t { color: var(--fault); } .ice-t { color: var(--ice); }
 .metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin: 6px 0 18px; }
-.metrics div { background: rgba(7, 8, 15, 0.8); padding: 14px; }
+.metrics div { background: rgba(var(--bg-rgb), 0.8); padding: 14px; }
 .metrics b { display: block; font: 800 2.1rem/1 var(--display); color: var(--sand); font-variant-numeric: tabular-nums; }
-.metrics span { display: block; margin-top: 6px; font-size: 0.8rem; line-height: 1.4; color: rgba(236, 231, 220, 0.8); }
+.metrics span { display: block; margin-top: 6px; font-size: 0.8rem; line-height: 1.4; color: rgba(var(--fg-rgb), 0.8); }
 
 
 /* Boot sequence */
@@ -176,7 +266,7 @@ footer p { color: var(--muted); font-size: inherit; }
 
 /* Career timeline on the data river */
 .hs.year { color: var(--sand); cursor: default; }
-.hs.year b { background: rgba(7, 8, 15, 0.5); border-color: rgba(232, 192, 122, 0.25); color: var(--paper); letter-spacing: 0.08em; }
+.hs.year b { background: rgba(var(--bg-rgb), 0.5); border-color: rgba(var(--sand-rgb), 0.25); color: var(--paper); letter-spacing: 0.08em; }
 .hs.year em { font-style: normal; color: var(--sand); margin-right: 10px; }
 .hs.year i { width: 7px; height: 7px; margin: 0 5px; background: currentColor; border: 0; }
 .hs.year i::before, .hs.year i::after { display: none; }
@@ -184,7 +274,7 @@ footer p { color: var(--muted); font-size: inherit; }
 /* Journey minimap */
 .minimap { position: fixed; z-index: 5; right: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); width: 200px; }
 .minimap svg { display: block; width: 100%; height: auto; overflow: visible; }
-.minimap .route { fill: none; stroke: rgba(159, 216, 230, 0.35); stroke-width: 1; stroke-dasharray: 2 3; }
+.minimap .route { fill: none; stroke: rgba(var(--ice-rgb), 0.35); stroke-width: 1; stroke-dasharray: 2 3; }
 .minimap .stop { cursor: pointer; }
 .minimap .stop circle { fill: var(--ink); stroke: var(--sand); stroke-width: 1; transition: fill 0.25s; }
 .minimap .stop:hover circle, .minimap .stop:focus-visible circle { fill: var(--sand); }
@@ -206,7 +296,7 @@ footer p { color: var(--muted); font-size: inherit; }
 
 /* Cursor */
 #cursor { position: fixed; left: 0; top: 0; z-index: 60; pointer-events: none; width: 0; height: 0; }
-#cursor::before { content: ""; position: absolute; width: 34px; height: 34px; left: -17px; top: -17px; border: 1px solid rgba(236, 231, 220, 0.45); border-radius: 50%;
+#cursor::before { content: ""; position: absolute; width: 34px; height: 34px; left: -17px; top: -17px; border: 1px solid rgba(var(--fg-rgb), 0.45); border-radius: 50%;
   transition: width 0.3s, height 0.3s, left 0.3s, top 0.3s, border-color 0.3s; }
 #cursor i { position: absolute; width: 4px; height: 4px; left: -2px; top: -2px; border-radius: 50%; background: var(--sand); }
 #cursor span { position: absolute; left: 30px; top: -5px; font: 500 0.6rem/1 var(--mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sand); white-space: nowrap; transition: left 0.3s; }
@@ -219,13 +309,24 @@ footer p { color: var(--muted); font-size: inherit; }
 
 @media (max-width: 899px) {
   .rail { display: none; }
-  .scrim { background: linear-gradient(180deg, rgba(7, 8, 15, 0) 0%, rgba(7, 8, 15, 0.35) 100%); }
+  .scrim { background: linear-gradient(180deg, rgba(var(--bg-rgb), 0) 0%, rgba(var(--bg-rgb), 0.35) 100%); }
   .chapter { min-height: 140vh; }
   .panel { margin-left: 0; padding-block: 62vh 10vh; }
-  .chapter:not(.hero) .panel { background: linear-gradient(180deg, rgba(7, 8, 15, 0) 0, rgba(7, 8, 15, 0.8) 40vh, rgba(7, 8, 15, 0.8) 100%);
+  .chapter:not(.hero) .panel { background: linear-gradient(180deg, rgba(var(--bg-rgb), 0) 0, rgba(var(--bg-rgb), 0.8) 40vh, rgba(var(--bg-rgb), 0.8) 100%);
     margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); max-width: none; }
   .hero .panel { bottom: 24vh; }
   .hud-bottom { display: none; }
+  .hud-actions .contact { display: none; }
+  .orb:hover span, .orb:focus-visible span { max-width: 0; }
+  .orb:hover, .orb:focus-visible { gap: 0; padding: 3px; }
+  .orb[aria-pressed="true"] span { max-width: 0; }
+  .orb[aria-pressed="true"] { gap: 0; padding: 3px; }
+  .dock .now { min-width: 0; white-space: nowrap; padding: 0 6px; font-size: 0.6rem; }
+  .dock button { padding: 9px 10px; }
+  .chapter:not(.hero) .panel { padding-bottom: calc(10vh + 72px); }
+  .hero .panel { bottom: calc(env(safe-area-inset-bottom, 0px) + 92px); }
+  .hs b { padding: 4px 6px; letter-spacing: 0.08em; }
+  .detail-nav { margin: 22px -20px calc(-28px - env(safe-area-inset-bottom, 0px)); }
   .minimap { display: none; }
   .brand span { display: none; }
   .chip { padding: 8px 11px; letter-spacing: 0.08em; }
@@ -244,13 +345,37 @@ footer p { color: var(--muted); font-size: inherit; }
 <header class="hud-top">
   <a class="brand" href="#signal">Abdelkrim Ghebouli<span>SAP BPC · Business Intelligence</span></a>
   <div class="hud-actions">
+    <div class="worlds" role="group" aria-label="Worlds"></div>
+    <button class="chip" id="guide-toggle" type="button" aria-expanded="false" aria-controls="guide" aria-label="How to explore">?</button>
     <button class="chip" id="sound-toggle" type="button" aria-pressed="false">Sound off</button>
-    <a class="chip" href="#decide">Contact</a>
+    <a class="chip contact" href="#decide">Contact</a>
   </div>
 </header>
 <nav class="rail" aria-label="Chapters"><ol></ol></nav>
 <div class="hotspots"></div>
-<div class="hud-bottom" aria-hidden="true"><span id="hud-stage">00 / SIGNAL</span><span id="hud-count" class="count">real time</span></div>
+<nav class="dock" aria-label="Chapter navigation">
+  <button class="prev" type="button" aria-label="Previous chapter">↑</button>
+  <span class="now" id="hud-stage" aria-live="polite">00 · SIGNAL</span>
+  <button class="next" type="button"><span>Next · raw</span> ↓</button>
+</nav>
+<div class="hud-bottom" aria-hidden="true"><span id="hud-count" class="count">real time</span></div>
+<div id="world-toast" aria-live="polite"><b></b><span></span></div>
+<div id="guide" role="dialog" aria-modal="true" aria-label="How to explore" hidden>
+  <div class="guide-card">
+    <p class="tag">How to explore</p>
+    <dl>
+      <div><dt>Scroll · swipe</dt><dd>Travel through the world, chapter by chapter</dd></div>
+      <div><dt><kbd>↑</kbd> <kbd>↓</kbd> · dock</dt><dd>Jump to the previous or next chapter</dd></div>
+      <div><dt>Click a label</dt><dd>Fly to that point and open its story</dd></div>
+      <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Next or previous point while a story is open</dd></div>
+      <div><dt>Drag</dt><dd>Orbit around the scene</dd></div>
+      <div><dt>Click empty space</dt><dd>Send a shockwave through the particles</dd></div>
+      <div><dt><kbd>W</kbd> · top orbs</dt><dd>Open a portal to another world: Daylight, Night or Blueprint</dd></div>
+      <div><dt><kbd>Esc</kbd></dt><dd>Close a story or this guide</dd></div>
+    </dl>
+    <button class="chip" type="button">Start exploring</button>
+  </div>
+</div>
 <div id="cursor" aria-hidden="true"><i></i><span></span></div>
 <div class="minimap"><span class="minimap-label">Journey</span><svg viewBox="0 0 200 70" aria-label="Journey map"></svg></div>
 <div id="boot" aria-hidden="true"><p>Abdelkrim Ghebouli · portfolio</p><ol></ol></div>
@@ -269,7 +394,7 @@ footer p { color: var(--muted); font-size: inherit; }
     <div class="panel">
       <p class="eyebrow fault">01 · Raw</p>
       <h2>The day the stock data broke</h2>
-      <span class="hint" data-hint-touch="Tap the red label">Move through the storm to repair it</span>
+      <span class="hint" data-hint-touch="Tap a red label">Move through the storm to repair it <small class="tally" data-chapter="1"></small></span>
     </div>
   </section>
 
@@ -277,7 +402,7 @@ footer p { color: var(--muted); font-size: inherit; }
     <div class="panel">
       <p class="eyebrow">02 · Clean</p>
       <h2>Rebuilt from the movement history</h2>
-      <span class="hint">Open a restored record</span>
+      <span class="hint">Open the two restored records <small class="tally" data-chapter="2"></small></span>
     </div>
   </section>
 
@@ -285,7 +410,7 @@ footer p { color: var(--muted); font-size: inherit; }
     <div class="panel">
       <p class="eyebrow sand">03 · Model</p>
       <h2>Eight systems, one structure</h2>
-      <span class="hint">Open a point of the star</span>
+      <span class="hint">Open the eight points of the star <small class="tally" data-chapter="3"></small></span>
     </div>
   </section>
 
@@ -293,7 +418,7 @@ footer p { color: var(--muted); font-size: inherit; }
     <div class="panel">
       <p class="eyebrow">04 · Consolidate</p>
       <h2>Many entities, one closing</h2>
-      <span class="hint">Open the core</span>
+      <span class="hint">Open the core and its six streams <small class="tally" data-chapter="4"></small></span>
     </div>
   </section>
 
@@ -301,7 +426,7 @@ footer p { color: var(--muted); font-size: inherit; }
     <div class="panel">
       <p class="eyebrow sand">05 · Report</p>
       <h2>Dashboards instead of manual reports</h2>
-      <span class="hint">Open a gold tower</span>
+      <span class="hint">Open the gold towers and the base <small class="tally" data-chapter="5"></small></span>
     </div>
   </section>
 
@@ -309,7 +434,7 @@ footer p { color: var(--muted); font-size: inherit; }
     <div class="panel">
       <p class="eyebrow">06 · Build</p>
       <h2>I also write the software</h2>
-      <span class="hint">Open a project</span>
+      <span class="hint">Open the projects, layers and team <small class="tally" data-chapter="6"></small></span>
     </div>
   </section>
 
@@ -342,26 +467,57 @@ footer p { color: var(--muted); font-size: inherit; }
 <aside id="detail" aria-label="Details">
   <button class="chip close" type="button">Close</button>
   <div class="detail-body"></div>
+  <nav class="detail-nav" aria-label="Points in this chapter">
+    <button class="prev" type="button">← <span></span></button>
+    <span class="pos"></span>
+    <button class="next" type="button"><span></span> →</button>
+  </nav>
 </aside>
 
 <template id="d-raw">
   <p class="tag">Incident · Géant Electronics</p>
   <h3>The stock-data incident</h3>
-  <p>Network delays corrupted stock data on nearly all articles in Cegid PMI. The quantities in the system no longer matched what had actually moved through the depots, and production was blocked.</p>
+  <p>Network delays corrupted the stock data of nearly every article in Cegid PMI, the company's ERP. Overnight, the system's quantities stopped being something anyone could rely on.</p>
   <dl class="readout">
     <div><dt>ERP</dt><dd>Cegid PMI</dd></div>
     <div><dt>Cause</dt><dd>Network delays</dd></div>
-    <div><dt>Articles affected</dt><dd class="fault-t">Nearly all</dd></div>
-    <div><dt>Production</dt><dd class="fault-t">Blocked</dd></div>
+    <div><dt>Scope</dt><dd class="fault-t">Nearly all articles</dd></div>
   </dl>
 </template>
-<template id="d-clean">
-  <p class="tag">Fix · Géant Electronics</p>
-  <h3>How I fixed it</h3>
-  <p>I analysed stock at depot and lot level against the full movement history to locate the records that had drifted.</p>
-  <p>Then I built an automated tool that detected and corrected the affected records, restoring accurate stock data across the company.</p>
+<template id="d-raw-mismatch">
+  <p class="tag">Symptom · what was wrong</p>
+  <h3>Stock that didn't match its own history</h3>
+  <p>Every quantity in an ERP should be the sum of the movements behind it: receipts, transfers, consumption, sales. After the network delays, the stock recorded at depot and lot level no longer added up to the movement history.</p>
   <dl class="readout">
-    <div><dt>Method</dt><dd>Stock vs. movement history</dd></div>
+    <div><dt>Level</dt><dd>Depot and lot</dd></div>
+    <div><dt>Check</dt><dd>Stock vs. movements</dd></div>
+    <div><dt>Result</dt><dd class="fault-t">Mismatch</dd></div>
+  </dl>
+</template>
+<template id="d-raw-blocked">
+  <p class="tag">Impact</p>
+  <h3>Production stopped</h3>
+  <p>With quantities that couldn't be trusted, production was blocked. Planning, picking and issuing material all depend on stock being right, so the problem reached far beyond the ERP screen.</p>
+  <dl class="readout">
+    <div><dt>Production</dt><dd class="fault-t">Blocked</dd></div>
+    <div><dt>Reach</dt><dd>Company-wide</dd></div>
+  </dl>
+</template>
+<template id="d-clean-method">
+  <p class="tag">Fix · step 1 of 2</p>
+  <h3>Finding the drift</h3>
+  <p>I analysed stock at depot and lot level against the full movement history, record by record, to locate exactly which quantities had drifted and by how much.</p>
+  <dl class="readout">
+    <div><dt>Source of truth</dt><dd>Movement history</dd></div>
+    <div><dt>Granularity</dt><dd>Depot and lot</dd></div>
+  </dl>
+</template>
+<template id="d-clean-tool">
+  <p class="tag">Fix · step 2 of 2</p>
+  <h3>A tool that repairs itself</h3>
+  <p>Rather than correct thousands of records by hand, I built an automated tool that detects the affected records and corrects them from their movement history.</p>
+  <p>Accurate stock data was restored across the whole company, and production could run again.</p>
+  <dl class="readout">
     <div><dt>Fix</dt><dd>Automated detect and correct</dd></div>
     <div><dt>Status</dt><dd class="ice-t">Restored company-wide</dd></div>
   </dl>
@@ -387,28 +543,70 @@ footer p { color: var(--muted); font-size: inherit; }
   <p>Enhanced an internal Python Flask platform for managing Cegid PMI configurations, improving processing speed by nearly 30% and expanding its data-handling capacity.</p>
   <p>I also automate reporting workflows with Python and optimise the SQL behind them.</p></template>
 <template id="d-shone">
-  <p class="tag">Current role</p>
+  <p class="tag">Current role · the core</p>
   <h3>SAP BPC Consultant</h3>
   <p class="dmeta">CNPC / Beijing Richfit International · June 2026 to now</p>
-  <p>On Sonatrach's SHONE project I support planning, consolidation and reporting across Sonatrach's operations in Algeria. Each stream in the scene is an entity's data flowing into one consolidated view.</p>
-  <ul>
-    <li>Configure Business Process Flows to structure and monitor planning and consolidation</li>
-    <li>Build EPM Add-in and Analysis for Office reports for end users</li>
-    <li>Build and maintain reports that support business decisions</li>
-    <li>Trained in BW Query Design and Security Design</li>
-  </ul>
+  <p>On Sonatrach's SHONE project I support planning, consolidation and reporting across Sonatrach's operations in Algeria. The core of this scene is the consolidated view; each of the six streams around it is one part of how I work on it.</p>
+</template>
+<template id="d-bpf">
+  <p class="tag">Stream · process</p>
+  <h3>Business Process Flows</h3>
+  <p>I apply BPF configuration in SAP BPC to structure and monitor the planning and consolidation processes: the steps, who acts on each, and where every entity stands in the cycle.</p>
+</template>
+<template id="d-epm">
+  <p class="tag">Stream · reporting</p>
+  <h3>EPM Add-in</h3>
+  <p>I develop reporting deliverables in the EPM Add-in, the Excel front end for SAP BPC, so end users can work with planning and consolidation data in a tool they already know.</p>
+</template>
+<template id="d-afo">
+  <p class="tag">Stream · reporting</p>
+  <h3>Analysis for Office</h3>
+  <p>I build reports in SAP Analysis for Office for end-user consumption, on top of the BW queries behind the BPC landscape.</p>
+</template>
+<template id="d-bwq">
+  <p class="tag">Stream · training</p>
+  <h3>BW Query Design</h3>
+  <p>I completed specialised training in BW Query Design within the SAP BPC/BW landscape: how the queries that feed every report are modelled and built.</p>
+</template>
+<template id="d-sec">
+  <p class="tag">Stream · training</p>
+  <h3>Security Design</h3>
+  <p>I completed specialised training in Security Design within the SAP BPC/BW landscape: who can see and change which data, across entities.</p>
+</template>
+<template id="d-rep">
+  <p class="tag">Stream · outcome</p>
+  <h3>Reports for decisions</h3>
+  <p>I build and maintain the reports that support business decision-making on the project. Everything upstream exists so that this last step is right.</p>
 </template>
 <template id="d-geant">
-  <p class="tag">Experience</p>
+  <p class="tag">The base · experience</p>
   <h3>Data Analyst &amp; ERP Support Specialist</h3>
   <p class="dmeta">Géant Electronics · January to June 2025</p>
-  <div class="metrics">
-    <div><b>4–6</b><span>Power BI dashboards used across departments</span></div>
-    <div><b>~30%</b><span>faster processing in the Flask platform for Cegid PMI</span></div>
-    <div><b>30–50</b><span>Cegid PMI users supported as primary ERP contact</span></div>
-    <div><b>10–20</b><span>after-sales staff onboarded in the Cegid PMI launch</span></div>
-  </div>
-  <p>I also worked with the commercial team on budgeting and revenue analysis, reconciling accounting entries against revenue data in the ERP to support financial reporting.</p>
+  <p>The four gold towers are what I delivered there. Under them sits the finance work: with the commercial team I worked on budgeting and revenue analysis, reconciling accounting entries against revenue (chiffre d'affaires) data in the ERP to support financial reporting.</p>
+</template>
+<template id="d-m-dash">
+  <p class="tag">Tower 1 · reporting</p>
+  <p class="bignum">4–6</p>
+  <h3>Power BI dashboards</h3>
+  <p>I built and maintained four to six Power BI dashboards used across several departments. They gave leadership real-time visibility into operational and financial metrics and replaced manual reporting.</p>
+</template>
+<template id="d-m-flask">
+  <p class="tag">Tower 2 · engineering</p>
+  <p class="bignum">~30%</p>
+  <h3>Faster configuration platform</h3>
+  <p>I enhanced an internal Python Flask platform for managing Cegid PMI configurations, improving its processing speed by nearly 30% and expanding how much data it could handle.</p>
+</template>
+<template id="d-m-users">
+  <p class="tag">Tower 3 · support</p>
+  <p class="bignum">30–50</p>
+  <h3>ERP users supported</h3>
+  <p>I was the primary ERP support resource for Cegid PMI across 30 to 50 end users, resolving navigation and configuration issues and reducing ticket resolution time.</p>
+</template>
+<template id="d-m-launch">
+  <p class="tag">Tower 4 · rollout</p>
+  <p class="bignum">10–20</p>
+  <h3>Staff onboarded</h3>
+  <p>I led the full Cegid PMI launch in the after-sales service department, driving adoption across 10 to 20 staff and gathering functional requirements after testing.</p>
 </template>
 <template id="d-olive">
   <p class="tag">Project · Lead backend developer</p>
@@ -429,6 +627,31 @@ footer p { color: var(--muted); font-size: inherit; }
   <h3>Jewelry Store Management System</h3>
   <p>A complete retail application with inventory, point of sale and reporting modules, designed on MVC for maintainability.</p>
   <p class="tech">Java · JavaFX · SQLite</p>
+</template>
+<template id="d-layer-ui">
+  <p class="tag">Layer · interface</p>
+  <h3>What people touch</h3>
+  <p>A React (Vite) front end on Olive Palace, a minimalist and responsive storefront for LatinaDZ, and a JavaFX desktop interface for the jewelry store system.</p>
+  <p class="tech">React · Vite · JavaFX · responsive layouts</p>
+</template>
+<template id="d-layer-logic">
+  <p class="tag">Layer · logic</p>
+  <h3>What makes it work</h3>
+  <p>Laravel backends for three to five client platforms and internal tools: server-side logic, integrations and the rules behind every screen. On the SAP side, a certification in ABAP Cloud back-end development.</p>
+  <p class="tech">Laravel · PHP · Python (Flask) · Java · ABAP</p>
+</template>
+<template id="d-layer-data">
+  <p class="tag">Layer · data</p>
+  <h3>What it all stands on</h3>
+  <p>Databases designed and managed for scalable web applications, plus the analyst's side: data cleaning and transformation, and SQL query optimisation.</p>
+  <p class="tech">MySQL · SQL Server · SQLite · MS Access · advanced Excel</p>
+</template>
+<template id="d-team">
+  <p class="tag">Above the tower · leadership</p>
+  <h3>Leading the team</h3>
+  <p class="dmeta">Backend Developer &amp; Dev Team Leader · Freelance / Dev Group Service · October 2024 to now</p>
+  <p>I supervise a remote team of four to six developers using Agile: running sprints and code reviews so client platforms and internal tools ship on schedule.</p>
+  <p class="tech">Agile · sprints · code review · Dale Carnegie certified</p>
 </template>
 <template id="d-home">
   <p class="tag">Origin · 36.07°N 4.76°E</p>

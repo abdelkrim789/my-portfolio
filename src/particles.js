@@ -249,29 +249,47 @@ export const FINAL_SHADER = {
   uniforms: {
     tDiffuse: { value: null }, uTime: { value: 0 }, uAberration: { value: 0.002 },
     uGlitch: { value: 0 }, uResolution: { value: new THREE.Vector2(1, 1) },
+    uLight: { value: 0 }, uGrain: { value: 0.045 }, uPortal: { value: new THREE.Vector4(0.5, 0.5, 0, 0) },
+    uRing: { value: new THREE.Color(1, 0.85, 0.6) },
   },
   vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float uTime, uAberration, uGlitch; uniform vec2 uResolution;
+    uniform sampler2D tDiffuse; uniform float uTime, uAberration, uGlitch, uLight, uGrain; uniform vec2 uResolution;
+    uniform vec4 uPortal; uniform vec3 uRing;
     varying vec2 vUv;
     float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7)))*43758.5453); }
     void main(){
       vec2 uv = vUv;
+      // the edge of the portal between worlds: a refracting, chromatic ring
+      vec2 px = uv*uResolution;
+      vec2 pc = uPortal.xy*uResolution;
+      float pd = length(px - pc);
+      float pw = 0.045*min(uResolution.x, uResolution.y);
+      float ring = exp(-pow((pd - uPortal.z)/pw, 2.0)) * uPortal.w;
+      vec2 pdir = normalize(px - pc + 1e-4);
+      uv -= pdir/uResolution * ring * pw * 0.9;
       float band = floor(uv.y*28.0);
       float tick = floor(uTime*24.0);
       float on = step(0.72, hash(vec2(band, tick)));
       uv.x += (hash(vec2(band*1.7, tick)) - 0.5)*0.08*uGlitch*on;
       vec2 dir = uv - 0.5;
       float dl = length(dir);
-      float ab = uAberration*(0.4 + dl*1.6) + uGlitch*0.012*on;
+      float ab = uAberration*(0.4 + dl*1.6) + uGlitch*0.012*on + ring*0.012;
       vec3 col;
       col.r = texture2D(tDiffuse, uv + dir*ab).r;
       col.g = texture2D(tDiffuse, uv).g;
       col.b = texture2D(tDiffuse, uv - dir*ab).b;
-      col = 1.0 - exp(-col*1.25);
-      col += vec3(0.012, 0.014, 0.03);
-      col *= mix(1.0, smoothstep(1.05, 0.25, dl), 0.75);
-      col += (hash(uv*uResolution + fract(uTime)*100.0) - 0.5)*0.045;
+      if (uLight > 0.5) {
+        col *= mix(1.0, smoothstep(1.2, 0.35, dl), 0.22);
+        float fiber = hash(floor(px/2.0) + 3.1) - 0.5;
+        col += fiber*0.012;
+      } else {
+        col = 1.0 - exp(-col*1.25);
+        col += vec3(0.012, 0.014, 0.03);
+        col *= mix(1.0, smoothstep(1.05, 0.25, dl), 0.75);
+      }
+      col = mix(col, uRing, clamp(ring*0.85, 0.0, 1.0));
+      col += (hash(uv*uResolution + fract(uTime)*100.0) - 0.5)*uGrain;
       gl_FragColor = vec4(col, 1.0);
     }`,
 };
