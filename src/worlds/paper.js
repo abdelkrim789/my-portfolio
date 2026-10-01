@@ -376,7 +376,7 @@ export async function createPaper(env) {
 
   return {
     id: 'day', camera, fovKick: 3,
-    post: { conv: 1, grain: 0.035, vig: 0.18, ab: 0.0012, grid: 0, light: 1 },
+    post: { conv: 1, grain: 0.035, vig: 0.18, ab: 0.0012, grid: 0, light: 1, tilt: 0.45 },
     pose(stage, P, L) {
       const fr = stage - Math.floor(stage), lift = Math.sin(Math.PI * fr);
       const cx = stage * SP;
@@ -436,6 +436,7 @@ export async function createPaper(env) {
       if (Math.abs(stage - 1) < 1.2) {
         let has = false;
         if (mouseActive) { ray.setFromCamera(mouse, camera); has = !!ray.ray.intersectPlane(plane, hit); if (has) islands[1].group.worldToLocal(hit); }
+        let done = 0;
         rawBoxes.forEach((b) => {
           const near = has && Math.hypot(b.chaosP.x - hit.x, b.chaosP.z - hit.z) < 4.2;
           b.r = clamp(b.r + (near ? dt * 2.6 : -dt * 0.1), 0, 1);
@@ -443,7 +444,9 @@ export async function createPaper(env) {
           b.m.position.lerpVectors(b.chaosP, b.orderP, e);
           b.m.quaternion.slerpQuaternions(b.chaosQ, b.orderQ, e);
           if (b.bad) b.m.material.color.copy(cRed).lerp(cKraft, e);
+          if (e > 0.85) done++;
         });
+        if (done > rawBoxes.length * 0.7) env.achieve?.('repair');
       }
       if (magnifier) { magnifier.position.x = Math.sin(time * 0.8) * 0.9; magnifier.position.z = Math.cos(time * 0.6) * 0.5; }
       if (fountainTop) fountainTop.rotation.y = time * 0.6;

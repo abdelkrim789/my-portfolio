@@ -31,8 +31,11 @@ export const WORLDS = {
     orb: { color: [0.8, 0.92, 1.0], fill: 0.04, rim: 0.7, cross: 0.8, alpha: 0.7 },
     ring: [1.0, 0.86, 0.5], back: 0x0a2b4d,
   },
+  planet: {
+    name: 'Planet', tag: 'A tiny world to drive', theme: '#10203c', ring: [1.0, 0.82, 0.45],
+  },
 };
-export const WORLD_ORDER = ['day', 'night', 'blueprint'];
+export const WORLD_ORDER = ['day', 'night', 'blueprint', 'planet'];
 
 export function savedWorld() {
   try { const w = localStorage.getItem('ag-world'); if (w && WORLDS[w]) return w; } catch {}

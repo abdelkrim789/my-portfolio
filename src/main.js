@@ -12,9 +12,6 @@ import { createAudio } from './audio.js';
 import { PROJECTS, projectCanvas } from './screens.js';
 import { POINTS, MILESTONES } from './content.js';
 import { createComposite } from './transition.js';
-import { createPaper } from './worlds/paper.js';
-import { createNight } from './worlds/night.js';
-import { createSchematic } from './worlds/schematic.js';
 
 const STAGES = ['SIGNAL', 'RAW', 'CLEAN', 'MODEL', 'CONSOLIDATE', 'REPORT', 'BUILD', 'DECIDE'];
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -43,6 +40,47 @@ WORLD_ORDER.forEach((w) => {
 });
 applyWorldCSS(world);
 let worldGL = null; // set once WebGL is up
+
+// ---------- achievements ----------
+const ACH = [
+  ['multiverse', 'Multiverse', 'Visit all four worlds'],
+  ['points', 'Every point', 'Open all 33 stories'],
+  ['repair', 'Fixer', 'Repair the corrupted stock with your cursor'],
+  ['roadtrip', 'Road trip', 'Drive the rover to all eight landmarks'],
+  ['postcard', 'Wish you were here', 'Take a postcard (P)'],
+  ['tremor', 'Seismic', 'Send ten shockwaves'],
+  ['hello', 'Hello', 'Meet the person behind it'],
+  ['finale', 'The decision', 'Reach the last chapter'],
+];
+const store = (k, d) => { try { return JSON.parse(localStorage.getItem(k) || 'null') ?? d; } catch { return d; } };
+const keep = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const got = new Set(store('ag-ach', []));
+const visitedWorlds = new Set(store('ag-worlds', []));
+const achToast = document.getElementById('ach-toast');
+let achT;
+function renderAch() {
+  const ul = document.getElementById('ach-list'); if (!ul) return;
+  ul.innerHTML = ACH.map(([id, name, how]) => `<li class="${got.has(id) ? 'got' : ''}"><b>${name}</b><span>${how}</span></li>`).join('');
+  const c = document.getElementById('ach-count'); if (c) c.textContent = `${got.size}/${ACH.length}`;
+}
+function achieve(id) {
+  if (got.has(id)) return;
+  const a = ACH.find((x) => x[0] === id); if (!a) return;
+  got.add(id); keep('ag-ach', [...got]); renderAch();
+  if (achToast) {
+    achToast.querySelector('b').textContent = a[1]; achToast.querySelector('span').textContent = a[2];
+    achToast.classList.add('on'); clearTimeout(achT); achT = setTimeout(() => achToast.classList.remove('on'), 3600);
+  }
+  window.dispatchEvent(new CustomEvent('achievement', { detail: id }));
+}
+function markWorld(w) { visitedWorlds.add(w); keep('ag-worlds', [...visitedWorlds]); if (visitedWorlds.size >= WORLD_ORDER.length) achieve('multiverse'); }
+renderAch();
+
+// driving takes over the arrow keys and WASD
+const driveKeys = { up: false, down: false, left: false, right: false };
+let driving = false;
+const KEYMAP = { ArrowUp: 'up', w: 'up', W: 'up', ArrowDown: 'down', s: 'down', S: 'down', ArrowLeft: 'left', a: 'left', A: 'left', ArrowRight: 'right', d: 'right', D: 'right' };
+addEventListener('keyup', (e) => { const k = KEYMAP[e.key]; if (k) driveKeys[k] = false; });
 const toast = document.getElementById('world-toast');
 let toastT;
 function showToast(w) {
@@ -55,6 +93,7 @@ function showToast(w) {
 }
 // cubic-bezier(0.65, 0, 0.25, 1): the same curve drives the CSS reveal and the WebGL ring
 const PORTAL_MS = reduced ? 350 : 2100;
+const PORTAL = { night: [0, 2100], day: [1, 1900], blueprint: [2, 2000], planet: [3, 1800] };
 let portalBusy = false;
 async function travelTo(w, x = innerWidth / 2, y = innerHeight / 2) {
   if (w === world || portalBusy) return;
@@ -68,8 +107,10 @@ async function travelTo(w, x = innerWidth / 2, y = innerHeight / 2) {
   world = w; saveWorld(w);
   showToast(w);
   const swapCSS = () => { root.classList.add('swapping'); applyWorldCSS(w); setTimeout(() => root.classList.remove('swapping'), 900); };
-  if (worldGL) { worldGL.start(prev, w, x, y, PORTAL_MS); setTimeout(swapCSS, PORTAL_MS * 0.32); } else swapCSS();
-  setTimeout(() => { portalBusy = false; }, PORTAL_MS);
+  const dur = reduced ? 350 : PORTAL[w][1];
+  if (worldGL) { worldGL.start(prev, w, x, y, dur, PORTAL[w][0]); setTimeout(swapCSS, dur * 0.35); } else swapCSS();
+  markWorld(w);
+  setTimeout(() => { portalBusy = false; }, dur);
 }
 
 // ---------- chapter UI (works with or without WebGL) ----------
@@ -151,6 +192,7 @@ function setActive(i) {
   dockPrev.disabled = i === 0; dockNext.disabled = i === sections.length - 1;
   dockNext.querySelector('span').textContent = i < sections.length - 1 ? `Next · ${STAGES[i + 1].toLowerCase()}` : 'The end';
   scramble(sections[i].querySelector('h2'));
+  if (i === sections.length - 1) achieve('finale');
   listeners.forEach((fn) => fn(i));
 }
 
@@ -220,6 +262,7 @@ function openDetail(hs) {
   seen.add(hs.d);
   try { localStorage.setItem('ag-seen', JSON.stringify([...seen])); } catch {}
   updateTallies();
+  if (HS_ALL.every((h) => seen.has(h.d))) achieve('points');
   const pts = chapterPoints(hs.k), i = pts.indexOf(hs);
   detailPos.textContent = `${i + 1} / ${pts.length}`;
   const many = pts.length > 1;
@@ -270,6 +313,10 @@ setTimeout(bootDone, 9000);
 // keyboard: arrows travel between chapters, or between points while a panel is open; W changes world; ? shows controls
 addEventListener('keydown', (e) => {
   if (e.target.closest?.('input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (driving && KEYMAP[e.key]) { e.preventDefault(); driveKeys[KEYMAP[e.key]] = true; return; }
+  if (e.key === 'g' || e.key === 'G') { worldGL?.toggleDrive(); return; }
+  if (e.key === 'f' || e.key === 'F') { worldGL?.toggleHUD(); return; }
+  if (e.key === 'p' || e.key === 'P') { worldGL?.postcard(); return; }
   if (e.key === '?') { e.preventDefault(); setGuide(guide.hidden); return; }
   if (e.key === 'w' || e.key === 'W') { const i = WORLD_ORDER.indexOf(world); travelTo(WORLD_ORDER[(i + 1) % WORLD_ORDER.length]); return; }
   if (focusHS && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); stepDetail(e.key === 'ArrowRight' ? 1 : -1); return; }
@@ -283,6 +330,7 @@ addEventListener('keydown', (e) => {
 // ---------- WebGL ----------
 const canvas = document.getElementById('stage');
 const gl2 = (() => { try { return !!canvas.getContext('webgl2'); } catch { return false; } })();
+markWorld(world);
 if (!gl2) {
   root.classList.add('no-webgl');
   bootDone();
@@ -294,21 +342,43 @@ if (!gl2) {
   start().catch((e) => { console.error(e); bootDone(); });
 }
 
+// What this device can comfortably run: 0 software/very weak, 1 laptop or phone, 2 dedicated GPU
+function detectTier(renderer) {
+  let gpu = '';
+  try { const gl = renderer.getContext(); const ext = gl.getExtension('WEBGL_debug_renderer_info'); gpu = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER); } catch {}
+  const mem = navigator.deviceMemory || 8, cores = navigator.hardwareConcurrency || 4;
+  let tier = 2;
+  if (/swiftshader|llvmpipe|software|basic render|microsoft basic/i.test(gpu)) tier = 0;
+  else if (coarse || mem <= 4 || cores <= 4 || /intel|mali|adreno|powervr|apple gpu/i.test(gpu)) tier = 1;
+  if (/nvidia|geforce|rtx|radeon rx|apple m[1-9]/i.test(gpu) && !coarse) tier = 2;
+  return { tier, gpu: gpu.replace(/ANGLE \(|\)$/g, '').slice(0, 64) };
+}
+
+const LOADERS = {
+  day: () => import('./worlds/paper.js').then((m) => m.createPaper),
+  night: () => import('./worlds/night.js').then((m) => m.createNight),
+  blueprint: () => import('./worlds/schematic.js').then((m) => m.createSchematic),
+  planet: () => import('./worlds/planet.js').then((m) => m.createPlanet),
+};
+
 async function start() {
   const small = innerWidth < 760;
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
-  let dpr = Math.min(devicePixelRatio || 1, 1.5);
+  const { tier, gpu } = detectTier(renderer);
+  root.dataset.tier = tier;
+  const DPR_MAX = tier >= 2 ? Math.min(devicePixelRatio || 1, 1.75) : tier === 1 ? Math.min(devicePixelRatio || 1, 1.3) : 0.75;
+  let dpr = DPR_MAX;
   renderer.setPixelRatio(dpr);
   renderer.setSize(innerWidth, innerHeight);
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.info.autoReset = false;
 
   const fontFam = '"Big Shoulders Display", "Arial Narrow", Impact, sans-serif';
   try { await Promise.race([document.fonts.load('800 200px "Big Shoulders Display"'), new Promise((r) => setTimeout(r, 1800))]); } catch {}
   const canv = {};
   for (const id of Object.keys(PROJECTS)) canv[id] = await projectCanvas(id);
 
-  // project images in the story panel, for every world
   const shotURL = {};
   detailListeners.open.push((h) => {
     const c = canv[h.d];
@@ -319,37 +389,64 @@ async function start() {
     detailBody.prepend(fig);
   });
 
-  const env = { renderer, small, coarse, reduced, fontFam, meURL, canv, goChapter };
-  const makers = { day: createPaper, night: createNight, blueprint: createSchematic };
-  const LOGS = { day: 'Folding the paper atlas', night: 'Waking the desert particles', blueprint: 'Plotting the tower' };
+  const audio = createAudio();
+  const env = {
+    renderer, small, coarse, reduced, tier, fontFam, meURL, canv, goChapter, achieve,
+    onLandmark: (k, n) => { goChapter(k); audio.chime(k + 3); if (n >= 8) achieve('roadtrip'); },
+  };
+  const LOGS = { day: 'Folding the paper atlas', night: 'Waking the desert particles', blueprint: 'Plotting the tower', planet: 'Growing a tiny planet' };
   const made = {}, making = {};
   async function ensure(id) {
     if (made[id]) return made[id];
-    if (!making[id]) making[id] = makers[id](env).then((w) => { w.resize(innerWidth, innerHeight, dpr); made[id] = w; return w; });
+    if (!making[id]) making[id] = LOADERS[id]().then((make) => make(env)).then((w) => { w.resize(innerWidth, innerHeight, dpr); made[id] = w; return w; });
     return making[id];
   }
+  bootLog(`Detected ${['a light', 'a standard', 'a strong'][tier]} graphics device`);
   bootLog(LOGS[world]);
   let active = await ensure(world);
   bootLog('World ready');
 
-  const composite = createComposite();
-  const audio = createAudio();
-  let glitch = 0;
-  let trans = null;
+  const composite = createComposite(renderer, { fluid: tier > 0 && !reduced });
+  audio.setWorld(world);
+  let glitch = 0, trans = null, shocks = 0, wantShot = false, hudOn = false;
+  const driveBtn = document.getElementById('drive-toggle');
+  function setDriving(on) {
+    if (!active.drivable) on = false;
+    driving = on; Object.keys(driveKeys).forEach((k) => (driveKeys[k] = false));
+    active.setDrive?.(on, stage);
+    root.classList.toggle('driving', on);
+    if (driveBtn) { driveBtn.setAttribute('aria-pressed', String(on)); driveBtn.innerHTML = on ? '<span class="long">Exit drive</span><span class="short">Exit</span>' : '<span class="long">Take the wheel</span><span class="short">Drive</span>'; }
+    if (on) { closeDetail(); audio.thump(); }
+  }
+  driveBtn?.addEventListener('click', () => setDriving(!driving));
+  document.querySelectorAll('#dpad button').forEach((b) => {
+    const k = b.dataset.k;
+    const on = (e) => { e.preventDefault(); driveKeys[k] = true; }, off = () => (driveKeys[k] = false);
+    b.addEventListener('pointerdown', on); b.addEventListener('pointerup', off); b.addEventListener('pointerleave', off); b.addEventListener('pointercancel', off);
+  });
+  document.getElementById('postcard-btn')?.addEventListener('click', () => { setGuide(false); wantShot = true; });
+  document.getElementById('perf-btn')?.addEventListener('click', () => { setGuide(false); toggleHUD(); });
+  const hud = document.getElementById('perf');
+  function toggleHUD() { hudOn = !hudOn; hud.hidden = !hudOn; }
+
   worldGL = {
     prepare: (id) => ensure(id),
-    start(prevId, id, x, y, dur) {
-      trans = { from: made[prevId], t0: performance.now(), dur, ox: x / innerWidth, oy: 1 - y / innerHeight };
+    start(prevId, id, x, y, dur, mode) {
+      if (driving) setDriving(false);
+      trans = { from: made[prevId], t0: performance.now(), dur, mode, ox: x / innerWidth, oy: 1 - y / innerHeight };
       active = made[id];
       composite.uniforms.uOrigin.value.set(trans.ox, trans.oy);
       composite.uniforms.uCrack.value.setRGB(...WORLDS[id].ring);
-      if (!reduced) glitch = 0.6;
-      audio.crack(); setTimeout(() => audio.chime(activeIdx + 4), 520);
+      if (!reduced) glitch = mode === 0 ? 0.6 : 0.25;
+      audio.setWorld(id);
+      audio.portal(mode); setTimeout(() => audio.chime(activeIdx + 4), 520);
     },
+    toggleDrive: () => setDriving(!driving),
+    toggleHUD,
+    postcard: () => { wantShot = true; },
   };
-  // warm up the other worlds in the background once this one is running
   const idle = window.requestIdleCallback || ((f) => setTimeout(f, 2500));
-  setTimeout(() => idle(() => WORLD_ORDER.filter((w) => w !== 'night' || !small).forEach((w) => ensure(w).catch(() => {}))), 6000);
+  if (tier > 0) setTimeout(() => idle(() => WORLD_ORDER.filter((w) => w !== 'night' || !small).forEach((w) => ensure(w).catch(() => {}))), 7000);
 
   function resize() {
     renderer.setPixelRatio(dpr); renderer.setSize(innerWidth, innerHeight);
@@ -368,10 +465,10 @@ async function start() {
     soundBtn.textContent = on ? 'Sound on' : 'Sound off';
     if (on) audio.chime(activeIdx);
   });
-  listeners.push((i) => { if (!reduced) glitch = Math.max(glitch, 0.5); audio.chime(i); });
+  listeners.push((i) => { if (!reduced) glitch = Math.max(glitch, 0.3); audio.chime(i); });
   let wantKey = null;
   document.querySelectorAll('[data-glyph]').forEach((el) => {
-    const on = () => { wantKey = el.dataset.glyph; audio.tick(); };
+    const on = () => { wantKey = el.dataset.glyph; audio.tick(); if (wantKey === '__face') achieve('hello'); };
     const off = () => { if (wantKey === el.dataset.glyph) wantKey = null; };
     el.addEventListener('pointerenter', on); el.addEventListener('pointerleave', off);
     el.addEventListener('focus', on); el.addEventListener('blur', off);
@@ -393,7 +490,7 @@ async function start() {
     hsLayer.appendChild(el);
   });
   updateTallies();
-  detailListeners.open.push(() => { glitch = reduced ? 0 : Math.max(glitch, 0.4); audio.chime(activeIdx + 2); });
+  detailListeners.open.push(() => { glitch = reduced ? 0 : Math.max(glitch, 0.3); audio.chime(activeIdx + 2); });
   const years = MILESTONES.map(([st, y, t]) => {
     const el = document.createElement('span');
     el.className = 'hs static year';
@@ -407,7 +504,7 @@ async function start() {
   const mouse = new THREE.Vector2(9, 9), mouseT = new THREE.Vector2(9, 9);
   let lastMove = -10, px = innerWidth / 2, py = innerHeight / 2;
   let drag = null, yaw = 0, pitch = 0, vYaw = 0, vPitch = 0, hoverEl = null;
-  const INTERACTIVE = 'a, button, [data-glyph], #detail, #guide, .panel p, .panel h2, .panel ul';
+  const INTERACTIVE = 'a, button, [data-glyph], #detail, #guide, #dpad, .panel p, .panel h2, .panel ul';
   addEventListener('pointermove', (e) => {
     px = e.clientX; py = e.clientY;
     mouseT.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
@@ -416,7 +513,7 @@ async function start() {
     if (drag) {
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
       drag.moved += Math.abs(dx) + Math.abs(dy); drag.x = e.clientX; drag.y = e.clientY;
-      if (drag.mouse && drag.moved > 6) { vYaw = -dx * 0.004; vPitch = dy * 0.003; yaw += vYaw; pitch = clamp(pitch + vPitch, -0.5, 0.5); }
+      if (drag.mouse && drag.moved > 6 && !driving) { vYaw = -dx * 0.004; vPitch = dy * 0.003; yaw += vYaw; pitch = clamp(pitch + vPitch, -0.5, 0.5); }
     }
   }, { passive: true });
   addEventListener('pointerdown', (e) => {
@@ -430,7 +527,8 @@ async function start() {
       if (focusHS) closeDetail();
       active.shock((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1, (performance.now() - t0) / 1000, stage);
       audio.thump();
-      glitch = Math.max(glitch, reduced ? 0 : 0.3);
+      glitch = Math.max(glitch, reduced ? 0 : 0.25);
+      if (++shocks >= 10) achieve('tremor');
     }
     drag = null;
   });
@@ -441,7 +539,8 @@ async function start() {
   let cx = px, cy = py, curText = '';
 
   const t0 = performance.now();
-  let stage = targetStage(), prevStage = stage, last = t0, frames = 0, slowAcc = 0, tier = 0, focusAmt = 0;
+  let stage = targetStage(), prevStage = stage, last = t0, focusAmt = 0;
+  let ema = 1 / 60, govT = 0, govUp = 0, hudT = 0, hudFrames = 0;
   const introDur = reduced ? 0.8 : 3.8;
   const scrim = document.querySelector('.scrim');
   const P = new THREE.Vector3(), L = new THREE.Vector3(), off = new THREE.Vector3(), tmp = new THREE.Vector3();
@@ -451,17 +550,19 @@ async function start() {
 
   function placeCamera(W, time, motion, interactive, arrive) {
     const fov = W.pose(stage, P, L);
-    if (interactive) {
-      off.subVectors(P, L).applyAxisAngle(Y, yaw);
-      right.crossVectors(Y, off).normalize();
+    const UP = W.up || Y;
+    const cam = W.camera;
+    cam.up.copy(UP);
+    if (interactive && !driving) {
+      off.subVectors(P, L).applyAxisAngle(UP, yaw);
+      right.crossVectors(UP, off).normalize();
       off.applyAxisAngle(right, pitch);
       P.copy(L).add(off);
     }
     if (arrive > 0) P.sub(L).multiplyScalar(1 + arrive * 0.45).add(L);
-    const cam = W.camera;
     cam.position.copy(P); cam.lookAt(L); cam.updateMatrixWorld();
     right.setFromMatrixColumn(cam.matrixWorld, 0); upV.setFromMatrixColumn(cam.matrixWorld, 1);
-    if (interactive) {
+    if (interactive && !driving) {
       const mx = mouse.x > 5 ? 0 : mouse.x, my = mouse.y > 5 ? 0 : mouse.y;
       const par = P.distanceTo(L) * 0.012;
       P.addScaledVector(right, mx * par * 3).addScaledVector(upV, my * par * 1.8);
@@ -477,15 +578,43 @@ async function start() {
       }
     }
     cam.position.copy(P);
-    cam.fov = fov + (reduced ? 0 : motion * W.fovKick);
+    cam.fov = fov + (reduced || driving ? 0 : motion * W.fovKick);
     cam.updateProjectionMatrix();
     cam.lookAt(L); cam.updateMatrixWorld();
+  }
+
+  function takePostcard() {
+    let shot;
+    try { shot = canvas.toDataURL('image/jpeg', 0.92); } catch { return; }
+    const img = new Image();
+    img.onload = () => {
+      const W = 1800, H = 1200, pad = 60, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      const g = cv.getContext('2d');
+      g.fillStyle = '#fbf8f1'; g.fillRect(0, 0, W, H);
+      const iw = W - pad * 2, ih = H - pad * 2 - 150, ar = img.width / img.height;
+      let sw = img.width, sh = img.height, sx = 0, sy = 0;
+      if (ar > iw / ih) { sw = img.height * (iw / ih); sx = (img.width - sw) / 2; } else { sh = img.width / (iw / ih); sy = (img.height - sh) / 2; }
+      g.drawImage(img, sx, sy, sw, sh, pad, pad, iw, ih);
+      g.fillStyle = '#141a2e'; g.font = `800 64px ${fontFam}`; g.textBaseline = 'alphabetic';
+      g.fillText(`GREETINGS FROM ${WORLDS[world].name.toUpperCase()}`, pad, H - 92);
+      g.font = '500 24px "IBM Plex Mono", monospace'; g.fillStyle = '#9a5608';
+      g.fillText(`ABDELKRIM GHEBOULI · SAP BPC & BI · CHAPTER ${String(activeIdx).padStart(2, '0')}`, pad, H - 48);
+      g.textAlign = 'right'; g.fillStyle = '#59616f'; g.fillText('abdelkrim789.github.io/my-portfolio', W - pad, H - 48);
+      g.strokeStyle = '#9a5608'; g.lineWidth = 3; g.strokeRect(W - pad - 120, H - 170, 120, 100);
+      g.font = `800 34px ${fontFam}`; g.textAlign = 'center'; g.fillStyle = '#9a5608'; g.fillText('DZ', W - pad - 60, H - 108);
+      const a = document.createElement('a'); a.href = cv.toDataURL('image/jpeg', 0.9); a.download = `postcard-${WORLDS[world].name.toLowerCase()}-${activeIdx}.jpg`;
+      document.body.appendChild(a); a.click(); a.remove();
+      root.classList.add('flash'); setTimeout(() => root.classList.remove('flash'), 500);
+      achieve('postcard');
+    };
+    img.src = shot;
   }
 
   function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     const time = (now - t0) / 1000;
     if (document.hidden) { requestAnimationFrame(frame); return; }
+    renderer.info.reset();
 
     const target = targetStage();
     stage += (target - stage) * Math.min(1, dt * 2.6);
@@ -505,7 +634,7 @@ async function start() {
     if (trans) { tT = (now - trans.t0) / trans.dur; if (tT >= 1) { trans = null; tT = -1; } }
     const arrive = tT >= 0 ? 1 - ease2(tT) : 0;
     const portalW = tT >= 0 ? Math.sin(Math.PI * tT) : 0;
-    const ctx = { dt, time, stage, vel, mouse, mouseActive, introT, glyphKey: wantKey, focusD: focusHS?.d, portalW: reduced ? 0 : portalW, glitch };
+    const ctx = { dt, time, stage, vel, mouse, mouseActive, introT, glyphKey: wantKey, focusD: focusHS?.d, portalW: reduced ? 0 : portalW, glitch, driveKeys };
 
     placeCamera(active, time, motion, true, arrive);
     active.update(ctx);
@@ -516,11 +645,15 @@ async function start() {
       trans.from.update({ ...ctx, mouseActive: false, focusD: null });
       texB = trans.from.render();
     }
+    composite.stepFluid((px / innerWidth), 1 - py / innerHeight, mouseActive, dt);
     composite.uniforms.uTime.value = time;
     composite.uniforms.uGlitch.value = active.id === 'night' ? 0 : glitch;
-    composite.draw(renderer, texA, active.post, texB, trans?.from?.post, Math.max(0, tT));
+    composite.uniforms.uTilt.value = focusHS ? 0.35 : 1;
+    composite.draw(texA, active.post, texB, trans?.from?.post, Math.max(0, tT), trans?.mode || 0);
+    if (wantShot) { wantShot = false; takePostcard(); }
     scrim.style.opacity = innerWidth / innerHeight < 0.9 ? 1 : (0.4 + 0.6 * Math.min(1, stage * 1.6)).toFixed(3);
-    audio.update(Math.min(1, motion + portalW), vel);
+    audio.setNight(active.nightLevel?.() || 0);
+    audio.update(Math.min(1, motion + portalW), vel, driving ? Math.abs(active.driveSpeed?.() || 0) : 0);
 
     // labels
     const cam = active.camera;
@@ -540,7 +673,7 @@ async function start() {
       h.el.style.pointerEvents = w > 0.5 ? 'auto' : 'none';
     }
     years.forEach((y, i) => {
-      let w = clamp(1 - Math.abs(stage - y.st) / 0.32, 0, 1) * lw;
+      let w = driving ? 0 : clamp(1 - Math.abs(stage - y.st) / 0.32, 0, 1) * lw;
       if (w > 0.01) { active.milestone(i, y.v).project(cam); if (y.v.z > 1 || Math.abs(y.v.x) > 1.05 || Math.abs(y.v.y) > 1.05) w = 0; }
       if (w < 0.01) { if (y.w >= 0.01) y.el.style.visibility = 'hidden'; y.w = w; return; }
       if (y.w < 0.01) y.el.style.visibility = 'visible';
@@ -555,7 +688,8 @@ async function start() {
       cx += (px - cx) * Math.min(1, dt * 16); cy += (py - cy) * Math.min(1, dt * 16);
       cursor.style.transform = `translate(${cx}px, ${cy}px)`;
       let txt = '';
-      if (drag && drag.moved > 6) txt = 'Orbit';
+      if (driving) txt = '';
+      else if (drag && drag.moved > 6) txt = 'Orbit';
       else if (hoverEl?.classList.contains('hs')) txt = 'Open';
       else if (hoverEl?.dataset.glyph) txt = 'Look';
       else if (!hoverEl && Math.abs(stage - 1) < 0.3) txt = 'Repair';
@@ -567,16 +701,22 @@ async function start() {
     }
     if (!root.classList.contains('booted')) bootDone();
 
-    if (introT >= 1 && tier < 2 && !trans) {
-      frames++; slowAcc += dt;
-      if (frames === 90) {
-        if (slowAcc / frames > 1 / 34) {
-          tier++;
-          if (tier === 1) { dpr = 1; resize(); } else Object.values(made).forEach((w) => w.quality(2));
-        } else tier = 2;
-        frames = 0; slowAcc = 0;
-      }
+    // resolution governor: trade pixels for frame rate, continuously
+    ema += (dt - ema) * 0.08;
+    govT += dt;
+    if (!trans && introT >= 1 && govT > 1.2) {
+      govT = 0;
+      if (ema > 1 / 46 && dpr > 0.6) { dpr = Math.max(0.6, +(dpr - 0.15).toFixed(2)); govUp = 0; resize(); }
+      else if (ema < 1 / 57 && dpr < DPR_MAX) { if (++govUp >= 3) { govUp = 0; dpr = Math.min(DPR_MAX, +(dpr + 0.1).toFixed(2)); resize(); } }
+      else govUp = 0;
+      if (dpr <= 0.6 && ema > 1 / 30) Object.values(made).forEach((w) => w.quality(2));
     }
+    hudFrames++; hudT += dt;
+    if (hudOn && hudT > 0.5) {
+      const i = renderer.info.render;
+      hud.innerHTML = `<b>${Math.round(hudFrames / hudT)} fps</b> · ${(ema * 1000).toFixed(1)} ms<br>world ${WORLDS[world].name} · tier ${tier} · dpr ${dpr.toFixed(2)}<br>${i.calls} draw calls · ${(i.triangles / 1000).toFixed(1)}k tris · ${(i.points / 1000).toFixed(1)}k pts<br>${innerWidth * dpr | 0}×${innerHeight * dpr | 0} px<br><small>${gpu || 'unknown GPU'}</small>`;
+      hudT = 0; hudFrames = 0;
+    } else if (!hudOn && hudT > 0.5) { hudT = 0; hudFrames = 0; }
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

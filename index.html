@@ -6,7 +6,7 @@
 <title>Abdelkrim Ghebouli</title>
 <meta name="description" content="Abdelkrim Ghebouli, SAP BPC consultant and business intelligence specialist. A real-time portfolio built from 60,000 particles.">
 <meta name="theme-color" content="#eceee9">
-<script>try{var w=localStorage.getItem('ag-world');document.documentElement.dataset.world=(w==='night'||w==='blueprint')?w:'day'}catch(e){document.documentElement.dataset.world='day'}</script>
+<script>try{var w=localStorage.getItem('ag-world');document.documentElement.dataset.world=(w==='night'||w==='blueprint'||w==='planet')?w:'day'}catch(e){document.documentElement.dataset.world='day'}</script>
 <meta name="author" content="Abdelkrim Ghebouli">
 <link rel="canonical" href="https://abdelkrim789.github.io/my-portfolio/">
 <meta property="og:type" content="profile">
@@ -57,6 +57,14 @@
   --sand: #ffd27a; --ice: #a6e4ff; --fault: #ff8a75;
   --bg-rgb: 11, 49, 87; --bg2-rgb: 15, 61, 107; --fg-rgb: 234, 243, 251;
   --sand-rgb: 255, 210, 122; --ice-rgb: 166, 228, 255; --fault-rgb: 255, 138, 117;
+  color-scheme: dark;
+}
+/* Planet: a tiny world. Deep evening navy UI over a sky that moves from dawn to night. */
+:root[data-world="planet"] {
+  --ink: #10203c; --ink-2: #17305a; --paper: #fdf6e3; --muted: #a9b8d4;
+  --sand: #f6c453; --ice: #8fd3e8; --fault: #ff7b6b;
+  --bg-rgb: 16, 32, 60; --bg2-rgb: 23, 48, 90; --fg-rgb: 253, 246, 227;
+  --sand-rgb: 246, 196, 83; --ice-rgb: 143, 211, 232; --fault-rgb: 255, 123, 107;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -115,6 +123,45 @@ a { color: inherit; }
 #world-toast.loading { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 #world-toast.loading b { opacity: 0.25; }
 
+/* Drive mode, achievements, performance HUD, postcard flash */
+.chip.drive { display: none; border-color: rgba(var(--sand-rgb), 0.6); color: var(--sand); }
+.webgl[data-world="planet"] .chip.drive { display: inline-block; }
+.chip.drive .short { display: none; }
+@media (max-width: 899px) { .chip.drive .long { display: none; } .chip.drive .short { display: inline; } .hud-actions { gap: 5px; } .hud-actions .chip { padding: 8px 9px; } }
+.chip.drive[aria-pressed="true"] { background: var(--sand); color: var(--ink); }
+.driving .chapter .panel { opacity: 0.25 !important; pointer-events: none; }
+.driving .hint { visibility: hidden; }
+#drive-hint { position: fixed; z-index: 6; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 78px); transform: translateX(-50%); display: none;
+  font: 500 0.66rem/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--paper); padding: 9px 14px; border-radius: 999px;
+  background: rgba(var(--bg-rgb), 0.7); border: 1px solid var(--line); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); white-space: nowrap; }
+.driving #drive-hint { display: block; }
+#dpad { position: fixed; z-index: 7; right: 18px; bottom: calc(env(safe-area-inset-bottom, 0px) + 78px); display: none; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); gap: 6px; }
+.driving #dpad { display: grid; }
+@media (pointer: fine) { .driving #dpad { display: none; } }
+#dpad button { all: unset; display: grid; place-items: center; border-radius: 14px; background: rgba(var(--bg-rgb), 0.72); border: 1px solid rgba(var(--sand-rgb), 0.5); color: var(--sand); font: 600 1.1rem/1 var(--mono); touch-action: none; }
+#dpad [data-k="up"] { grid-column: 2; grid-row: 1; } #dpad [data-k="left"] { grid-column: 1; grid-row: 2; } #dpad [data-k="down"] { grid-column: 2; grid-row: 2; } #dpad [data-k="right"] { grid-column: 3; grid-row: 2; }
+#perf { position: fixed; z-index: 9; left: var(--gutter); top: calc(env(safe-area-inset-top, 0px) + 70px); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--line);
+  background: rgba(var(--bg-rgb), 0.82); font: 400 0.68rem/1.55 var(--mono); color: var(--paper); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; pointer-events: none; }
+#perf b { color: var(--sand); font-weight: 500; } #perf small { color: var(--muted); font-size: 0.6rem; }
+#ach-toast { position: fixed; z-index: 30; left: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); max-width: min(340px, calc(100% - 32px)); padding: 12px 16px 13px;
+  border-radius: 6px; border: 1px solid rgba(var(--sand-rgb), 0.55); background: rgba(var(--bg-rgb), 0.92); transform: translateY(16px); opacity: 0; pointer-events: none;
+  transition: opacity 0.4s, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+#ach-toast.on { opacity: 1; transform: none; }
+#ach-toast small { display: block; font: 500 0.6rem/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--sand); margin-bottom: 6px; }
+#ach-toast b { display: block; font: 800 1.5rem/1 var(--display); text-transform: uppercase; color: var(--paper); }
+#ach-toast span { display: block; margin-top: 4px; font-size: 0.82rem; color: rgba(var(--fg-rgb), 0.8); }
+.ach { list-style: none; margin: 0 0 18px; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.ach li { padding: 8px 10px; border: 1px dashed var(--line); border-radius: 4px; opacity: 0.6; min-width: 0; }
+.ach li.got { opacity: 1; border-style: solid; border-color: rgba(var(--sand-rgb), 0.6); }
+.ach li b { display: block; font: 600 0.78rem/1.2 var(--body); color: var(--paper); }
+.ach li.got b::after { content: " ✓"; color: var(--sand); }
+.ach li span { display: block; font-size: 0.7rem; line-height: 1.35; color: var(--muted); margin-top: 2px; }
+.guide-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.guide-card { max-height: calc(100vh - 48px); overflow-y: auto; }
+.flash::after { content: ""; position: fixed; inset: 0; z-index: 95; background: #fff; pointer-events: none; animation: flash 0.5s ease-out forwards; }
+@keyframes flash { from { opacity: 0.85; } to { opacity: 0; } }
+@media (max-width: 420px) { .ach { grid-template-columns: 1fr; } }
+
 /* Chapter dock */
 .dock { position: fixed; z-index: 6; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
   display: flex; align-items: center; gap: 2px; padding: 4px; border: 1px solid var(--line); border-radius: 999px;
@@ -136,6 +183,7 @@ a { color: inherit; }
 .orb[data-world="night"] i { background: radial-gradient(circle at 62% 38%, #e9ecf5 0 22%, #0e1122 23%), #0e1122; }
 .orb[data-world="blueprint"] i { background: linear-gradient(#0b3157, #0b3157) padding-box,
   repeating-linear-gradient(0deg, transparent 0 4px, rgba(166, 228, 255, 0.55) 4px 5px), repeating-linear-gradient(90deg, #0b3157 0 4px, rgba(166, 228, 255, 0.55) 4px 5px); }
+.orb[data-world="planet"] i { background: radial-gradient(circle at 36% 34%, #9fd46a 0 20%, #3fa7d6 21% 44%, #8cc152 45% 58%, #2f86b8 59%); }
 .orb span { max-width: 0; overflow: hidden; white-space: nowrap; transition: max-width 0.35s; }
 .orb:hover, .orb:focus-visible, .orb[aria-pressed="true"] { gap: 7px; padding: 3px 10px 3px 3px; }
 .orb:hover span, .orb:focus-visible span, .orb[aria-pressed="true"] span { max-width: 9em; }
@@ -352,6 +400,7 @@ footer p { color: var(--muted); font-size: inherit; }
   <a class="brand" href="#signal">Abdelkrim Ghebouli<span>SAP BPC · Business Intelligence</span></a>
   <div class="hud-actions">
     <div class="worlds" role="group" aria-label="Worlds"></div>
+    <button class="chip drive" id="drive-toggle" type="button" aria-pressed="false"><span class="long">Take the wheel</span><span class="short">Drive</span></button>
     <button class="chip" id="guide-toggle" type="button" aria-expanded="false" aria-controls="guide" aria-label="How to explore">?</button>
     <button class="chip" id="sound-toggle" type="button" aria-pressed="false">Sound off</button>
     <a class="chip contact" href="#decide">Contact</a>
@@ -366,6 +415,10 @@ footer p { color: var(--muted); font-size: inherit; }
 </nav>
 <div class="hud-bottom" aria-hidden="true"><span id="hud-count" class="count">real time</span></div>
 <div id="world-toast" aria-live="polite"><b></b><span></span></div>
+<div id="drive-hint" aria-live="polite">Drive · WASD or arrows · visit all eight landmarks · G to exit</div>
+<div id="dpad" aria-hidden="true"><button type="button" data-k="up">▲</button><button type="button" data-k="left">◀</button><button type="button" data-k="down">▼</button><button type="button" data-k="right">▶</button></div>
+<div id="perf" aria-live="off" hidden></div>
+<div id="ach-toast" role="status"><small>Achievement unlocked</small><b></b><span></span></div>
 <div id="guide" role="dialog" aria-modal="true" aria-label="How to explore" hidden>
   <div class="guide-card">
     <p class="tag">How to explore</p>
@@ -376,10 +429,19 @@ footer p { color: var(--muted); font-size: inherit; }
       <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Next or previous point while a story is open</dd></div>
       <div><dt>Drag</dt><dd>Orbit around the scene</dd></div>
       <div><dt>Click empty space</dt><dd>Send a shockwave through the particles</dd></div>
-      <div><dt><kbd>W</kbd> · top orbs</dt><dd>Open a portal to another world: Daylight, Night or Blueprint</dd></div>
+      <div><dt><kbd>W</kbd> · top orbs</dt><dd>Open a portal to another world: Daylight, Night, Blueprint or Planet</dd></div>
+      <div><dt><kbd>G</kbd></dt><dd>On the Planet, take the wheel and drive the rover yourself</dd></div>
+      <div><dt><kbd>P</kbd></dt><dd>Take a postcard of the current view</dd></div>
+      <div><dt><kbd>F</kbd></dt><dd>Show live performance: frame rate, draw calls, resolution</dd></div>
       <div><dt><kbd>Esc</kbd></dt><dd>Close a story or this guide</dd></div>
     </dl>
-    <button class="chip" type="button">Start exploring</button>
+    <p class="tag">Achievements <span id="ach-count"></span></p>
+    <ul class="ach" id="ach-list"></ul>
+    <div class="guide-actions">
+      <button class="chip" type="button">Start exploring</button>
+      <button class="chip" type="button" id="postcard-btn">Take a postcard</button>
+      <button class="chip" type="button" id="perf-btn">Performance</button>
+    </div>
   </div>
 </div>
 <div id="cursor" aria-hidden="true"><i></i><span></span></div>

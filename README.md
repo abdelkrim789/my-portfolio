@@ -10,26 +10,36 @@ through GitHub Actions (Settings → Pages → Source must be set to **GitHub Ac
 
 ## Put it somewhere else (no build needed)
 
-`dist/index.html` is the whole site in one file.
+`dist/` is the whole site (an `index.html` plus an `assets/` folder).
 
 - **Netlify:** go to app.netlify.com/drop and drag the `dist` folder in. Done.
-- **Vercel / GitHub Pages:** upload `dist/index.html` as the site root.
+- **Vercel / GitHub Pages:** publish the `dist` folder as the site root.
 
 Then connect your domain in that host's settings.
 
 ## Worlds
 
-Three separate worlds tell the same story, each with its own objects, materials and way of moving:
+Four separate worlds tell the same story, each with its own objects, materials and way of moving:
 
-- **Daylight · The Paper Atlas** (`src/worlds/paper.js`): a pop-up book on a table. Cut-paper solids with ink
-  edges and real shadows; you slide sideways from card to card while pieces fold up, drop in and grow.
+- **Daylight · The Paper Atlas** (`src/worlds/paper.js`): a pop-up book on a table; you slide sideways from card to card.
 - **Night · The Desert** (`src/worlds/night.js`): 60,000 particles; you fly along one camera path.
-- **Blueprint · The Tower** (`src/worlds/schematic.js`): eight floors of plotted linework; you spiral down
-  while each floor draws itself.
+- **Blueprint · The Tower** (`src/worlds/schematic.js`): plotted linework floors; you spiral downwards.
+- **Planet · A tiny world** (`src/worlds/planet.js`): a toon planet; a rover drives you between landmarks while
+  the sky moves from dawn to night. Press `G` (or "Take the wheel") to drive it yourself.
 
-Switch with the orbs at the top or the `W` key. The old world shatters from where you clicked
-(`src/transition.js`). Each world is built only when first needed, and only the active one renders.
-Shared content (points, milestones) lives in `src/content.js`.
+Each destination has its own transition (`src/transition.js`): shatter, page curl, plotter scan, warp iris.
+The same file holds the liquid cursor field and the tilt-shift focus.
+
+## Performance
+
+- Every world is a separate chunk loaded on demand; three.js is shared. Only the active world renders.
+- The device is graded at start (GPU string, cores, memory) and worlds scale counts, shadows and MSAA.
+- A resolution governor lowers or raises the pixel ratio continuously to hold the frame rate.
+- Press `F` for the live HUD: fps, frame time, draw calls, triangles, resolution, GPU.
+
+## Extras
+
+`P` saves a postcard of the current view. Eight achievements are listed in the `?` guide.
 
 ## Add real screenshots of your projects
 

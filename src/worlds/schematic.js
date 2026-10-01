@@ -421,6 +421,7 @@ export async function createSchematic(env) {
         b.obj.quaternion.slerpQuaternions(b.chaosQ, b.orderQ, e);
         if (b.bad) b.col.set(C.red).lerp(cIce, e);
       });
+      if (Math.abs(stage - 1) < 1.2 && rawBoxes.filter((b) => b.r > 0.85).length > rawBoxes.length * 0.7) env.achieve?.('repair');
       if (lens) { lens.position.x = -4 + Math.sin(time * 0.7) * 3.5; }
       if (team) team.rotation.y = time * 0.4;
       if (globe && floors[7].root.visible) globe.rotation.y = -0.6 + Math.sin(time * 0.1) * 0.6;

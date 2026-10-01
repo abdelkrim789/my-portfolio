@@ -1,3 +1,10 @@
 import { defineConfig } from 'vite';
-import { viteSingleFile } from 'vite-plugin-singlefile';
-export default defineConfig({ base: './', plugins: [viteSingleFile()], build: { chunkSizeWarningLimit: 2000 } });
+
+// Each world is its own chunk, loaded only when a visitor opens it; three.js is shared.
+export default defineConfig({
+  base: './',
+  build: {
+    chunkSizeWarningLimit: 900,
+    rollupOptions: { output: { manualChunks: (id) => (id.includes('node_modules/three') ? 'three' : undefined) } },
+  },
+});
