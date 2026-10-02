@@ -1,0 +1,68 @@
+/* The Desk's interface is stationery: a typed index card for whatever you're looking at, and paper tags on hover. */
+.desk-ui { --card: #f7f2e4; --rule: rgba(80, 120, 170, 0.22); --margin: rgba(196, 72, 60, 0.55); --typed: #1d1d24; --type: "Courier Prime", "Courier New", monospace;
+  position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.6s, visibility 0.6s; }
+.desk-ui.on { opacity: 1; visibility: visible; }
+.desk-ui :focus-visible { outline: 2px solid #c9a24a; outline-offset: 3px; }
+.desk-card { position: absolute; left: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); width: min(380px, calc(100vw - 32px)); pointer-events: auto;
+  padding: 16px 20px 18px 50px; color: var(--typed); font: 400 0.95rem/22px var(--type); transform: rotate(-0.7deg); transform-origin: 0 100%;
+  background: linear-gradient(90deg, transparent 36px, var(--margin) 36px 37px, transparent 37px), linear-gradient(var(--card) 0 40px, transparent 40px),
+    repeating-linear-gradient(180deg, transparent 0 21px, var(--rule) 21px 22px), var(--card);
+  background-position: 0 0, 0 0, 0 18px, 0 0;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.05), 0 18px 40px rgba(10, 20, 14, 0.38), 0 2px 6px rgba(10, 20, 14, 0.2);
+  transition: transform 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2), opacity 0.3s; }
+.desk-card.swap { opacity: 0; transform: rotate(-2deg) translateY(10px); }
+.desk-card header { display: flex; justify-content: space-between; align-items: center; margin: 0 0 8px; font-size: 0.82rem; color: #6a6252; }
+.dc-nav { display: flex; gap: 4px; }
+.dc-nav button { all: unset; cursor: pointer; width: 28px; height: 24px; display: grid; place-items: center; border: 1.5px solid currentColor; border-radius: 4px; font: 700 1rem/1 var(--type); color: var(--typed); }
+.dc-nav button:hover, .dc-nav button:focus-visible { background: var(--typed); color: var(--card); }
+.dc-nav button[disabled] { opacity: 0.3; cursor: default; background: none; color: var(--typed); }
+.dc-title { margin: 0 0 8px; font: 700 1.5rem/1.1 var(--type); letter-spacing: -0.01em; text-transform: none; color: var(--typed); }
+.dc-body { margin: 0 0 12px; }
+.dc-body p { margin: 0 0 6px; color: var(--typed); max-width: none; font-size: 0.95rem; line-height: 22px; }
+.dc-more { max-height: 0; overflow: hidden; }
+.desk-card.expanded .dc-more { max-height: min(46vh, 420px); overflow-y: auto; overscroll-behavior: contain; margin: 0 -8px 12px 0; padding-right: 8px; }
+.dc-more .tag { font: 700 0.8rem/22px var(--type); color: #2f5a43; letter-spacing: 0; text-transform: none; margin: 8px 0 0; }
+.dc-more h3 { font: 700 1.2rem/22px var(--type); text-transform: none; margin: 0 0 4px; letter-spacing: 0; }
+.dc-more ul, .dc-more li { color: var(--typed); }
+.dc-more p { font-size: 0.9rem; line-height: 22px; color: var(--typed); margin: 0 0 8px; max-width: none; }
+.dc-more .dmeta, .dc-more .tech { font: 400 0.82rem/22px var(--type); color: #6a6252; letter-spacing: 0; }
+.dc-more .readout { border-top: 1px dashed rgba(0, 0, 0, 0.2); font: 400 0.82rem/22px var(--type); letter-spacing: 0; }
+.dc-more .readout dt { text-transform: none; color: #6a6252; }
+.dc-more .bignum { font: 700 2.6rem/1 var(--type); color: #b4302a; margin: 4px 0; }
+.dc-more figure { margin: 6px 0 10px; border: 1px solid rgba(0, 0, 0, 0.15); }
+.dc-more figure img { display: block; width: 100%; height: auto; }
+.dc-more figure.portrait { width: 120px; transform: rotate(2deg); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2); border: 6px solid #fff; border-bottom-width: 22px; }
+.dc-more a.link { color: #2f5a43; font: 700 0.9rem/22px var(--type); }
+.dc-more .creds { margin: 6px 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.dc-more .creds li { font: 400 0.85rem/1.3 var(--type); color: var(--typed); background: transparent; border: 1px dashed rgba(0, 0, 0, 0.25); padding: 6px 8px; }
+.dc-more .creds code { color: #b4302a; font: 700 0.85rem/1 var(--type); letter-spacing: 0; }
+.dc-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.dc-actions button, .dc-actions a { all: unset; cursor: pointer; padding: 5px 12px; border: 1.5px solid var(--typed); border-radius: 999px; font: 700 0.86rem/1.2 var(--type); color: var(--typed); }
+.dc-actions .primary { background: #1f3a2c; border-color: #1f3a2c; color: #f7f2e4; }
+.dc-actions button:hover, .dc-actions a:hover, .dc-actions button:focus-visible, .dc-actions a:focus-visible { background: #c9a24a; border-color: #c9a24a; color: #1d1d24; }
+
+.desk-tag { position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; padding: 5px 10px 5px 18px; pointer-events: none; opacity: 0; transition: opacity 0.2s;
+  font: 700 0.84rem/1 "Courier Prime", monospace; color: #1d1d24; background: #e9d9ae; clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.3)); white-space: nowrap; }
+.desk-tag::before { content: ""; position: absolute; left: 7px; top: 50%; width: 5px; height: 5px; margin-top: -2.5px; border-radius: 50%; background: #5a4a2a; }
+.desk-tag.on { opacity: 1; }
+.desk-tag small { font-weight: 400; color: #5a4a2a; }
+
+.desk-back { all: unset; position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); transform: translateX(-50%); cursor: pointer; pointer-events: auto;
+  padding: 9px 16px; border-radius: 999px; background: rgba(14, 31, 23, 0.85); color: #f1ead8; font: 700 0.86rem/1 "Courier Prime", monospace; opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s; z-index: 8; }
+.desk-back kbd { font: inherit; padding: 1px 6px; border: 1px solid rgba(241, 234, 216, 0.4); border-radius: 4px; margin-left: 6px; }
+.desk-ui.os .desk-back { opacity: 1; visibility: visible; }
+.desk-ui.os .desk-card { opacity: 0; pointer-events: none; transform: translateY(30px) rotate(-3deg); }
+.desk-hint { position: absolute; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 30px); transform: translateX(-50%); margin: 0; padding: 6px 12px; border-radius: 999px;
+  background: rgba(14, 31, 23, 0.55); color: #f1ead8; font: 400 0.82rem/1 "Courier Prime", monospace; white-space: nowrap; transition: opacity 0.5s; }
+.desk-ui.os .desk-hint, .desk-ui.toured .desk-hint { opacity: 0; }
+
+@media (max-width: 559px), (max-aspect-ratio: 9/10) {
+  .desk-card { left: 10px; right: 72px; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); padding: 12px 14px 14px 40px; font-size: 0.88rem;
+    background-position: 0 0, 0 0, 0 14px, 0 0; }
+  .desk-card { background: linear-gradient(90deg, transparent 28px, var(--margin) 28px 29px, transparent 29px), linear-gradient(var(--card) 0 36px, transparent 36px), repeating-linear-gradient(180deg, transparent 0 21px, var(--rule) 21px 22px), var(--card); }
+  .dc-title { font-size: 1.2rem; }
+  .desk-card.expanded .dc-more { max-height: 38vh; }
+  .desk-hint { font-size: 0.72rem; bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 70px); }
+  .desk-ui.os .desk-back { bottom: auto; top: calc(env(safe-area-inset-top, 0px) + 10px); left: auto; right: 10px; transform: none; z-index: 30; }
+}

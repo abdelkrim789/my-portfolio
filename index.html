@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Abdelkrim Ghebouli</title>
-<meta name="description" content="Abdelkrim Ghebouli, SAP BPC consultant and business intelligence specialist. A real-time portfolio built from 60,000 particles.">
-<meta name="theme-color" content="#eceee9">
-<script>try{var w=localStorage.getItem('ag-world');document.documentElement.dataset.world=(w==='night'||w==='blueprint'||w==='planet')?w:'day'}catch(e){document.documentElement.dataset.world='day'}</script>
+<meta name="description" content="Abdelkrim Ghebouli, SAP BPC consultant and business intelligence specialist. A real-time portfolio in three worlds: a journey of light, an archive frozen in ice, and a desk with a working computer.">
+<meta name="theme-color" content="#06070d">
+<script>(function(){var d=document.documentElement,w='night';try{var s=localStorage.getItem('ag-world');if(s==='ice'||s==='desk')w=s}catch(e){}d.dataset.world=w;d.dataset.ui=w==='night'?'journey':'own'})()</script>
 <meta name="author" content="Abdelkrim Ghebouli">
 <link rel="canonical" href="https://abdelkrim789.github.io/my-portfolio/">
 <meta property="og:type" content="profile">
 <meta property="og:title" content="Abdelkrim Ghebouli · SAP BPC Consultant">
-<meta property="og:description" content="SAP-certified BI and SAP BPC consultant. A portfolio you fly through: 240,000 particles rendered live.">
+<meta property="og:description" content="SAP-certified BI and SAP BPC consultant. Three worlds to explore: light, ice, and a desk with a working computer.">
 <meta property="og:url" content="https://abdelkrim789.github.io/my-portfolio/">
 <meta property="og:image" content="https://abdelkrim789.github.io/my-portfolio/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -43,28 +43,20 @@
   --gutter: clamp(16px, 5vw, 72px);
   color-scheme: dark;
 }
-/* Daylight: ink on paper. A cool gesso ground, indigo ink, saffron and olive-era ochre for highlights. */
-:root[data-world="day"] {
-  --ink: #eceee9; --ink-2: #e1e4dc; --paper: #141a2e; --muted: #59616f;
-  --sand: #9a5608; --ice: #1b5a80; --fault: #b0301c;
-  --bg-rgb: 236, 238, 233; --bg2-rgb: 225, 228, 220; --fg-rgb: 20, 26, 46;
-  --sand-rgb: 154, 86, 8; --ice-rgb: 27, 90, 128; --fault-rgb: 176, 48, 28;
+/* Cold Storage: polar daylight. Snow-white UI, ink-black type, a signal-orange accent like arctic gear. */
+:root[data-world="ice"] {
+  --ink: #e4eaef; --ink-2: #d6dee5; --paper: #0c1420; --muted: #5a6877;
+  --sand: #e4521b; --ice: #1d64a0; --fault: #c4321c;
+  --bg-rgb: 228, 234, 239; --bg2-rgb: 214, 222, 229; --fg-rgb: 12, 20, 32;
+  --sand-rgb: 228, 82, 27; --ice-rgb: 29, 100, 160; --fault-rgb: 196, 50, 28;
   color-scheme: light;
 }
-/* Blueprint: the plan behind it. Prussian blue drafting film with white linework. */
-:root[data-world="blueprint"] {
-  --ink: #0b3157; --ink-2: #0f3d6b; --paper: #eaf3fb; --muted: #9dbcd8;
-  --sand: #ffd27a; --ice: #a6e4ff; --fault: #ff8a75;
-  --bg-rgb: 11, 49, 87; --bg2-rgb: 15, 61, 107; --fg-rgb: 234, 243, 251;
-  --sand-rgb: 255, 210, 122; --ice-rgb: 166, 228, 255; --fault-rgb: 255, 138, 117;
-  color-scheme: dark;
-}
-/* Planet: a tiny world. Deep evening navy UI over a sky that moves from dawn to night. */
-:root[data-world="planet"] {
-  --ink: #10203c; --ink-2: #17305a; --paper: #fdf6e3; --muted: #a9b8d4;
-  --sand: #f6c453; --ice: #8fd3e8; --fault: #ff7b6b;
-  --bg-rgb: 16, 32, 60; --bg2-rgb: 23, 48, 90; --fg-rgb: 253, 246, 227;
-  --sand-rgb: 246, 196, 83; --ice-rgb: 143, 211, 232; --fault-rgb: 255, 123, 107;
+/* The Desk: a sunlit office. Banker's-green blotter, paper, and brass from the desk lamp. */
+:root[data-world="desk"] {
+  --ink: #16291f; --ink-2: #1f3a2c; --paper: #f1ead8; --muted: #a9b7a6;
+  --sand: #d9ae4c; --ice: #9cc7b4; --fault: #e0654a;
+  --bg-rgb: 22, 41, 31; --bg2-rgb: 31, 58, 44; --fg-rgb: 241, 234, 216;
+  --sand-rgb: 217, 174, 76; --ice-rgb: 156, 199, 180; --fault-rgb: 224, 101, 74;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -123,28 +115,13 @@ a { color: inherit; }
 #world-toast.loading { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 #world-toast.loading b { opacity: 0.25; }
 
-/* Drive mode, achievements, performance HUD, postcard flash */
-.chip.drive { display: none; border-color: rgba(var(--sand-rgb), 0.6); color: var(--sand); }
-.webgl[data-world="planet"] .chip.drive { display: inline-block; }
-.chip.drive .short { display: none; }
-@media (max-width: 899px) { .chip.drive .long { display: none; } .chip.drive .short { display: inline; } .hud-actions { gap: 5px; } .hud-actions .chip { padding: 8px 9px; } }
-.chip.drive[aria-pressed="true"] { background: var(--sand); color: var(--ink); }
-.driving .chapter .panel { opacity: 0.25 !important; pointer-events: none; }
-.driving .hint { visibility: hidden; }
-#drive-hint { position: fixed; z-index: 6; left: 50%; top: calc(env(safe-area-inset-top, 0px) + 78px); transform: translateX(-50%); display: none;
-  font: 500 0.66rem/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--paper); padding: 9px 14px; border-radius: 999px;
-  background: rgba(var(--bg-rgb), 0.7); border: 1px solid var(--line); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); white-space: nowrap; }
-.driving #drive-hint { display: block; }
-#dpad { position: fixed; z-index: 7; right: 18px; bottom: calc(env(safe-area-inset-bottom, 0px) + 78px); display: none; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); gap: 6px; }
-.driving #dpad { display: grid; }
-@media (pointer: fine) { .driving #dpad { display: none; } }
-#dpad button { all: unset; display: grid; place-items: center; border-radius: 14px; background: rgba(var(--bg-rgb), 0.72); border: 1px solid rgba(var(--sand-rgb), 0.5); color: var(--sand); font: 600 1.1rem/1 var(--mono); touch-action: none; }
-#dpad [data-k="up"] { grid-column: 2; grid-row: 1; } #dpad [data-k="left"] { grid-column: 1; grid-row: 2; } #dpad [data-k="down"] { grid-column: 2; grid-row: 2; } #dpad [data-k="right"] { grid-column: 3; grid-row: 2; }
+/* Achievements, performance HUD, postcard flash */
+@media (max-width: 899px) { .hud-actions { gap: 5px; } .hud-actions .chip { padding: 8px 10px; } }
 #perf { position: fixed; z-index: 9; left: var(--gutter); top: calc(env(safe-area-inset-top, 0px) + 70px); padding: 10px 12px; border-radius: 6px; border: 1px solid var(--line);
   background: rgba(var(--bg-rgb), 0.82); font: 400 0.68rem/1.55 var(--mono); color: var(--paper); letter-spacing: 0.04em; font-variant-numeric: tabular-nums; pointer-events: none; }
 #perf b { color: var(--sand); font-weight: 500; } #perf small { color: var(--muted); font-size: 0.6rem; }
-#ach-toast { position: fixed; z-index: 30; left: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 72px); max-width: min(340px, calc(100% - 32px)); padding: 12px 16px 13px;
-  border-radius: 6px; border: 1px solid rgba(var(--sand-rgb), 0.55); background: rgba(var(--bg-rgb), 0.92); transform: translateY(16px); opacity: 0; pointer-events: none;
+#ach-toast { position: fixed; z-index: 30; right: var(--gutter); top: calc(env(safe-area-inset-top, 0px) + 74px); max-width: min(340px, calc(100% - 32px)); padding: 12px 16px 13px;
+  border-radius: 6px; border: 1px solid rgba(var(--sand-rgb), 0.55); background: rgba(var(--bg-rgb), 0.92); transform: translateY(-12px); opacity: 0; pointer-events: none;
   transition: opacity 0.4s, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
 #ach-toast.on { opacity: 1; transform: none; }
 #ach-toast small { display: block; font: 500 0.6rem/1 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--sand); margin-bottom: 6px; }
@@ -173,24 +150,126 @@ a { color: inherit; }
 .dock .now { font: 500 0.66rem/1 var(--mono); letter-spacing: 0.14em; color: var(--sand); padding: 0 10px; min-width: 9.5em; text-align: center; }
 .dock .next { border: 1px solid rgba(var(--sand-rgb), 0.45); }
 
-/* World switcher */
-.worlds { display: flex; align-items: center; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(var(--bg2-rgb), 0.6);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-.orb { all: unset; cursor: pointer; display: flex; align-items: center; gap: 0; border-radius: 999px; padding: 3px; color: var(--paper);
-  font: 500 0.62rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; transition: gap 0.3s, padding 0.3s; }
-.orb i { width: 18px; height: 18px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(var(--fg-rgb), 0.35); }
-.orb[data-world="day"] i { background: radial-gradient(circle at 35% 35%, #fbfbf7 0 30%, #e4e1d3 31% 55%, #b98a3c 56% 60%, #eceee9 61%); }
-.orb[data-world="night"] i { background: radial-gradient(circle at 62% 38%, #e9ecf5 0 22%, #0e1122 23%), #0e1122; }
-.orb[data-world="blueprint"] i { background: linear-gradient(#0b3157, #0b3157) padding-box,
-  repeating-linear-gradient(0deg, transparent 0 4px, rgba(166, 228, 255, 0.55) 4px 5px), repeating-linear-gradient(90deg, #0b3157 0 4px, rgba(166, 228, 255, 0.55) 4px 5px); }
-.orb[data-world="planet"] i { background: radial-gradient(circle at 36% 34%, #9fd46a 0 20%, #3fa7d6 21% 44%, #8cc152 45% 58%, #2f86b8 59%); }
-.orb span { max-width: 0; overflow: hidden; white-space: nowrap; transition: max-width 0.35s; }
-.orb:hover, .orb:focus-visible, .orb[aria-pressed="true"] { gap: 7px; padding: 3px 10px 3px 3px; }
-.orb:hover span, .orb:focus-visible span, .orb[aria-pressed="true"] span { max-width: 9em; }
-.orb[aria-pressed="true"] { background: rgba(var(--sand-rgb), 0.16); color: var(--sand); cursor: default; }
-::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
-::view-transition-new(root) { z-index: 2; }
+/* World button in the header */
+.world-btn { display: inline-flex; align-items: center; gap: 8px; padding: 5px 13px 5px 5px; position: relative; }
+.world-btn i { width: 22px; height: 22px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgba(var(--fg-rgb), 0.3); background: var(--wart); }
+.world-btn span { color: var(--muted); }
+.world-btn b { font-weight: 500; color: var(--paper); }
+.world-btn::after { content: ""; position: absolute; inset: -1px; border-radius: 999px; border: 1px solid var(--sand); opacity: 0; animation: wbping 2.6s 4s ease-out 4; pointer-events: none; }
+.world-btn.seen::after { animation: none; }
+@keyframes wbping { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.35, 1.7); } }
+:root { --wart: radial-gradient(circle at 62% 38%, #e9ecf5 0 22%, #0e1122 23%); }
+:root[data-world="ice"] { --wart: linear-gradient(135deg, #ffffff 0 30%, #b9dcf2 31% 60%, #7fb2d6 61%); }
+:root[data-world="desk"] { --wart: repeating-linear-gradient(180deg, #f3d48a 0 3px, #1f3a2c 3px 5px); }
+@media (max-width: 899px) { .world-btn span { display: none; } }
 
+/* World art, used on cards before a world has been visited */
+.art { display: block; background: #0e1122 center / cover no-repeat; }
+.art-night { background:
+  radial-gradient(1.2px 1.2px at 20% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 70% 20%, #fff 50%, transparent 51%),
+  radial-gradient(1px 1px at 45% 60%, #e8c07a 50%, transparent 51%), radial-gradient(1.4px 1.4px at 85% 55%, #9fd8e6 50%, transparent 51%),
+  radial-gradient(circle at 50% 120%, rgba(232, 192, 122, 0.55) 0 30%, transparent 55%), radial-gradient(circle at 50% 40%, rgba(159, 216, 230, 0.35) 0 12%, transparent 30%), #06070d; }
+.art-ice { background:
+  linear-gradient(135deg, transparent 38%, rgba(255, 255, 255, 0.95) 38% 40%, transparent 40%),
+  conic-gradient(from 45deg at 50% 52%, #f7fbff, #cfe6f5, #a6cde8, #e8f3fb, #f7fbff) 50% 52% / 34% 54% no-repeat,
+  linear-gradient(180deg, #eef3f7 0 60%, #d7e1e9 60%); }
+.art-desk { background:
+  linear-gradient(#103a22, #103a22) 50% 44% / 30% 34% no-repeat, linear-gradient(#ddd0b2, #ddd0b2) 50% 42% / 40% 50% no-repeat,
+  linear-gradient(#1f3a2c, #1f3a2c) 50% 100% / 100% 26% no-repeat,
+  repeating-linear-gradient(180deg, rgba(255, 224, 160, 0.6) 0 5px, transparent 5px 9px), linear-gradient(180deg, #d8b97c, #9a7448); }
+
+/* World cards (in the conversation and the picker) */
+.w-cards { display: grid; grid-template-columns: repeat(3, 108px); gap: 8px; animation: pop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.w-card { all: unset; cursor: pointer; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; background: rgba(var(--bg-rgb), 0.94);
+  border: 1px solid var(--line); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.3), border-color 0.25s; }
+.w-card .art { aspect-ratio: 16 / 10; width: 100%; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.w-card .w-txt { display: grid; gap: 3px; padding: 8px 9px 10px; }
+.w-card b { font: 800 1rem/0.95 var(--display); text-transform: uppercase; color: var(--paper); }
+.w-card small { font: 400 0.68rem/1.3 var(--body); color: var(--muted); }
+.w-card em { font: 500 0.6rem/1 var(--mono); font-style: normal; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sand); margin-top: 3px; }
+.w-card:hover:not([disabled]), .w-card:focus-visible { transform: translateY(-4px); border-color: var(--sand); }
+.w-card:hover:not([disabled]) .art { transform: scale(1.08); }
+.w-card[disabled] { cursor: default; opacity: 0.72; }
+.w-card[disabled] em { color: var(--muted); }
+#world-panel { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding: 24px 16px; background: rgba(var(--bg-rgb), 0.6);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); animation: fade 0.35s ease both; }
+#world-panel .wp { width: min(980px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; }
+#world-panel .wp-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 18px; }
+#world-panel h2 { margin: 0; font-size: clamp(2.2rem, 5vw, 3.6rem); }
+#world-panel .wp-head p { margin: 6px 0 0; font-size: 0.95rem; color: var(--muted); }
+#world-panel .w-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.w-card.big { border-radius: 16px; }
+.w-card.big .w-txt { padding: 14px 16px 18px; gap: 6px; }
+.w-card.big b { font-size: 1.7rem; }
+.w-card.big small { font-size: 0.86rem; color: rgba(var(--fg-rgb), 0.78); }
+.w-card.big em { font-size: 0.68rem; margin-top: 8px; }
+@media (max-width: 760px) { #world-panel .w-list { grid-template-columns: 1fr; } .w-card.big { flex-direction: row; } .w-card.big .art { width: 38%; aspect-ratio: auto; min-height: 110px; } .w-card.big b { font-size: 1.35rem; } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { opacity: 0; transform: translateY(8px) scale(0.96); } }
+
+/* The conversation */
+#talk { position: fixed; z-index: 20; right: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); width: min(352px, calc(100vw - 24px));
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px; pointer-events: none; font: 400 0.88rem/1.45 var(--body); }
+#talk > * { pointer-events: auto; }
+.talk-stack { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; width: 100%; transition: opacity 0.35s, transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.35s; }
+#talk.quiet .talk-stack, #talk:not(.open) .talk-stack { opacity: 0; transform: translateY(12px) scale(0.98); visibility: hidden; pointer-events: none; }
+.bubble { max-width: 300px; padding: 9px 14px 10px; border-radius: 18px 18px 5px 18px; background: rgba(var(--bg-rgb), 0.92); color: var(--paper);
+  border: 1px solid var(--line); box-shadow: 0 10px 34px rgba(0, 0, 0, 0.2); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  animation: pop 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.25) both; transform-origin: 100% 100%; }
+.bubble.me { align-self: flex-start; background: var(--sand); color: var(--ink); border-color: transparent; border-radius: 18px 18px 18px 5px; font-weight: 500; transform-origin: 0 100%; }
+.bubble.typing { display: flex; gap: 4px; padding: 13px 14px; }
+.bubble.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: typing 1s infinite ease-in-out; }
+.bubble.typing i:nth-child(2) { animation-delay: 0.15s; } .bubble.typing i:nth-child(3) { animation-delay: 0.3s; }
+@keyframes typing { 0%, 60%, 100% { transform: translateY(0); opacity: 0.5; } 30% { transform: translateY(-4px); opacity: 1; } }
+.chips { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; animation: pop 0.4s 0.05s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.chip-r { all: unset; cursor: pointer; padding: 8px 13px; border-radius: 999px; border: 1px solid rgba(var(--sand-rgb), 0.7); color: var(--sand); background: rgba(var(--bg-rgb), 0.9);
+  font: 500 0.8rem/1.1 var(--body); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: background 0.2s, color 0.2s, transform 0.2s; }
+.chip-r:hover, .chip-r:focus-visible { background: var(--sand); color: var(--ink); transform: translateY(-1px); }
+.talk-contact { width: 100%; max-width: 300px; padding: 12px 14px; border-radius: 16px; background: rgba(var(--bg-rgb), 0.94); border: 1px solid rgba(var(--sand-rgb), 0.5); animation: pop 0.4s both; }
+.talk-contact .mail { display: block; font: 800 1.15rem/1.1 var(--display); color: var(--paper); overflow-wrap: anywhere; user-select: all; margin-bottom: 10px; }
+.talk-contact .row { display: flex; gap: 6px; flex-wrap: wrap; }
+.talk-contact button, .talk-contact a { all: unset; cursor: pointer; font: 500 0.66rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; padding: 8px 11px; border-radius: 999px; border: 1px solid var(--line); color: var(--paper); }
+.talk-contact .copy { background: var(--sand); color: var(--ink); border-color: var(--sand); }
+.talk-contact a:hover, .talk-contact a:focus-visible { border-color: var(--sand); color: var(--sand); }
+.talk-me { display: flex; align-items: center; gap: 10px; }
+.talk-name { order: -1; display: grid; text-align: right; font: 600 0.8rem/1.2 var(--body); color: var(--paper); padding: 6px 10px; border-radius: 10px; background: rgba(var(--bg-rgb), 0.7);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: opacity 0.3s; }
+.talk-name small { font: 400 0.62rem/1.3 var(--mono); letter-spacing: 0.06em; color: var(--muted); }
+#talk.open .talk-name { opacity: 0; pointer-events: none; }
+.talk-face { all: unset; cursor: pointer; position: relative; width: 52px; height: 52px; border-radius: 50%; flex: none; box-shadow: 0 0 0 2px var(--sand), 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+.talk-face img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display: block; }
+.talk-face:hover { transform: scale(1.07); }
+.talk-face .dot { position: absolute; right: 1px; bottom: 1px; width: 12px; height: 12px; border-radius: 50%; background: #3ccf6e; box-shadow: 0 0 0 2px var(--ink); }
+.talk-face .badge { position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; border-radius: 9px; background: var(--fault); color: #fff; font: 600 0.66rem/18px var(--body); text-align: center; }
+.talk-face::before { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid var(--sand); opacity: 0; }
+#talk.waiting .talk-face::before { animation: talkping 1.8s ease-out infinite; }
+#talk.waiting .talk-face { animation: nudge 3.2s 1s ease-in-out infinite; }
+@keyframes talkping { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.6); } }
+@keyframes nudge { 0%, 86%, 100% { transform: rotate(0); } 89% { transform: rotate(-9deg); } 92% { transform: rotate(8deg); } 95% { transform: rotate(-4deg); } }
+.no-webgl #talk, .no-webgl .world-btn { display: none; }
+@media (max-width: 559px), (max-aspect-ratio: 9/10) {
+  /* on phones the conversation drops in from the top, away from the controls at the bottom */
+  .talk-stack { position: fixed; top: calc(env(safe-area-inset-top, 0px) + 64px); left: 10px; right: 10px; width: auto; }
+  #talk.quiet .talk-stack, #talk:not(.open) .talk-stack { transform: translateY(-12px) scale(0.98); }
+  .bubble { transform-origin: 100% 0; }
+  .os-open #talk { display: none; }
+}
+@media (max-width: 899px) {
+  #talk { right: 12px; width: min(330px, calc(100vw - 24px)); font-size: 0.84rem; }
+  :root[data-world="night"] #talk { bottom: calc(env(safe-area-inset-bottom, 0px) + 68px); }
+  .talk-name { display: none; }
+  .talk-face { width: 46px; height: 46px; }
+  .bubble { max-width: 270px; }
+  .w-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+}
+
+/* Worlds with their own interface: the Night's scroll journey steps aside */
+html[data-ui="own"], html[data-ui="own"] body { overflow: hidden; overscroll-behavior: none; }
+body > main, body > footer, .rail, .dock, .hotspots, .progress, .scrim, .minimap, .hud-bottom { transition: opacity 0.6s, visibility 0.6s; }
+html[data-ui="own"] body > main, html[data-ui="own"] body > footer, html[data-ui="own"] .rail, html[data-ui="own"] .dock, html[data-ui="own"] .hotspots,
+html[data-ui="own"] .progress, html[data-ui="own"] .scrim, html[data-ui="own"] .minimap, html[data-ui="own"] #detail, html[data-ui="own"] .hud-bottom { opacity: 0; visibility: hidden; pointer-events: none; }
+html[data-ui="own"] #stage { touch-action: none; }
 #world-toast { position: fixed; z-index: 7; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.96); text-align: center; pointer-events: none;
   opacity: 0; transition: opacity 0.6s, transform 0.9s cubic-bezier(0.2, 0.8, 0.2, 1); }
 #world-toast.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
@@ -274,6 +353,11 @@ p { margin: 0 0 14px; color: rgba(var(--fg-rgb), 0.86); max-width: 62ch; }
 .creds li:hover, .creds li:focus-visible { border-color: var(--sand); }
 .creds code { display: block; font: 500 0.7rem/1 var(--mono); color: var(--sand); letter-spacing: 0.1em; margin-bottom: 6px; }
 .contact { border-top: 1px solid var(--line); padding-top: 22px; display: grid; gap: 16px; }
+.other-worlds { font-size: 0.92rem; color: rgba(var(--fg-rgb), 0.8); }
+.link-btn { all: unset; cursor: pointer; color: var(--sand); border-bottom: 1px solid currentColor; font-weight: 500; }
+.link-btn:hover, .link-btn:focus-visible { color: var(--ice); }
+.guide-card dl div[class^="g-"] { opacity: 0.45; }
+:root[data-world="night"] .guide-card .g-night, :root[data-world="ice"] .guide-card .g-ice, :root[data-world="desk"] .guide-card .g-desk { opacity: 1; }
 #email { font: 800 clamp(1.5rem, 4.2vw, 2.6rem)/1 var(--display); letter-spacing: 0.01em; user-select: all; overflow-wrap: anywhere; }
 .contact-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn { font: 500 0.74rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; padding: 13px 18px; border-radius: 999px; cursor: pointer; text-decoration: none;
@@ -326,7 +410,9 @@ footer p { color: var(--muted); font-size: inherit; }
 .hs.year i::before, .hs.year i::after { display: none; }
 
 /* Journey minimap */
-.minimap { position: fixed; z-index: 5; right: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 40px); width: 200px; }
+.minimap { position: fixed; z-index: 5; right: var(--gutter); top: calc(env(safe-area-inset-top, 0px) + 86px); width: 200px; }
+.focused #talk { right: calc(min(440px, 100%) + 16px); }
+@media (max-width: 899px) { .focused #talk { opacity: 0; visibility: hidden; } }
 .minimap svg { display: block; width: 100%; height: auto; overflow: visible; }
 .minimap .route { fill: none; stroke: rgba(var(--ice-rgb), 0.35); stroke-width: 1; stroke-dasharray: 2 3; }
 .minimap .stop { cursor: pointer; }
@@ -399,11 +485,10 @@ footer p { color: var(--muted); font-size: inherit; }
 <header class="hud-top">
   <a class="brand" href="#signal">Abdelkrim Ghebouli<span>SAP BPC · Business Intelligence</span></a>
   <div class="hud-actions">
-    <div class="worlds" role="group" aria-label="Worlds"></div>
-    <button class="chip drive" id="drive-toggle" type="button" aria-pressed="false"><span class="long">Take the wheel</span><span class="short">Drive</span></button>
+    <button class="chip world-btn" id="world-btn" type="button" aria-haspopup="dialog" aria-controls="world-panel"><i aria-hidden="true"></i><span>World</span><b>Night</b></button>
     <button class="chip" id="guide-toggle" type="button" aria-expanded="false" aria-controls="guide" aria-label="How to explore">?</button>
     <button class="chip" id="sound-toggle" type="button" aria-pressed="false">Sound off</button>
-    <a class="chip contact" href="#decide">Contact</a>
+    <a class="chip contact" href="#decide" data-contact>Contact</a>
   </div>
 </header>
 <nav class="rail" aria-label="Chapters"><ol></ol></nav>
@@ -415,25 +500,28 @@ footer p { color: var(--muted); font-size: inherit; }
 </nav>
 <div class="hud-bottom" aria-hidden="true"><span id="hud-count" class="count">real time</span></div>
 <div id="world-toast" aria-live="polite"><b></b><span></span></div>
-<div id="drive-hint" aria-live="polite">Drive · WASD or arrows · visit all eight landmarks · G to exit</div>
-<div id="dpad" aria-hidden="true"><button type="button" data-k="up">▲</button><button type="button" data-k="left">◀</button><button type="button" data-k="down">▼</button><button type="button" data-k="right">▶</button></div>
+<aside id="talk" class="quiet" aria-label="Talk to Abdelkrim"></aside>
+<div id="world-panel" role="dialog" aria-modal="true" aria-labelledby="wp-title" hidden>
+  <div class="wp">
+    <div class="wp-head"><div><h2 id="wp-title">Choose a world</h2><p>Same person, same story. Three completely different ways to explore it.</p></div><button class="chip close" type="button">Close</button></div>
+    <div class="w-list"></div>
+  </div>
+</div>
 <div id="perf" aria-live="off" hidden></div>
 <div id="ach-toast" role="status"><small>Achievement unlocked</small><b></b><span></span></div>
 <div id="guide" role="dialog" aria-modal="true" aria-label="How to explore" hidden>
   <div class="guide-card">
     <p class="tag">How to explore</p>
     <dl>
-      <div><dt>Scroll · swipe</dt><dd>Travel through the world, chapter by chapter</dd></div>
-      <div><dt><kbd>↑</kbd> <kbd>↓</kbd> · dock</dt><dd>Jump to the previous or next chapter</dd></div>
-      <div><dt>Click a label</dt><dd>Fly to that point and open its story</dd></div>
-      <div><dt><kbd>←</kbd> <kbd>→</kbd></dt><dd>Next or previous point while a story is open</dd></div>
-      <div><dt>Drag</dt><dd>Orbit around the scene</dd></div>
-      <div><dt>Click empty space</dt><dd>Send a shockwave through the particles</dd></div>
-      <div><dt><kbd>W</kbd> · top orbs</dt><dd>Open a portal to another world: Daylight, Night, Blueprint or Planet</dd></div>
-      <div><dt><kbd>G</kbd></dt><dd>On the Planet, take the wheel and drive the rover yourself</dd></div>
-      <div><dt><kbd>P</kbd></dt><dd>Take a postcard of the current view</dd></div>
-      <div><dt><kbd>F</kbd></dt><dd>Show live performance: frame rate, draw calls, resolution</dd></div>
-      <div><dt><kbd>Esc</kbd></dt><dd>Close a story or this guide</dd></div>
+      <div class="g-night"><dt>Scroll · <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Night: travel through the story, chapter by chapter</dd></div>
+      <div class="g-night"><dt>Click a label</dt><dd>Night: fly to that point and open its story. Drag to orbit, click empty space for a shockwave</dd></div>
+      <div class="g-ice"><dt>Scroll · <kbd>←</kbd> <kbd>→</kbd></dt><dd>Cold Storage: move along the archive, one block at a time</dd></div>
+      <div class="g-ice"><dt>Drag · click a block</dt><dd>Cold Storage: turn the block in your hands, click (or <kbd>Enter</kbd>) to thaw it and read it</dd></div>
+      <div class="g-desk"><dt>Click an object</dt><dd>Desk: everything is clickable. Scroll for a guided tour of the room</dd></div>
+      <div class="g-desk"><dt>The computer</dt><dd>Desk: boot AG/OS, open my files, or type <kbd>HELP</kbd> in the terminal. SAP people: try <kbd>SM37</kbd></dd></div>
+      <div><dt><kbd>W</kbd> · World button</dt><dd>Change world: Night, Cold Storage or the Desk. Or just ask me in the chat</dd></div>
+      <div><dt><kbd>P</kbd> · <kbd>F</kbd></dt><dd>Take a postcard of the view · show live performance</dd></div>
+      <div><dt><kbd>Esc</kbd></dt><dd>Close whatever is open</dd></div>
     </dl>
     <p class="tag">Achievements <span id="ach-count"></span></p>
     <ul class="ach" id="ach-list"></ul>
@@ -519,6 +607,7 @@ footer p { color: var(--muted); font-size: inherit; }
         <li tabindex="0" data-glyph="S4C03"><code>S4C03</code>Implementation Consultant · S/4HANA Cloud PE</li>
         <li tabindex="0" data-glyph="ABAP"><code>C_ABAPD_2309</code>Back-End Developer · ABAP Cloud</li>
       </ul>
+      <p class="other-worlds">This story also exists frozen in ice, and on my desk. <button type="button" class="link-btn" data-worlds>See the other worlds</button></p>
       <div class="contact">
         <span id="email" data-glyph="@">abdelkrimghebouli.34@gmail.com</span>
         <div class="contact-row">
@@ -530,7 +619,7 @@ footer p { color: var(--muted); font-size: inherit; }
     </div>
   </section>
 </main>
-<footer><p>One world, rendered live in your browser with Three.js and custom shaders. No video, no images: every shape here is computed.</p></footer>
+<footer><p>Three worlds, rendered live in your browser with Three.js and custom shaders. No video and no 3D models: every shape here is computed.</p></footer>
 
 <aside id="detail" aria-label="Details">
   <button class="chip close" type="button">Close</button>

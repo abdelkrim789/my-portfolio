@@ -1,0 +1,135 @@
+/* AG/OS. A banker's-green desktop, paper-coloured windows with hard shadows, brass for whatever is selected.
+   VT323 for the system voice (titles, BIOS, terminal), IBM Plex Mono for reading. */
+.agos {
+  --g0: #0e1f17; --g1: #16291f; --g2: #1f3a2c; --g3: #2f5a43; --paper: #ece5d3; --paper2: #ddd4bd; --brass: #e2bd62; --ink: #1b1b22; --red: #b4302a;
+  --sys: "VT323", "IBM Plex Mono", monospace; --read: "IBM Plex Mono", ui-monospace, monospace;
+  position: fixed; left: 0; top: 0; z-index: 6; width: 800px; height: 600px; transform-origin: 0 0; pointer-events: none;
+  opacity: 0; visibility: hidden; transition: opacity 0.45s, visibility 0.45s; color: var(--ink); font: 400 13px/1.45 var(--read);
+}
+.agos.on.ready.shown { opacity: 1; visibility: visible; pointer-events: auto; }
+.agos.on.shown:not(.ready) { opacity: 1; visibility: visible; }
+.agos *, .agos *::before, .agos *::after { box-sizing: border-box; }
+.agos p { color: inherit; max-width: none; }
+.agos h3 { text-wrap: wrap; }
+.agos button, .agos a, .agos input { font: inherit; color: inherit; }
+.agos :focus-visible { outline: 2px solid var(--brass); outline-offset: 1px; }
+.agos-screen { position: absolute; inset: 0; overflow: hidden; border-radius: 18px / 15px; background: #050806; }
+.agos-crt { position: absolute; inset: 0; pointer-events: none; border-radius: inherit; z-index: 50;
+  background:
+    linear-gradient(115deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0) 28%),
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, 0.13) 0 1px, transparent 1px 3px),
+    radial-gradient(ellipse at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.5) 100%);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6), inset 0 0 4px rgba(0, 0, 0, 0.9); animation: agos-flicker 6s infinite steps(1); }
+@keyframes agos-flicker { 0%, 100% { opacity: 1; } 47% { opacity: 0.94; } 48% { opacity: 1; } 81% { opacity: 0.97; } }
+.agos-boot { position: absolute; inset: 0; padding: 34px 40px; background: #050806; transition: opacity 0.4s; }
+.agos-boot pre { margin: 0; font: 400 24px/1.25 var(--sys); color: #ffbe4a; text-shadow: 0 0 6px rgba(255, 170, 40, 0.55); white-space: pre-wrap; }
+.agos.ready .agos-boot { opacity: 0; pointer-events: none; }
+.agos-desk { position: absolute; inset: 0; opacity: 0; transition: opacity 0.5s 0.1s;
+  background: radial-gradient(circle at 50% 42%, rgba(226, 189, 98, 0.08), transparent 55%), repeating-conic-gradient(var(--g1) 0 25%, var(--g2) 0 50%) 0 0 / 4px 4px; }
+.agos.ready .agos-desk { opacity: 1; }
+.agos-logo { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); font: 400 120px/1 var(--sys); color: transparent; -webkit-text-stroke: 1px rgba(226, 189, 98, 0.35); letter-spacing: 0.04em; pointer-events: none; }
+.agos-icons { list-style: none; margin: 0; padding: 14px 10px; display: grid; grid-template-rows: repeat(5, 92px); grid-auto-flow: column; grid-auto-columns: 88px; gap: 2px; position: absolute; left: 0; top: 0; bottom: 40px; }
+.agos-icons button { all: unset; cursor: pointer; display: grid; justify-items: center; gap: 4px; padding: 6px 4px; border-radius: 3px; text-align: center; }
+.agos-icons span { font: 400 17px/1.05 var(--sys); color: #f1ead8; text-shadow: 1px 1px 0 #000; padding: 1px 3px; }
+.agos-icons button:hover span, .agos-icons button:focus-visible span { background: var(--brass); color: var(--g0); text-shadow: none; }
+
+.agos-win { position: absolute; display: flex; flex-direction: column; background: var(--paper); border: 2px solid var(--g0); box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.45); min-width: 220px; animation: agos-open 0.18s steps(3) both; }
+@keyframes agos-open { from { transform: scale(0.85); opacity: 0; } }
+.agos-win header { display: flex; align-items: center; gap: 8px; padding: 3px 4px 3px 8px; background: var(--g3); color: #f1ead8; cursor: grab; user-select: none; touch-action: none; }
+.agos-win.front header { background: var(--g2); color: var(--brass); }
+.agos-win header b { flex: 1; font: 400 20px/1 var(--sys); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.agos-win .x { all: unset; cursor: pointer; width: 22px; height: 20px; display: grid; place-items: center; background: var(--paper); color: var(--g0); border: 2px solid var(--g0); font: 400 20px/1 var(--sys); }
+.agos-win .x:hover { background: var(--red); color: #fff; }
+.agos-body { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.agos-menu { display: flex; gap: 14px; padding: 2px 10px; border-bottom: 1px solid #b9ae93; font: 400 17px/1.2 var(--sys); color: #5a5446; }
+.agos-txt { flex: 1; margin: 0; padding: 10px 14px; overflow: auto; white-space: pre-wrap; font: 400 12.5px/1.5 var(--read); background: #fbf8ef; }
+.agos-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 12px; border-top: 1px solid #b9ae93; }
+.agos-actions button, .agos-actions a { all: unset; cursor: pointer; padding: 3px 12px; background: var(--paper2); border: 2px solid var(--g0); box-shadow: 2px 2px 0 var(--g0); font: 400 18px/1.2 var(--sys); color: var(--ink); }
+.agos-actions button:hover, .agos-actions a:hover, .agos-actions button:focus-visible, .agos-actions a:focus-visible { background: var(--brass); }
+.agos-actions button:active, .agos-actions a:active { transform: translate(2px, 2px); box-shadow: none; }
+.agos-actions button[disabled] { opacity: 0.5; cursor: default; }
+.agos-cap { margin: 0; padding: 6px 10px; font: 400 17px/1.2 var(--sys); color: #4c4639; background: var(--paper2); border-bottom: 1px solid #b9ae93; }
+.agos-scroll { flex: 1; min-height: 0; overflow: auto; }
+.agos-table { width: 100%; border-collapse: collapse; font: 400 12px/1.35 var(--read); }
+.agos-table th { position: sticky; top: 0; background: #cfc5ab; text-align: left; padding: 4px 8px; font: 400 17px/1.1 var(--sys); border-bottom: 1px solid #a99d80; }
+.agos-table td { padding: 4px 8px; border-bottom: 1px solid #d6ccb3; vertical-align: top; }
+.agos-table tbody tr:nth-child(even) { background: rgba(0, 0, 0, 0.03); }
+.app-career tbody tr { cursor: pointer; }
+.agos-table tr:hover td, .agos-table tr.sel td { background: rgba(226, 189, 98, 0.55); }
+.agos-table .st { display: inline-block; padding: 0 6px; font: 400 16px/1.2 var(--sys); }
+.agos-table .st.active { background: var(--g2); color: var(--brass); }
+.agos-table .st.finished { background: #d9e2cf; color: var(--g2); }
+.app-career .agos-scroll { flex: none; max-height: 46%; }
+.agos-log { flex: 1; min-height: 0; overflow: auto; border-top: 2px solid var(--g0); background: #fbf8ef; }
+.agos-doc { padding: 8px 12px 12px; }
+.agos-doc .tag { margin: 0 0 2px; font: 400 16px/1.2 var(--sys); color: var(--g3); text-transform: none; letter-spacing: 0; }
+.agos-doc h3 { margin: 6px 0 4px; font: 400 24px/1 var(--sys); color: var(--g0); text-transform: none; }
+.agos-doc p { margin: 0 0 8px; font-size: 12px; color: var(--ink); max-width: none; }
+.agos-doc .dmeta, .agos-doc .tech { font-size: 11.5px; color: #5a5446; }
+.agos-doc dl { margin: 6px 0; display: grid; gap: 2px; font-size: 11.5px; }
+.agos-doc dl div { display: flex; justify-content: space-between; gap: 10px; }
+.agos-doc dt { color: #6b6455; } .agos-doc dd { margin: 0; text-align: right; }
+.agos-doc .bignum { font: 400 46px/1 var(--sys); color: var(--red); margin: 0; }
+.agos-doc a.link { color: var(--g3); }
+.agos-filter { padding: 6px 10px; background: var(--paper2); border-bottom: 1px solid #b9ae93; font: 400 17px/1 var(--sys); }
+.agos-filter input { margin-left: 8px; width: 220px; padding: 2px 6px; border: 2px inset #b9ae93; background: #fffdf6; font: 400 12px/1.3 var(--read); }
+.agos-files { list-style: none; margin: 0; padding: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.agos-files button { all: unset; cursor: pointer; width: 104px; display: grid; justify-items: center; gap: 4px; padding: 8px 4px; text-align: center; font: 400 17px/1.05 var(--sys); }
+.agos-files small { font: 400 11px/1.2 var(--read); color: #5a5446; }
+.agos-files button:hover span, .agos-files button:focus-visible span { background: var(--brass); }
+.agos-url { padding: 4px 8px; background: var(--paper2); border-bottom: 1px solid #b9ae93; }
+.agos-url span { display: block; padding: 2px 8px; background: #fffdf6; border: 2px inset #b9ae93; font: 400 12px/1.3 var(--read); }
+.agos-page img { display: block; width: 100%; height: auto; border-bottom: 2px solid var(--g0); }
+.agos-cert { margin: 14px; padding: 18px 16px; text-align: center; background: #fbf8ef; border: 6px double #b08a3a; display: grid; gap: 4px; justify-items: center; }
+.agos-cert p { margin: 0; font: 400 18px/1 var(--sys); color: #5a5446; }
+.agos-cert b { font: 400 46px/1 var(--sys); color: var(--g2); }
+.agos-cert span { font-size: 12px; }
+.agos-cert i { width: 34px; height: 34px; border-radius: 50%; background: #b08a3a; margin-top: 6px; box-shadow: inset 0 0 0 4px #fbf8ef, inset 0 0 0 6px #b08a3a; }
+.agos-cert small { font: 400 16px/1 var(--sys); color: #5a5446; }
+.agos-mail { flex: 1; min-height: 0; display: grid; grid-template-columns: 170px 1fr; }
+.agos-mail ul { list-style: none; margin: 0; padding: 0; border-right: 2px solid var(--g0); background: #fbf8ef; }
+.agos-mail li { padding: 8px 10px; border-bottom: 1px solid #d6ccb3; display: grid; }
+.agos-mail li.sel { background: rgba(226, 189, 98, 0.55); }
+.agos-mail li b { font: 400 17px/1.1 var(--sys); } .agos-mail li span { font-size: 11px; color: #5a5446; }
+.agos-mail article { overflow: auto; display: flex; flex-direction: column; }
+.agos-mail article > p:not(.agos-cap) { padding: 10px 12px 0; margin: 0; font-size: 12.5px; }
+.agos-mail .agos-actions { border: 0; margin-top: auto; }
+.agos-term { flex: 1; min-height: 0; display: flex; flex-direction: column; background: #050806; color: #9cff9c; font: 400 19px/1.15 var(--sys); padding: 8px 10px; text-shadow: 0 0 5px rgba(120, 255, 140, 0.45); }
+.agos-term .out { flex: 1; overflow: auto; }
+.agos-term pre { margin: 0 0 4px; font: inherit; white-space: pre-wrap; }
+.agos-term form { display: flex; gap: 8px; align-items: center; }
+.agos-term input { flex: 1; background: transparent; border: 0; outline: 0; color: #fff; font: inherit; caret-color: #9cff9c; }
+
+.agos-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 40px; display: flex; align-items: center; gap: 6px; padding: 4px 6px; background: var(--g0); border-top: 2px solid var(--brass); z-index: 40; }
+.agos-startbtn { all: unset; cursor: pointer; padding: 3px 12px; background: var(--brass); color: var(--g0) !important; font: 400 22px/1 var(--sys) !important; border: 2px solid #f1ead8; box-shadow: 2px 2px 0 #000; }
+.agos-tasks { display: flex; gap: 4px; min-width: 0; overflow: hidden; flex: 1; }
+.agos-tasks button { all: unset; cursor: pointer; display: flex; align-items: center; gap: 5px; max-width: 120px; padding: 3px 8px; background: var(--g2); color: #f1ead8; font: 400 17px/1 var(--sys); border: 1px solid var(--g3); white-space: nowrap; overflow: hidden; }
+.agos-tasks button span { overflow: hidden; text-overflow: ellipsis; }
+.agos-tasks button.on { background: var(--g3); color: var(--brass); border-color: var(--brass); }
+.agos-cmd { display: flex; align-items: center; gap: 6px; font: 400 18px/1 var(--sys); color: var(--brass); }
+.agos-cmd input { width: 104px; padding: 3px 6px; border: 2px inset #6b6455; background: #f1ead8; color: var(--ink); font: 400 19px/1 var(--sys); text-transform: uppercase; }
+.agos-msg { position: absolute; left: 6px; right: 6px; bottom: 44px; text-align: center; font: 400 18px/1.2 var(--sys); pointer-events: none; }
+.agos-msg:not(:empty) { padding: 3px 8px; }
+.agos-msg.ok:not(:empty) { background: rgba(14, 31, 23, 0.9); color: #9cff9c; }
+.agos-msg.err:not(:empty) { background: #f1ead8; color: var(--red); border: 2px solid var(--red); }
+.agos-clock { font: 400 20px/1 var(--sys); color: #f1ead8; padding: 0 6px; }
+.agos-exit { all: unset; display: none; cursor: pointer; width: 30px; height: 28px; place-items: center; background: var(--red); color: #fff; font: 400 20px/1 var(--sys); border: 2px solid #f1ead8; }
+.agos.full .agos-exit { display: grid; }
+.agos-start { position: absolute; left: 6px; bottom: 44px; z-index: 45; width: 230px; background: var(--paper); border: 2px solid var(--g0); box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.45); padding: 0 0 6px; }
+.agos-start p { margin: 0 0 4px; padding: 8px 10px; background: var(--g2); color: var(--brass); font: 400 20px/1 var(--sys); }
+.agos-start button { all: unset; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; box-sizing: border-box; padding: 4px 10px; font: 400 18px/1.1 var(--sys); }
+.agos-start button:hover, .agos-start button:focus-visible { background: var(--brass); }
+.agos-start hr { border: 0; border-top: 1px solid #b9ae93; margin: 4px 0; }
+
+/* phones: the screen becomes the whole viewport, windows open full size */
+.agos.full { width: 100vw !important; height: 100dvh !important; transform: none !important; }
+.agos.full .agos-screen { border-radius: 0; }
+.agos.full .agos-icons { grid-template-rows: none; grid-auto-flow: row; grid-template-columns: repeat(auto-fill, 84px); grid-auto-rows: 92px; right: 0; top: calc(env(safe-area-inset-top, 0px) + 64px); justify-content: center; }
+.agos.full .agos-win { left: 6px !important; right: 6px; top: calc(env(safe-area-inset-top, 0px) + 60px) !important; bottom: 48px; width: auto !important; height: auto !important; }
+.agos.full .agos-cmd label { display: none; }
+.agos.full .agos-cmd input { width: 84px; }
+.agos.full .agos-tasks button { max-width: 74px; }
+.agos.full .agos-mail { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+.agos.full .agos-mail ul { border-right: 0; border-bottom: 2px solid var(--g0); }
+.agos.full .agos-logo { font-size: 72px; }
+@media (prefers-reduced-motion: reduce) { .agos-crt { animation: none; } .agos-win { animation: none; } }

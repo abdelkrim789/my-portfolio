@@ -1,24 +1,21 @@
 // Generative sound with a character per world. Nothing is a recording: every sound is synthesised.
-//  Daylight · soft marimba in a major pentatonic, paper rustle when you travel
-//  Night    · low drone that opens with speed, wind, FM bells in a minor mode
-//  Blueprint· a pulsing square bass, plotter-servo ticks, crisp blips
-//  Planet   · airy fifths, birdsong in daylight and crickets after dark, an engine when you drive
+//  Night        · low drone that opens with speed, wind, FM bells in a minor mode
+//  Cold Storage · an airy pad over blizzard noise, ice glints, cracks and drips when a block thaws
+//  The Desk     · a warm lo-fi chord, birds outside the window, key clicks, a floppy drive and a CRT whine
 const SCALES = {
-  day: [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.7, 1318.5],
   night: [220, 246.94, 293.66, 329.63, 392, 440, 493.88, 587.33],
-  blueprint: [293.66, 329.63, 349.23, 392, 440, 493.88, 523.25, 587.33],
-  planet: [349.23, 392, 440, 493.88, 523.25, 587.33, 659.25, 698.46],
+  ice: [587.33, 659.25, 783.99, 880, 987.77, 1174.7, 1318.5, 1567.98],
+  desk: [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25],
 };
 const DRONE = {
-  day: { freqs: [130.81, 196, 261.63], type: 'sine', gain: 0.05, cut: 900 },
   night: { freqs: [55, 82.41, 110, 55.2], type: 'sawtooth', gain: 0.11, cut: 320 },
-  blueprint: { freqs: [73.42, 110, 146.83], type: 'square', gain: 0.045, cut: 520 },
-  planet: { freqs: [87.31, 130.81, 174.61, 261.63], type: 'triangle', gain: 0.06, cut: 1200 },
+  ice: { freqs: [146.83, 220, 293.66, 440], type: 'sine', gain: 0.05, cut: 2400 },
+  desk: { freqs: [130.81, 164.81, 196, 246.94], type: 'triangle', gain: 0.04, cut: 900 },
 };
 
 export function createAudio() {
-  let ctx = null, master, filter, droneGain, windGain, windBP, delay, on = false, world = 'day';
-  let oscs = [], pulse, pulseAmt, engine, engineGain, nextCritter = 0, night = 0;
+  let ctx = null, master, filter, droneGain, windGain, windBP, delay, on = false, world = 'night';
+  let oscs = [], trem, tremAmt, nextCritter = 0;
 
   function noiseBuffer(len = 2) {
     const buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), d = buf.getChannelData(0);
@@ -35,21 +32,17 @@ export function createAudio() {
     delay.connect(fb); fb.connect(delay); delay.connect(wet); wet.connect(master);
     filter = ctx.createBiquadFilter(); filter.type = 'lowpass'; filter.Q.value = 3;
     droneGain = ctx.createGain(); droneGain.gain.value = 0;
-    pulse = ctx.createGain(); pulse.gain.value = 1;
-    filter.connect(droneGain); droneGain.connect(pulse); pulse.connect(master);
+    trem = ctx.createGain(); trem.gain.value = 1;
+    filter.connect(droneGain); droneGain.connect(trem); trem.connect(master);
     const lfo = ctx.createOscillator(); lfo.frequency.value = 0.07; const lfoAmt = ctx.createGain(); lfoAmt.gain.value = 90;
     lfo.connect(lfoAmt); lfoAmt.connect(filter.frequency); lfo.start();
-    // blueprint pulse: a 2 Hz gate on the drone
-    const plfo = ctx.createOscillator(); plfo.type = 'square'; plfo.frequency.value = 2; pulseAmt = ctx.createGain(); pulseAmt.gain.value = 0;
-    plfo.connect(pulseAmt); pulseAmt.connect(pulse.gain); plfo.start();
+    // a slow tremolo for the desk's electric-piano chord
+    const tl = ctx.createOscillator(); tl.frequency.value = 4.2; tremAmt = ctx.createGain(); tremAmt.gain.value = 0;
+    tl.connect(tremAmt); tremAmt.connect(trem.gain); tl.start();
     const noise = ctx.createBufferSource(); noise.buffer = noiseBuffer(); noise.loop = true;
     windBP = ctx.createBiquadFilter(); windBP.type = 'bandpass'; windBP.frequency.value = 700; windBP.Q.value = 0.7;
     windGain = ctx.createGain(); windGain.gain.value = 0;
     noise.connect(windBP); windBP.connect(windGain); windGain.connect(master); noise.start();
-    engine = ctx.createOscillator(); engine.type = 'sawtooth'; engine.frequency.value = 50;
-    const ef = ctx.createBiquadFilter(); ef.type = 'lowpass'; ef.frequency.value = 380;
-    engineGain = ctx.createGain(); engineGain.gain.value = 0;
-    engine.connect(ef); ef.connect(engineGain); engineGain.connect(master); engine.start();
     voice(world);
     return true;
   }
@@ -60,37 +53,36 @@ export function createAudio() {
     oscs = D.freqs.map((f, i) => { const o = ctx.createOscillator(); o.type = D.type; o.frequency.value = f; o.detune.value = (i - 1) * 5; o.connect(filter); o.start(); return o; });
     filter.frequency.setTargetAtTime(D.cut, t, 0.5);
     droneGain.gain.setTargetAtTime(D.gain, t, 0.8);
-    pulseAmt.gain.setTargetAtTime(w === 'blueprint' ? 0.5 : 0, t, 0.3);
-    windBP.frequency.setTargetAtTime(w === 'day' ? 3200 : w === 'blueprint' ? 1800 : 700, t, 0.4);
-    windBP.Q.setTargetAtTime(w === 'day' ? 0.4 : 0.7, t, 0.4);
+    tremAmt.gain.setTargetAtTime(w === 'desk' ? 0.25 : 0, t, 0.3);
+    windBP.frequency.setTargetAtTime(w === 'ice' ? 2600 : w === 'desk' ? 500 : 700, t, 0.4);
+    windBP.Q.setTargetAtTime(w === 'ice' ? 0.45 : 0.7, t, 0.4);
   }
-  function blip(f, type, dur, gain, toDelay = true, attack = 0.01) {
-    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+  function blip(f, type, dur, gain, toDelay = true, attack = 0.01, when = 0) {
+    const t = ctx.currentTime + when, o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.value = f;
     g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + attack); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(g); g.connect(master); if (toDelay) g.connect(delay);
     o.start(t); o.stop(t + dur + 0.05);
     return o;
   }
-  function critter() {
-    const t = ctx.currentTime;
-    if (night < 0.5) {
-      // a small bird: two or three quick upward chirps
-      const n = 2 + ((Math.random() * 2) | 0), base = 2200 + Math.random() * 1600;
-      for (let i = 0; i < n; i++) {
-        const o = ctx.createOscillator(), g = ctx.createGain(), s = t + i * 0.11;
-        o.type = 'sine'; o.frequency.setValueAtTime(base, s); o.frequency.exponentialRampToValueAtTime(base * 1.45, s + 0.07);
-        g.gain.setValueAtTime(0, s); g.gain.linearRampToValueAtTime(0.035, s + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, s + 0.09);
-        o.connect(g); g.connect(master); g.connect(delay); o.start(s); o.stop(s + 0.12);
-      }
-    } else {
-      // a cricket: a fast amplitude-modulated buzz
-      const o = ctx.createOscillator(), am = ctx.createOscillator(), amg = ctx.createGain(), g = ctx.createGain();
-      o.frequency.value = 4400 + Math.random() * 600; am.frequency.value = 42; amg.gain.value = 0.02;
-      g.gain.value = 0; am.connect(amg); amg.connect(g.gain);
-      o.connect(g); g.connect(master); o.start(t); am.start(t); o.stop(t + 0.5); am.stop(t + 0.5);
+  function burst(dur, f0, f1, q, gain, type = 'bandpass', when = 0) {
+    const t = ctx.currentTime + when, src = ctx.createBufferSource(); src.buffer = noiseBuffer(dur + 0.05);
+    const bp = ctx.createBiquadFilter(); bp.type = type; bp.Q.value = q;
+    bp.frequency.setValueAtTime(f0, t); bp.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.004); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(bp); bp.connect(g); g.connect(master); src.start(t); src.stop(t + dur + 0.05);
+    return g;
+  }
+  function bird() {
+    const t = ctx.currentTime, n = 2 + ((Math.random() * 2) | 0), base = 2400 + Math.random() * 1400;
+    for (let i = 0; i < n; i++) {
+      const o = ctx.createOscillator(), g = ctx.createGain(), s = t + i * 0.11;
+      o.type = 'sine'; o.frequency.setValueAtTime(base, s); o.frequency.exponentialRampToValueAtTime(base * 1.45, s + 0.07);
+      g.gain.setValueAtTime(0, s); g.gain.linearRampToValueAtTime(0.02, s + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, s + 0.09);
+      o.connect(g); g.connect(master); g.connect(delay); o.start(s); o.stop(s + 0.12);
     }
   }
+  const ok = () => ctx && on;
 
   return {
     get on() { return on; },
@@ -102,23 +94,23 @@ export function createAudio() {
       return on;
     },
     setWorld(w) { world = w; voice(w); },
-    setNight(n) { night = n; },
-    update(motion, velocity, drive = 0) {
-      if (!ctx || !on) return;
+    update(motion, velocity) {
+      if (!ok()) return;
       const t = ctx.currentTime, D = DRONE[world];
       filter.frequency.setTargetAtTime(D.cut + Math.min(1, velocity) * 1400, t, 0.25);
-      windGain.gain.setTargetAtTime((world === 'day' ? 0.006 : 0.015) + motion * (world === 'day' ? 0.05 : 0.09), t, 0.3);
-      engineGain.gain.setTargetAtTime(drive > 0.02 ? 0.05 + drive * 0.06 : 0, t, 0.15);
-      engine.frequency.setTargetAtTime(48 + drive * 90, t, 0.1);
-      if (world === 'planet' && t > nextCritter) { nextCritter = t + 1.2 + Math.random() * 3.2; critter(); }
-      if (world === 'blueprint' && motion > 0.2 && Math.random() < motion * 0.12) blip(1800 + Math.random() * 1400, 'square', 0.025, 0.012, false, 0.002);
+      const base = world === 'ice' ? 0.022 : world === 'desk' ? 0.004 : 0.015;
+      windGain.gain.setTargetAtTime(base + motion * (world === 'desk' ? 0.02 : 0.09), t, 0.3);
+      if (t > nextCritter) {
+        if (world === 'desk') { nextCritter = t + 3 + Math.random() * 6; bird(); }
+        else if (world === 'ice') { nextCritter = t + 1.5 + Math.random() * 4; blip(2600 + Math.random() * 2400, 'sine', 0.7, 0.012, true, 0.002); }
+        else nextCritter = t + 5;
+      }
     },
     chime(index) {
-      if (!ctx || !on) return;
+      if (!ok()) return;
       const S = SCALES[world], f = S[((index % S.length) + S.length) % S.length];
-      if (world === 'day') { blip(f, 'triangle', 0.9, 0.12); blip(f * 4, 'sine', 0.25, 0.03, false); }
-      else if (world === 'blueprint') { blip(f, 'square', 0.35, 0.05); blip(f * 2, 'sine', 0.2, 0.04, false); }
-      else if (world === 'planet') { blip(f, 'sine', 2.4, 0.1, true, 0.03); blip(f * 3, 'sine', 1.2, 0.03, true, 0.03); }
+      if (world === 'ice') { blip(f, 'sine', 2.2, 0.07, true, 0.004); blip(f * 2.76, 'sine', 0.9, 0.025, true, 0.002); blip(f * 5.4, 'sine', 0.35, 0.012, false, 0.001); }
+      else if (world === 'desk') { blip(f, 'triangle', 0.9, 0.08); blip(f * 2, 'sine', 0.4, 0.03, false); }
       else {
         const t = ctx.currentTime, o = ctx.createOscillator(), m = ctx.createOscillator(), mg = ctx.createGain(), g = ctx.createGain();
         o.type = 'sine'; o.frequency.value = f; m.frequency.value = f * 2.01; mg.gain.value = f * 0.6;
@@ -130,30 +122,49 @@ export function createAudio() {
       }
     },
     tick() {
-      if (!ctx || !on) return;
-      blip(world === 'day' ? 2400 : 1800, world === 'planet' ? 'sine' : 'square', 0.06, world === 'day' ? 0.02 : 0.025, false, 0.002);
+      if (!ok()) return;
+      blip(world === 'ice' ? 3200 : world === 'desk' ? 1400 : 1800, world === 'night' ? 'square' : 'sine', 0.05, world === 'night' ? 0.025 : 0.02, false, 0.002);
+    },
+    ui(kind) {
+      if (!ok()) return;
+      if (kind === 'msg') { blip(880, 'sine', 0.12, 0.03, false, 0.004); blip(1320, 'sine', 0.16, 0.025, false, 0.004, 0.06); }
+      else blip(1200, 'sine', 0.05, 0.02, false, 0.002);
     },
     thump() {
-      if (!ctx || !on) return;
+      if (!ok()) return;
       const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine'; o.frequency.setValueAtTime(world === 'day' ? 220 : 140, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.5);
+      o.type = 'sine'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(38, t + 0.5);
       g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
       o.connect(g); g.connect(master); g.connect(delay); o.start(t); o.stop(t + 0.75);
     },
+    // Cold Storage
+    crack() { if (!ok()) return; burst(0.18, 5200, 900, 1.2, 0.35); burst(0.5, 1800, 300, 0.8, 0.12, 'bandpass', 0.05); for (let i = 0; i < 5; i++) burst(0.05, 4000 + Math.random() * 3000, 2000, 3, 0.1, 'bandpass', 0.08 + i * 0.07 + Math.random() * 0.05); },
+    drip() { if (!ok()) return; const o = blip(1500, 'sine', 0.18, 0.05, true, 0.002); o.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.12); },
+    freeze() { if (!ok()) return; for (let i = 0; i < 9; i++) blip(1800 + i * 260 + Math.random() * 120, 'sine', 0.5, 0.015, true, 0.002, i * 0.045); burst(0.7, 6000, 9000, 0.6, 0.04, 'highpass'); },
+    whoosh() { if (!ok()) return; burst(0.5, 600, 2400, 0.7, 0.05); },
+    // The Desk
+    key() { if (!ok()) return; burst(0.035, 3000 + Math.random() * 1500, 1800, 2.5, 0.12); blip(140 + Math.random() * 30, 'square', 0.03, 0.02, false, 0.001); },
+    floppy() {
+      if (!ok()) return;
+      burst(0.12, 900, 400, 1.5, 0.2);
+      for (let i = 0; i < 16; i++) blip(i % 4 === 3 ? 220 : 330, 'square', 0.03, 0.03, false, 0.001, 0.35 + i * 0.075);
+      burst(0.08, 600, 300, 2, 0.15, 'bandpass', 1.6);
+    },
+    crt() { if (!ok()) return; const t = ctx.currentTime; blip(60, 'sine', 0.5, 0.25, false, 0.005); const o = blip(7800, 'sine', 1.4, 0.006, false, 0.2); o.frequency.setValueAtTime(7800, t); burst(0.25, 2000, 200, 0.7, 0.08); },
+    click() { if (!ok()) return; burst(0.03, 2500, 1500, 3, 0.18); },
     // the sound of crossing between worlds, shaped by the transition
     portal(mode) {
-      if (!ctx || !on) return;
-      const t = ctx.currentTime, len = mode === 1 ? 1.2 : 1.5;
+      if (!ok()) return;
+      const t = ctx.currentTime, len = 1.6;
+      if (mode === 2) { this.crt(); burst(0.4, 3000, 120, 0.8, 0.12); return; }
       const src = ctx.createBufferSource(); src.buffer = noiseBuffer(len);
-      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = mode === 1 ? 0.6 : 1.4;
-      const [f0, f1] = mode === 0 ? [3200, 240] : mode === 1 ? [900, 5200] : mode === 2 ? [400, 4000] : [200, 1800];
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = mode === 1 ? 0.5 : 1.4;
+      const [f0, f1] = mode === 0 ? [3200, 240] : [1200, 7000];
       bp.frequency.setValueAtTime(f0, t); bp.frequency.exponentialRampToValueAtTime(f1, t + len);
-      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(mode === 1 ? 0.18 : 0.3, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+      const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.28, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
       src.connect(bp); bp.connect(g); g.connect(master); g.connect(delay); src.start(t);
-      if (mode === 2) for (let i = 0; i < 14; i++) setTimeout(() => on && blip(1500 + Math.random() * 2000, 'square', 0.03, 0.02, false, 0.002), i * 90);
-      if (mode === 3) { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(80, t); o.frequency.exponentialRampToValueAtTime(640, t + 1.4); og.gain.setValueAtTime(0.0001, t); og.gain.exponentialRampToValueAtTime(0.15, t + 0.5); og.gain.exponentialRampToValueAtTime(0.0001, t + 1.6); o.connect(og); og.connect(master); o.start(t); o.stop(t + 1.7); }
+      if (mode === 1) for (let i = 0; i < 12; i++) blip(2200 + Math.random() * 3000, 'sine', 0.6, 0.012, true, 0.002, 0.1 + i * 0.07);
       if (mode === 0) { const o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.setValueAtTime(90, t + 0.3); o.frequency.exponentialRampToValueAtTime(30, t + 1.6); og.gain.setValueAtTime(0.0001, t + 0.3); og.gain.exponentialRampToValueAtTime(0.4, t + 0.42); og.gain.exponentialRampToValueAtTime(0.0001, t + 1.8); o.connect(og); og.connect(master); o.start(t + 0.3); o.stop(t + 1.9); }
     },
-    crack() { this.portal(0); },
   };
 }
