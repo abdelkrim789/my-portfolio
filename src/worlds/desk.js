@@ -150,7 +150,7 @@ export async function createDesk(env) {
   // ---------- what each thing says ----------
   const P = (p, l) => ({ pos: new THREE.Vector3(...p), look: new THREE.Vector3(...l) });
   const POSES = {
-    room: () => (F.mobile ? P([3.3, 3.5, 6.6], [-0.35, 0.55, -1.25]) : P([3.45, 2.75, 3.95], [-0.45, 0.95, -1.05])),
+    room: () => (F.mobile ? P([3.3, 3.5, 6.6], [-0.35, 0.55, -1.25]) : P([3.45, 2.8, 3.95], [-0.45, 1.12, -1.05])),
     board: () => P([1.9, 1.62, -0.5], [1.9, 1.6, -2.2]),
     certs: () => P([-1.95, 1.72, -0.65], [-1.95, 1.72, -2.2]),
   };

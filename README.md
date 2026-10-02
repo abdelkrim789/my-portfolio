@@ -68,4 +68,4 @@ npx vite build   # writes dist/
 - Desk objects, books and certificates: `src/worlds/desk-scene.js`; AG/OS programs: `src/worlds/os.js`
 - Conversation script: `src/guide.js`
 
-Older versions are kept as git tags: `v-three-verses`, `v-four-verses`.
+Older versions are kept on the branches `archive-four-worlds` (with Planet, Daylight and Blueprint) and `archive-three-worlds`.
