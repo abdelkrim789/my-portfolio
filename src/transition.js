@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Final composite: finishes the active world (A) and, during a world change, carries the previous one (B)
 // through a transition chosen by the destination:
 //   0 shatter (Night) · the old world cracks along Voronoi faults and falls away in shards
-//   1 freeze  (Ice)   · frost crystallises over the old world from your click, then thaws open onto the new one
+//   1 zellige (Medina) · the old world turns over tile by tile from your click, glazed like zellige as it flips
 //   2 power   (Desk)  · the old world switches off like a CRT tube; the new one powers on, line first
 // It also tone-maps HDR worlds, and applies a liquid cursor field and a tilt-shift band per world.
 const FLUID_W = 192, FLUID_H = 120;
@@ -131,34 +131,34 @@ export function createComposite(renderer, opts = {}) {
         return mix(col, uCrack*1.4, clamp(crack, 0.0, 1.0));
       }
 
-      // frost spreads as feathered crystals, then thaws open from the same point
-      vec3 freeze(vec2 uv){
-        vec2 asp = vec2(uAspect, 1.0), p = uv*asp, o = uOrigin*asp, d = p - o;
-        float r = length(d), ang = atan(d.y, d.x);
-        float far = length(max(o, asp - o)) + 0.25;
-        vec2 cid; float cell = voro(p*7.0, cid);
-        float feather = fbm(vec2(ang*3.0, r*6.0) + cid*0.37);
-        float ridge = 1.0 - abs(fbm(p*9.0 + cid)*2.0 - 1.0);
-        float e1 = smoothstep(0.0, 0.55, uT); e1 = e1*e1*(3.0 - 2.0*e1);
-        float frost = smoothstep(0.0, 0.07, e1*far*1.25 - r + (feather - 0.5)*0.35);
-        float e2 = smoothstep(0.42, 1.0, uT); e2 = e2*e2*(3.0 - 2.0*e2);
-        float edge = e2*far*1.3 - r + (fbm(p*4.0 + 9.0) - 0.5)*0.3;
-        float thaw = smoothstep(0.0, 0.05, edge);
-        // the frozen view: the old world blurred behind crystals, its light refracted along the ridges
-        vec2 nrm = vec2(fbm(p*14.0) - 0.5, fbm(p*14.0 + 3.3) - 0.5);
-        vec2 fuv = uv + nrm*0.03*frost;
-        vec3 ob = OLD(fuv)*0.4 + OLD(fuv + vec2(0.006, 0.004))*0.15 + OLD(fuv - vec2(0.006, 0.004))*0.15 + OLD(fuv + vec2(-0.004, 0.007))*0.15 + OLD(fuv + vec2(0.004, -0.007))*0.15;
-        vec3 ice = vec3(0.86, 0.93, 1.0);
-        float lines = (1.0 - smoothstep(0.0, 0.03, cell))*0.5 + pow(ridge, 6.0)*0.6;
-        vec3 frozen = mix(ob, ice, 0.5 + 0.3*feather) + ice*lines*0.35;
-        frozen += vec3(1.0)*pow(h1(floor(uv*uRes/2.0)), 60.0)*1.5*frost;
-        vec3 col = mix(OLD(uv), frozen, frost);
-        // the thaw front: a wet, refracting rim
-        float rim = exp(-pow(edge/0.025, 2.0));
-        vec2 wet = normalize(d + 1e-4)/asp*rim*0.03;
-        vec3 nw = NEW(uv - wet);
-        col = mix(col, nw, thaw);
-        col += ice*rim*0.5*(1.0 - e2*0.6);
+      // zellige: the old world turns over tile by tile from your click, each tile glazed with a star as it flips
+      vec3 tiles(vec2 uv){
+        vec2 asp = vec2(uAspect, 1.0), p = uv*asp, o = uOrigin*asp;
+        float S = 9.0; vec2 g = p*S, id = floor(g), f = fract(g) - 0.5;
+        vec2 c = (id + 0.5)/S;
+        float delay = length(c - o)*0.8 + h1(id)*0.2;
+        float t = clamp((uT*2.1 - delay)/0.6, 0.0, 1.0);
+        float e = t*t*(3.0 - 2.0*t);
+        float w = abs(cos(PI*e));
+        vec2 q = (vec2(c.x + f.x/max(w, 0.02)/S, c.y + f.y/S))/asp;
+        vec3 grout = vec3(0.07, 0.1, 0.2);
+        vec3 col;
+        if (t <= 0.0) col = OLD(uv);
+        else if (t >= 1.0) col = NEW(uv);
+        else if (abs(f.x) > 0.5*w) col = grout*(0.6 + 0.4*(1.0 - w));
+        else {
+          col = e < 0.5 ? OLD(q) : NEW(q);
+          float r = length(vec2(f.x/max(w, 0.02), f.y)), a = atan(f.y, f.x/max(w, 0.02));
+          float star = step(r, 0.33 + 0.09*cos(a*8.0));
+          float pick = h1(id + 1.3);
+          vec3 glaze = pick < 0.4 ? vec3(0.12, 0.31, 0.64) : pick < 0.7 ? vec3(0.12, 0.48, 0.35) : vec3(0.88, 0.64, 0.13);
+          float k = sin(PI*e);
+          col = mix(col, mix(glaze, vec3(0.96, 0.94, 0.88), star*0.7), k*0.7);
+          col += vec3(1.0, 0.86, 0.55)*pow(k, 6.0)*0.35*(0.6 + f.y);
+        }
+        float edge = max(abs(f.x), abs(f.y));
+        float wave = smoothstep(0.0, 0.15, t)*(1.0 - smoothstep(0.85, 1.0, t));
+        col = mix(col, grout, step(0.475, edge)*wave);
         return col;
       }
 
@@ -201,7 +201,7 @@ export function createComposite(renderer, opts = {}) {
         vec3 col;
         if (uT < 0.0) col = NEW(uv);
         else if (uMode < 0.5) col = shatter(uv);
-        else if (uMode < 1.5) col = freeze(uv);
+        else if (uMode < 1.5) col = tiles(uv);
         else col = power(uv);
         gl_FragColor = vec4(col, 1.0);
       }`,

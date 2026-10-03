@@ -1,0 +1,81 @@
+/* The Medina's interface is an arched window of limewash, with cobalt and saffron from the doors and tiles.
+   Reem Kufi carries the Arabic and the titles (geometric Kufi, with a Latin cut that matches); Amiri is for reading. */
+.md-ui { --lime: #f6f1e7; --lime2: #ece3d2; --ink: #1b1a2e; --cobalt: #1f4fa3; --saffron: #e0a422; --emerald: #1f7a5a; --muted: #6b6253;
+  --kufi: "Reem Kufi", "Amiri", sans-serif; --read: "Amiri", Georgia, serif;
+  position: fixed; inset: 0; z-index: 4; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity 0.7s, visibility 0.7s; color: var(--ink); }
+.md-ui.on { opacity: 1; visibility: visible; }
+.md-ui :focus-visible { outline: 2px solid var(--saffron); outline-offset: 3px; }
+
+.md-panel { position: absolute; left: var(--gutter); bottom: calc(env(safe-area-inset-bottom, 0px) + 26px); width: min(392px, 34vw); max-height: calc(100vh - 140px);
+  display: flex; flex-direction: column; pointer-events: auto; padding: 66px 30px 24px; text-align: center;
+  background: linear-gradient(180deg, rgba(246, 241, 231, 0.97), rgba(240, 233, 219, 0.95));
+  border-radius: 196px 196px 6px 6px / 120px 120px 6px 6px; box-shadow: 0 30px 70px rgba(40, 20, 10, 0.35), 0 2px 0 rgba(255, 255, 255, 0.6) inset;
+  transition: opacity 0.35s, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.md-panel::before { content: ""; position: absolute; inset: 9px; border: 1.5px solid rgba(31, 79, 163, 0.45); border-radius: 188px 188px 3px 3px / 114px 114px 3px 3px; pointer-events: none; }
+.md-panel::after { content: ""; position: absolute; left: 9px; right: 9px; bottom: 9px; height: 10px; pointer-events: none;
+  background: repeating-linear-gradient(90deg, var(--cobalt) 0 10px, var(--lime) 10px 12px, var(--emerald) 12px 22px, var(--lime) 22px 24px); opacity: 0.8; }
+.md-panel.swap { opacity: 0; transform: translateY(10px); }
+.md-ui.walking .md-panel { opacity: 0.35; }
+.md-ui.walking .md-panel:hover, .md-ui.walking .md-panel:focus-within { opacity: 1; }
+.md-arch { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); color: var(--saffron); }
+.md-arch svg { display: block; fill: currentColor; }
+.md-panel header { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 6px; font: 500 0.8rem/1.2 var(--kufi); color: var(--muted); letter-spacing: 0.02em; }
+.md-ar { margin: 2px 0 0; font: 700 2.5rem/1.15 var(--kufi); color: var(--cobalt); max-width: none; }
+.md-en { margin: 0 0 12px; font: 700 1.6rem/1.08 var(--kufi); color: var(--ink); text-transform: none; letter-spacing: 0; text-wrap: balance; }
+.md-body p { margin: 0 auto 10px; font: 400 1.08rem/1.5 var(--read); color: var(--ink); max-width: 34ch; }
+.md-body .md-hint { font: 500 0.82rem/1.3 var(--kufi); color: var(--muted); }
+.md-detail { overflow-y: auto; overscroll-behavior: contain; text-align: left; margin: 0 -8px 12px; padding: 0 8px; max-height: 0; }
+.md-panel.detail .md-detail { max-height: min(46vh, 440px); }
+.md-detail .tag { font: 500 0.8rem/1.3 var(--kufi); letter-spacing: 0; text-transform: none; color: var(--emerald); margin: 10px 0 2px; }
+.md-detail h3 { font: 700 1.3rem/1.15 var(--kufi); text-transform: none; letter-spacing: 0; margin: 0 0 6px; color: var(--ink); }
+.md-detail p { font: 400 1.02rem/1.5 var(--read); color: var(--ink); margin: 0 0 10px; max-width: none; }
+.md-detail .dmeta, .md-detail .tech, .md-detail .md-note { font: 500 0.82rem/1.4 var(--kufi); color: var(--muted); letter-spacing: 0; }
+.md-detail .readout { border-top: 1px solid rgba(27, 26, 46, 0.14); font: 400 0.95rem/1.35 var(--read); letter-spacing: 0; }
+.md-detail .readout dt { text-transform: none; color: var(--muted); }
+.md-detail .fault-t { color: #b4302a; } .md-detail .ice-t { color: var(--emerald); }
+.md-detail .bignum { font: 700 3rem/1 var(--kufi); color: var(--saffron); margin: 6px 0 2px; }
+.md-detail hr { border: 0; height: 10px; margin: 14px 0; background: radial-gradient(circle, var(--saffron) 0 3px, transparent 4px) center / 18px 10px repeat-x; opacity: 0.7; }
+.md-detail figure.shot { margin: 4px 0 12px; border-radius: 6px; overflow: hidden; box-shadow: 0 10px 24px rgba(40, 20, 10, 0.2); }
+.md-detail figure.shot img { display: block; width: 100%; height: auto; }
+.md-detail a.link { color: var(--cobalt); font: 700 0.95rem/1.3 var(--kufi); letter-spacing: 0; }
+.md-detail .md-mail { font: 700 1.1rem/1.3 var(--kufi); color: var(--cobalt); overflow-wrap: anywhere; user-select: all; }
+.md-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding-bottom: 12px; }
+.md-actions button { all: unset; cursor: pointer; padding: 8px 15px; border-radius: 999px; border: 1.5px solid rgba(27, 26, 46, 0.3); font: 500 0.92rem/1.1 var(--kufi); color: var(--ink); transition: background 0.2s, color 0.2s, border-color 0.2s; }
+.md-actions button.primary { background: var(--cobalt); border-color: var(--cobalt); color: var(--lime); }
+.md-actions button:hover, .md-actions button:focus-visible { background: var(--saffron); border-color: var(--saffron); color: var(--ink); }
+
+/* the route, as a small map of the walk */
+.md-map { position: absolute; right: var(--gutter); top: calc(env(safe-area-inset-top, 0px) + 92px); width: 120px; height: 170px; pointer-events: auto; }
+.md-map svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.md-map .route { fill: none; stroke: rgba(246, 241, 231, 0.75); stroke-width: 1.4; stroke-dasharray: 3 3; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4)); }
+.md-map ol { list-style: none; margin: 0; padding: 0; }
+.md-map button { all: unset; position: absolute; transform: translate(-50%, -50%); cursor: pointer; width: 18px; height: 18px; display: grid; place-items: center; }
+.md-map button i { width: 9px; height: 9px; background: var(--lime); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); transition: transform 0.25s; }
+.md-map button.past i { background: var(--saffron); }
+.md-map button.on i { background: var(--saffron); transform: scale(1.9); }
+.md-map button span { position: absolute; right: 22px; white-space: nowrap; padding: 3px 8px; border-radius: 999px; background: var(--lime); font: 500 0.75rem/1.2 var(--kufi); color: var(--ink); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+.md-map button:hover span, .md-map button:focus-visible span { opacity: 1; }
+
+/* labels on things you can open */
+.md-tags { position: absolute; inset: 0; pointer-events: none; }
+.md-tag { all: unset; position: absolute; left: 0; top: 0; display: flex; align-items: center; gap: 6px; padding: 5px 11px 5px 7px; margin: -14px 0 0 -12px; border-radius: 999px; cursor: pointer;
+  background: rgba(246, 241, 231, 0.92); color: var(--ink); font: 500 0.8rem/1.1 var(--kufi); white-space: nowrap; box-shadow: 0 6px 16px rgba(30, 15, 5, 0.3); visibility: hidden; will-change: transform, opacity; }
+.md-tag i { width: 12px; height: 12px; background: var(--cobalt); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+.md-tag.done i { background: var(--saffron); }
+.md-tag.done span::after { content: " ✓"; color: var(--emerald); }
+.md-tag:hover, .md-tag:focus-visible, .md-tag.on { background: var(--cobalt); color: var(--lime); }
+.md-tag:hover i, .md-tag.on i { background: var(--saffron); }
+
+@media (max-width: 559px), (max-aspect-ratio: 9/10) {
+  .md-panel { left: 10px; right: 70px; width: auto; bottom: calc(env(safe-area-inset-bottom, 0px) + 12px); padding: 46px 16px 16px; max-height: 58vh;
+    border-radius: 140px 140px 6px 6px / 64px 64px 6px 6px; }
+  .md-panel::before { border-radius: 132px 132px 3px 3px / 58px 58px 3px 3px; }
+  .md-arch { top: 12px; } .md-arch svg { width: 20px; height: 20px; }
+  .md-ar { font-size: 1.8rem; } .md-en { font-size: 1.25rem; margin-bottom: 6px; }
+  .md-body p { font-size: 0.98rem; margin-bottom: 6px; }
+  .md-panel.detail .md-detail { max-height: 34vh; }
+  .md-actions { padding-bottom: 10px; gap: 6px; } .md-actions button { padding: 7px 12px; font-size: 0.85rem; }
+  .md-map { display: none; }
+  .md-tag { font-size: 0.72rem; padding: 4px 9px 4px 6px; }
+}
+@media (prefers-reduced-motion: reduce) { .md-panel { transition: none; } }

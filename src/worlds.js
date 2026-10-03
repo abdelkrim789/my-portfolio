@@ -1,6 +1,6 @@
 // Three worlds, one person. Each one tells the same story in a different way:
 //   night · a journey you scroll through, made of light
-//   ice   · an archive of objects frozen in ice that you turn and thaw
+//   medina · a walk through an old town at golden hour, where every place is a chapter
 //   desk  · a room you explore, with a computer that runs my CV
 export const WORLDS = {
   night: {
@@ -13,16 +13,16 @@ export const WORLDS = {
     orb: { color: [0.86, 0.88, 0.95], fill: 0.35, rim: 1, cross: 0, alpha: 1 },
     ring: [1.0, 0.85, 0.6], back: 0x05060b, mode: 0,
   },
-  ice: {
-    name: 'Cold Storage', short: 'Ice', tag: 'Everything I built, kept on ice', how: 'Turn and thaw objects', pitch: 'Each piece of my work frozen in a block of ice. Turn it, thaw it, read it.',
-    theme: '#dfe6ec', ring: [0.86, 0.94, 1.0], mode: 1,
+  medina: {
+    name: 'The Medina', short: 'Medina', tag: 'A walk through my story', how: 'Walk, knock, light the lanterns', pitch: 'An old Algerian town at golden hour. Every door, shop and lantern on the walk is a chapter.',
+    theme: '#f4ede0', ring: [1.0, 0.72, 0.38], mode: 1,
   },
   desk: {
     name: 'The Desk', short: 'Desk', tag: 'Where the work happens', how: 'Click anything, boot the computer', pitch: 'My workstation. Every object is clickable, and the computer runs my CV.',
     theme: '#2a1f17', ring: [1.0, 0.8, 0.5], mode: 2,
   },
 };
-export const WORLD_ORDER = ['night', 'ice', 'desk'];
+export const WORLD_ORDER = ['night', 'medina', 'desk'];
 export const worldName = (w) => WORLDS[w].short || WORLDS[w].name;
 
 export function savedWorld() {

@@ -15,7 +15,7 @@ import { createComposite } from './transition.js';
 import { createGuide } from './guide.js';
 
 // Night is a journey through the page scroll; Cold Storage and the Desk run their own interface and input.
-const UI = { night: 'journey', ice: 'own', desk: 'own' };
+const UI = { night: 'journey', medina: 'own', desk: 'own' };
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
 const root = document.documentElement;
@@ -43,7 +43,11 @@ const ACH = [
   ['points', 'Every point', 'Open all 33 stories in the Night'],
   ['finale', 'The decision', 'Reach the last chapter of the Night'],
   ['tremor', 'Seismic', 'Send ten shockwaves through the Night'],
-  ['thaw', 'Thaw', 'Thaw every block in Cold Storage'],
+  ['lanterns', 'Lamplighter', 'Light every lantern in the souk'],
+  ['repair', 'Fixer', 'Repair the corrupted stock at Géant'],
+  ['consolidate', 'Consolidated', 'Open all six streams in the riad'],
+  ['cat', 'Friend of cats', 'Pet the medina’s cat'],
+  ['pigeon', 'Carrier pigeon', 'Send a pigeon from the rooftop'],
   ['tcode', 'Power user', 'Run a transaction code on my computer'],
   ['floppy', 'Disk jockey', 'Change world with a floppy disk'],
   ['postcard', 'Wish you were here', 'Take a postcard (P)'],
@@ -193,7 +197,7 @@ function setActive(i) {
   if (world === 'night') {
     if (i === sections.length - 1) { achieve('finale'); setTimeout(() => guide?.event('night-end'), 2600); }
     if (i === 3) setTimeout(() => guide?.event('night-tease'), 1800);
-    if (i >= 6) { warm('ice'); warm('desk'); }
+    if (i >= 6) { warm('medina'); warm('desk'); }
   }
   listeners.forEach((fn) => fn(i));
 }
@@ -371,7 +375,7 @@ function detectTier(renderer) {
 
 const LOADERS = {
   night: () => import('./worlds/night.js').then((m) => m.createNight),
-  ice: () => import('./worlds/ice.js').then((m) => m.createIce),
+  medina: () => import('./worlds/medina.js').then((m) => m.createMedina),
   desk: () => import('./worlds/desk.js').then((m) => m.createDesk),
 };
 const DTMAX = Math.min(1, +new URLSearchParams(location.search).get('dtmax') || 0.05);
@@ -409,7 +413,7 @@ async function start() {
     renderer, small, coarse, reduced, tier, fontFam, meURL, canv, shotFor, goChapter, achieve, audio, guide, isUI, overlayOpen,
     travel: (w, x, y) => travelTo(w, x, y), warm: (w) => warm(w), scramble, PROJECTS,
   };
-  const LOGS = { night: 'Waking the desert particles', ice: 'Freezing the archive', desk: 'Dusting off the desk' };
+  const LOGS = { night: 'Waking the desert particles', medina: 'Raising the medina walls', desk: 'Dusting off the desk' };
   const made = {}, making = {};
   // code arrives early (idle prefetch); a world is only built once someone shows intent: the picker, a card, a click
   const mods = {};

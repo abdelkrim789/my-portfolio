@@ -1,21 +1,21 @@
 // Generative sound with a character per world. Nothing is a recording: every sound is synthesised.
 //  Night        · low drone that opens with speed, wind, FM bells in a minor mode
-//  Cold Storage · an airy pad over blizzard noise, ice glints, cracks and drips when a block thaws
+//  The Medina   · a plucked oud in the Hijaz mode over a low drone, water, a murmur of the souk, pigeons
 //  The Desk     · a warm lo-fi chord, birds outside the window, key clicks, a floppy drive and a CRT whine
 const SCALES = {
   night: [220, 246.94, 293.66, 329.63, 392, 440, 493.88, 587.33],
-  ice: [587.33, 659.25, 783.99, 880, 987.77, 1174.7, 1318.5, 1567.98],
+  medina: [293.66, 311.13, 369.99, 392, 440, 466.16, 523.25, 587.33],
   desk: [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25],
 };
 const DRONE = {
   night: { freqs: [55, 82.41, 110, 55.2], type: 'sawtooth', gain: 0.11, cut: 320 },
-  ice: { freqs: [146.83, 220, 293.66, 440], type: 'sine', gain: 0.05, cut: 2400 },
+  medina: { freqs: [73.42, 110, 146.83], type: 'triangle', gain: 0.045, cut: 600 },
   desk: { freqs: [130.81, 164.81, 196, 246.94], type: 'triangle', gain: 0.04, cut: 900 },
 };
 
 export function createAudio() {
   let ctx = null, master, filter, droneGain, windGain, windBP, delay, on = false, world = 'night';
-  let oscs = [], trem, tremAmt, nextCritter = 0;
+  let oscs = [], trem, tremAmt, nextCritter = 0, seaG = null, seaLevel = 0;
 
   function noiseBuffer(len = 2) {
     const buf = ctx.createBuffer(1, ctx.sampleRate * len, ctx.sampleRate), d = buf.getChannelData(0);
@@ -54,8 +54,8 @@ export function createAudio() {
     filter.frequency.setTargetAtTime(D.cut, t, 0.5);
     droneGain.gain.setTargetAtTime(D.gain, t, 0.8);
     tremAmt.gain.setTargetAtTime(w === 'desk' ? 0.25 : 0, t, 0.3);
-    windBP.frequency.setTargetAtTime(w === 'ice' ? 2600 : w === 'desk' ? 500 : 700, t, 0.4);
-    windBP.Q.setTargetAtTime(w === 'ice' ? 0.45 : 0.7, t, 0.4);
+    windBP.frequency.setTargetAtTime(w === 'medina' ? 1100 : w === 'desk' ? 500 : 700, t, 0.4);
+    windBP.Q.setTargetAtTime(w === 'medina' ? 0.5 : 0.7, t, 0.4);
   }
   function blip(f, type, dur, gain, toDelay = true, attack = 0.01, when = 0) {
     const t = ctx.currentTime + when, o = ctx.createOscillator(), g = ctx.createGain();
@@ -83,6 +83,31 @@ export function createAudio() {
     }
   }
   const ok = () => ctx && on;
+  // a plucked string (Karplus-Strong), rendered once per pitch: the oud of the Medina
+  const plucks = new Map();
+  function pluckBuf(f) {
+    const key = Math.round(f * 10);
+    if (plucks.has(key)) return plucks.get(key);
+    const sr = ctx.sampleRate, len = Math.floor(sr * 1.8), b = ctx.createBuffer(1, len, sr), d = b.getChannelData(0);
+    const N = Math.max(2, Math.round(sr / f)), ring = new Float32Array(N);
+    for (let i = 0; i < N; i++) ring[i] = (Math.random() * 2 - 1) * (1 - i / N * 0.3);
+    let k = 0;
+    for (let i = 0; i < len; i++) { const a = ring[k], c = ring[(k + 1) % N]; const v = (a + c) * 0.5 * 0.9965; ring[k] = v; d[i] = a; k = (k + 1) % N; }
+    plucks.set(key, b); return b;
+  }
+  function pluck(f, gain = 0.22, when = 0) {
+    const src = ctx.createBufferSource(); src.buffer = pluckBuf(f);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600; lp.Q.value = 0.8;
+    const g = ctx.createGain(); g.gain.value = gain;
+    src.connect(lp); lp.connect(g); g.connect(master); g.connect(delay); src.start(ctx.currentTime + when);
+  }
+  function coo() {
+    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain(), m = ctx.createOscillator(), mg = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(420, t); o.frequency.linearRampToValueAtTime(360, t + 0.5);
+    m.frequency.value = 18; mg.gain.value = 30; m.connect(mg); mg.connect(o.frequency);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.03, t + 0.08); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6);
+    o.connect(g); g.connect(master); o.start(t); m.start(t); o.stop(t + 0.65); m.stop(t + 0.65);
+  }
 
   return {
     get on() { return on; },
@@ -98,18 +123,18 @@ export function createAudio() {
       if (!ok()) return;
       const t = ctx.currentTime, D = DRONE[world];
       filter.frequency.setTargetAtTime(D.cut + Math.min(1, velocity) * 1400, t, 0.25);
-      const base = world === 'ice' ? 0.022 : world === 'desk' ? 0.004 : 0.015;
+      const base = world === 'medina' ? 0.012 : world === 'desk' ? 0.004 : 0.015;
       windGain.gain.setTargetAtTime(base + motion * (world === 'desk' ? 0.02 : 0.09), t, 0.3);
       if (t > nextCritter) {
         if (world === 'desk') { nextCritter = t + 3 + Math.random() * 6; bird(); }
-        else if (world === 'ice') { nextCritter = t + 1.5 + Math.random() * 4; blip(2600 + Math.random() * 2400, 'sine', 0.7, 0.012, true, 0.002); }
+        else if (world === 'medina') { nextCritter = t + 2.5 + Math.random() * 5; if (Math.random() < 0.5) coo(); else { const S = SCALES.medina; pluck(S[(Math.random() * S.length) | 0] / 2, 0.1); } }
         else nextCritter = t + 5;
       }
     },
     chime(index) {
       if (!ok()) return;
       const S = SCALES[world], f = S[((index % S.length) + S.length) % S.length];
-      if (world === 'ice') { blip(f, 'sine', 2.2, 0.07, true, 0.004); blip(f * 2.76, 'sine', 0.9, 0.025, true, 0.002); blip(f * 5.4, 'sine', 0.35, 0.012, false, 0.001); }
+      if (world === 'medina') { pluck(f, 0.26); pluck(f * 1.5, 0.08, 0.09); }
       else if (world === 'desk') { blip(f, 'triangle', 0.9, 0.08); blip(f * 2, 'sine', 0.4, 0.03, false); }
       else {
         const t = ctx.currentTime, o = ctx.createOscillator(), m = ctx.createOscillator(), mg = ctx.createGain(), g = ctx.createGain();
@@ -123,7 +148,8 @@ export function createAudio() {
     },
     tick() {
       if (!ok()) return;
-      blip(world === 'ice' ? 3200 : world === 'desk' ? 1400 : 1800, world === 'night' ? 'square' : 'sine', 0.05, world === 'night' ? 0.025 : 0.02, false, 0.002);
+      if (world === 'medina') { pluck(1174.7, 0.06); return; }
+      blip(world === 'desk' ? 1400 : 1800, world === 'night' ? 'square' : 'sine', 0.05, world === 'night' ? 0.025 : 0.02, false, 0.002);
     },
     ui(kind) {
       if (!ok()) return;
@@ -137,10 +163,22 @@ export function createAudio() {
       g.gain.setValueAtTime(0.3, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.7);
       o.connect(g); g.connect(master); g.connect(delay); o.start(t); o.stop(t + 0.75);
     },
-    // Cold Storage
-    crack() { if (!ok()) return; burst(0.18, 5200, 900, 1.2, 0.35); burst(0.5, 1800, 300, 0.8, 0.12, 'bandpass', 0.05); for (let i = 0; i < 5; i++) burst(0.05, 4000 + Math.random() * 3000, 2000, 3, 0.1, 'bandpass', 0.08 + i * 0.07 + Math.random() * 0.05); },
+    // the Medina
+    meow() { if (!ok()) return; const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain(), bp = ctx.createBiquadFilter(); o.type = 'sawtooth'; o.frequency.setValueAtTime(520, t); o.frequency.linearRampToValueAtTime(820, t + 0.18); o.frequency.linearRampToValueAtTime(560, t + 0.5); bp.type = 'bandpass'; bp.frequency.value = 1400; bp.Q.value = 2.5; g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.12, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.6); o.connect(bp); bp.connect(g); g.connect(master); o.start(t); o.stop(t + 0.65); },
+    // the sea below the rooftop: slow surf, filtered noise breathing in and out
+    sea(level) {
+      if (!ctx || Math.abs(level - seaLevel) < 0.02) return;
+      seaLevel = level;
+      if (!seaG) {
+        const src = ctx.createBufferSource(); src.buffer = noiseBuffer(4); src.loop = true;
+        const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 420; lp.Q.value = 0.4;
+        const sw = ctx.createGain(); sw.gain.value = 0.6; const lfo = ctx.createOscillator(); lfo.frequency.value = 0.12; const la = ctx.createGain(); la.gain.value = 0.4;
+        lfo.connect(la); la.connect(sw.gain); seaG = ctx.createGain(); seaG.gain.value = 0;
+        src.connect(lp); lp.connect(sw); sw.connect(seaG); seaG.connect(master); src.start(); lfo.start();
+      }
+      seaG.gain.setTargetAtTime(level * 0.16, ctx.currentTime, 0.9);
+    },
     drip() { if (!ok()) return; const o = blip(1500, 'sine', 0.18, 0.05, true, 0.002); o.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.12); },
-    freeze() { if (!ok()) return; for (let i = 0; i < 9; i++) blip(1800 + i * 260 + Math.random() * 120, 'sine', 0.5, 0.015, true, 0.002, i * 0.045); burst(0.7, 6000, 9000, 0.6, 0.04, 'highpass'); },
     whoosh() { if (!ok()) return; burst(0.5, 600, 2400, 0.7, 0.05); },
     // The Desk
     key() { if (!ok()) return; burst(0.035, 3000 + Math.random() * 1500, 1800, 2.5, 0.12); blip(140 + Math.random() * 30, 'square', 0.03, 0.02, false, 0.001); },
@@ -163,7 +201,7 @@ export function createAudio() {
       bp.frequency.setValueAtTime(f0, t); bp.frequency.exponentialRampToValueAtTime(f1, t + len);
       const g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.28, t + 0.05); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
       src.connect(bp); bp.connect(g); g.connect(master); g.connect(delay); src.start(t);
-      if (mode === 1) for (let i = 0; i < 12; i++) blip(2200 + Math.random() * 3000, 'sine', 0.6, 0.012, true, 0.002, 0.1 + i * 0.07);
+      if (mode === 1) { for (let i = 0; i < 18; i++) burst(0.03, 3200 + Math.random() * 2000, 1600, 3, 0.06, 'bandpass', 0.05 + i * 0.06 + Math.random() * 0.03); const S = SCALES.medina; [0, 2, 4, 7].forEach((n, i) => pluck(S[n], 0.18, 0.3 + i * 0.16)); }
       if (mode === 0) { const o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.setValueAtTime(90, t + 0.3); o.frequency.exponentialRampToValueAtTime(30, t + 1.6); og.gain.setValueAtTime(0.0001, t + 0.3); og.gain.exponentialRampToValueAtTime(0.4, t + 0.42); og.gain.exponentialRampToValueAtTime(0.0001, t + 1.8); o.connect(og); og.connect(master); o.start(t + 0.3); o.stop(t + 1.9); }
     },
   };

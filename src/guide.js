@@ -34,10 +34,10 @@ export function createGuide(o) {
   const here = () => worldName(getWorld());
   const HOW = {
     night: ['Scroll and I’ll take you through my story, chapter by chapter.', 'The glowing labels open each part. Drag to look around.'],
-    ice: ['Scroll to open the vault. Every block holds one piece of my work.', 'Drag a block to turn it. Click it to thaw it and read what’s inside.'],
+    medina: ['Scroll to walk through the medina, from the city gate to the rooftop.', 'Knock on doors, light the lanterns, open the fountains: anything with a label opens.'],
     desk: ['Everything on this desk is clickable, or just scroll for a tour.', 'Start with the computer: it runs my CV.'],
   };
-  const ICON = { night: '✦', ice: '❄', desk: '▣' };
+  const ICON = { night: '✦', medina: '✷', desk: '▣' };
 
   // ---------- the script ----------
   const NODES = {
@@ -55,16 +55,17 @@ export function createGuide(o) {
     bye: () => ({ say: [['Enjoy! I’m here if you need me.', 'Have fun. Click my face any time.', 'Okay! I’ll be in the corner.'][(Math.random() * 3) | 0]], quiet: 2600 }),
     // arrivals
     'enter-night': () => ({ say: ['Back in the desert, at night. ✦', HOW.night[0]] }),
-    'enter-ice': () => ({ say: ['Brr. Welcome to Cold Storage. ❄', HOW.ice[0], HOW.ice[1]] }),
+    'enter-medina': () => ({ say: ['Ahlan! Welcome to my medina. ✷', HOW.medina[0], HOW.medina[1]] }),
     'enter-desk': () => ({ say: ['Welcome to my desk. Make yourself at home.', HOW.desk[0], HOW.desk[1]] }),
     // invitations
-    'night-tease': () => ({ say: ['Psst. Everything you’re seeing here also exists frozen in ice, as real objects you can turn in your hands.', 'Want to see that version?'],
-      replies: [['Show me ❄', { travel: 'ice' }], ['Later', 'bye']] }),
+    'night-tease': () => ({ say: ['Psst. The same story is also a walk through an old Algerian town at golden hour.', 'Want to take that walk?'],
+      replies: [['Take the walk ✷', { travel: 'medina' }], ['Later', 'bye']] }),
     'night-end': () => ({ say: ['That’s the end of the night story.', 'Two more worlds are waiting:'], cards: 'others' }),
-    'ice-tease': () => ({ say: ['You’re good at this. 🔥', 'One more world: my desk, where my CV runs on an old computer. Boot it?'],
-      replies: [['Boot it ▣', { travel: 'desk' }], ['Keep thawing', 'bye']] }),
-    'ice-end': () => ({ say: ['That’s the whole archive. The two small blocks beside me are doors to the other worlds.'], replies: [['How do I contact you?', 'contact'], ['Show the worlds', 'worlds']] }),
-    'desk-tease': () => ({ say: ['Now you know my system. 😄', 'Want the same story as light in the desert, or frozen in ice?'], cards: 'others' }),
+    'medina-souk': () => ({ say: ['This is my favourite part. Every lantern is a skill: click one to light it.'] }),
+    'medina-lanterns': () => ({ say: ['You lit the whole souk. 🔥', 'One more world: my desk, where my CV runs on an old computer. Boot it?'],
+      replies: [['Boot it ▣', { travel: 'desk' }], ['Keep walking', 'bye']] }),
+    'medina-end': () => ({ say: ['You made it to the rooftop. 🌅', 'The pigeons on the ledge carry messages to me. The telescope opens the Night, and the room with the light on, down there, is my desk.'], replies: [['How do I contact you?', 'contact'], ['Show the worlds', 'worlds']] }),
+    'desk-tease': () => ({ say: ['Now you know my system. 😄', 'Want the same story as light in the desert, or as a walk through the medina?'], cards: 'others' }),
     'desk-floppy': () => ({ say: ['Nice find. Those floppy disks are worlds.', 'Click one and the computer loads it.'] }),
     idle: () => {
       const w = pickOther();
@@ -156,7 +157,7 @@ export function createGuide(o) {
     armQuiet(node.quiet || (pending ? (coarse ? 14000 : 24000) : Math.max(coarse ? 5000 : 6500, read)));
   }
   function go(act, echo) {
-    if (echo) { stack.querySelectorAll('.chips, .w-cards').forEach((n) => n.remove()); stack.appendChild(el('div', 'bubble me', '')).textContent = echo.replace(/ [❄▣✦]$/, ''); trim(5); }
+    if (echo) { stack.querySelectorAll('.chips, .w-cards').forEach((n) => n.remove()); stack.appendChild(el('div', 'bubble me', '')).textContent = echo.replace(/ [✷▣✦]$/, ''); trim(5); }
     if (typeof act === 'string') { play(act); return; }
     if (act.travel) { pending = false; play('travel', act.travel); travel(act.travel, act.x, act.y); }
   }
@@ -187,7 +188,7 @@ export function createGuide(o) {
   // idle nudges
   setInterval(() => {
     if (document.hidden || open || idles >= 2) return;
-    if (document.querySelector('.agos.shown, .ice-ui.thawed, .desk-card.expanded, #detail.open')) { lastActivity = performance.now(); return; }
+    if (document.querySelector('.agos.shown, .md-panel.detail, .desk-card.expanded, #detail.open')) { lastActivity = performance.now(); return; }
     if (performance.now() - lastActivity > 45000) { lastActivity = performance.now(); play('idle'); idles++; }
   }, 4000);
 
