@@ -380,6 +380,7 @@ const LOADERS = {
   desk: () => import('./worlds/desk.js').then((m) => m.createDesk),
 };
 const DTMAX = Math.min(1, +new URLSearchParams(location.search).get('dtmax') || 0.05);
+const NOGOV = /[?&]nogov/.test(location.search); // capture mode: keep the resolution fixed
 const isUI = (t) => !!t?.closest?.('a, button, input, textarea, select, label, #talk, .hud-top, #guide, #world-panel, #detail');
 
 async function start() {
@@ -741,7 +742,7 @@ async function start() {
     // resolution governor: trade pixels for frame rate, continuously
     ema += (dt - ema) * 0.08;
     govT += dt;
-    if (!trans && introT >= 1 && govT > 1.2) {
+    if (!NOGOV && !trans && introT >= 1 && govT > 1.2) {
       govT = 0;
       if (ema > 1 / 46 && dpr > 0.6) { dpr = Math.max(0.6, +(dpr - 0.15).toFixed(2)); govUp = 0; resize(); }
       else if (ema < 1 / 57 && dpr < DPR_MAX) { if (++govUp >= 3) { govUp = 0; dpr = Math.min(DPR_MAX, +(dpr + 0.1).toFixed(2)); resize(); } }

@@ -400,6 +400,7 @@ export async function createDesk(env) {
 
   setCard('room');
   drawScreen('saver', '', 0);
+  if (/[?&]debug/.test(location.search)) window.__desk = { tour, focusOn, click, enterOS, exitOS, get camPos() { return camPos; }, camera };
   return {
     id: 'desk', ui: 'own', camera,
     precompile() { try { renderer.compileAsync?.(scene, camera).catch(() => {}); } catch {} },

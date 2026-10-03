@@ -618,7 +618,7 @@ export async function createMonument(env) {
   const nG = new THREE.BufferGeometry(); nG.setAttribute('position', new THREE.BufferAttribute(nPos, 3));
   const nPts = new THREE.Points(nG, new THREE.PointsMaterial({ color: new THREE.Color(2, 1.6, 1.1), size: 0.012, depthTest: false, transparent: true, blending: THREE.AdditiveBlending })); noor.add(nPts);
   noor.renderOrder = 20; noor.traverse((o) => { o.renderOrder = 20; o.frustumCulled = false; }); noor.visible = false; scene.add(noor);
-  let noorTalk = 0, noorShow = 0;
+  let noorTalk = 0, noorShow = 0, noorHidden = false;
 
   // ---------- bloom and light rays ----------
   const rt0 = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, samples: tier >= 2 ? 4 : tier === 1 ? 2 : 0, depthTexture: new THREE.DepthTexture(4, 4) });
@@ -1022,7 +1022,7 @@ export async function createMonument(env) {
     if (i >= 1) titleEl.classList.add('gone');
   }
 
-  if (/[?&]debug/.test(location.search)) window.__monument = { go: (i) => { go(i); snapT = performance.now() + 1e5; }, get stage() { return stage; }, camera, scene, renderer, H, act: (id) => activate(id), ask: (q) => ask(q), vault: () => openVault(), archive: () => openArchive(), powerAll, openAll, repair, volU, cam: (p, l) => { mode = 'detour'; detour = { id: 'dbg', legs: [{ p: V(p), l: V(l) }], leg: 0 }; P.set(...p); L.set(...l); }, free: (p, yawA) => { mode = 'free'; free = { p: V(p), yaw: yawA, pitch: 0, to: null }; }, set skyWait(v) { skyWait = v; } };
+  if (/[?&]debug/.test(location.search)) window.__monument = { go: (i) => { go(i); snapT = performance.now() + 1e5; }, get stage() { return stage; }, camera, scene, renderer, H, act: (id) => activate(id), ask: (q) => ask(q), vault: () => openVault(), archive: () => openArchive(), powerAll, openAll, repair, volU, cam: (p, l) => { mode = 'detour'; detour = { id: 'dbg', legs: [{ p: V(p), l: V(l) }], leg: 0 }; P.set(...p); L.set(...l); }, free: (p, yawA) => { mode = 'free'; free = { p: V(p), yaw: yawA, pitch: 0, to: null }; }, set skyWait(v) { skyWait = v; }, set noorHidden(v) { noorHidden = v; }, setStage(v) { stage = stageT = v; }, get P() { return P; }, composer, bloom, rays, vol, mirror: () => mirror };
 
   let on = false, rtW = 4, rtH = 4, lastAuto = 0;
   const C = new THREE.Color();
@@ -1176,7 +1176,7 @@ export async function createMonument(env) {
       }
       // NOOR beside you, from the hall on
       noorShow += ((stage > 1.85 || mode !== 'route' ? 1 : 0) - noorShow) * Math.min(1, dt * 1.5);
-      noor.visible = noorShow > 0.02 && on;
+      noor.visible = noorShow > 0.02 && on && !noorHidden;
       noorEl.classList.toggle('on', noorShow > 0.5);
       if (noor.visible) {
         right.setFromMatrixColumn(camera.matrixWorld, 0); tmp.setFromMatrixColumn(camera.matrixWorld, 1);
