@@ -75,7 +75,7 @@ export async function createMonument(env) {
   const C1 = concreteTex([134, 124, 112]);
   const M = {
     wall: new THREE.MeshStandardMaterial({ map: C1.map, bumpMap: C1.bump, bumpScale: 0.6, roughness: 0.92, color: 0xd9d0c4 }),
-    mono: new THREE.MeshStandardMaterial({ map: C1.map, bumpMap: C1.bump, bumpScale: 0.5, roughness: 0.9, color: 0xc4b6a4 }),
+    mono: new THREE.MeshStandardMaterial({ map: C1.map, bumpMap: C1.bump, bumpScale: 0.5, roughness: 0.9, color: new THREE.Color(1.5, 1.42, 1.34) }),
     stone: new THREE.MeshStandardMaterial({ map: C1.map, bumpMap: C1.bump, bumpScale: 0.4, roughness: 0.7, color: 0x8f857a }),
     dark: new THREE.MeshStandardMaterial({ color: 0x0c0a09, roughness: 0.9 }),
     brass: new THREE.MeshStandardMaterial({ color: 0xc89a52, metalness: 1, roughness: 0.3 }),
@@ -92,7 +92,7 @@ export async function createMonument(env) {
   const waterRefl = mirror ? addReflection(waterMat, mirror, { strength: 1.0, blur: 0.5, distort: 0.012 }) : null;
 
   // ---------- sky, sun, desert (outside) ----------
-  const sunDir = new THREE.Vector3(-0.55, 0.12, -0.83).normalize();
+  const sunDir = new THREE.Vector3(-0.82, 0.16, 0.3).normalize(); // low, from the left, raking across the face
   const skyU = { uSun: { value: sunDir }, uTime: { value: 0 } };
   const sky = new THREE.Mesh(new THREE.SphereGeometry(4500, 48, 24), new THREE.ShaderMaterial({
     side: THREE.BackSide, depthWrite: false, fog: false, uniforms: skyU,
@@ -104,7 +104,7 @@ export async function createMonument(env) {
         vec3 d = normalize(vD); float h = d.y;
         float s = max(dot(d, uSun), 0.0);
         float side = dot(normalize(d.xz), normalize(uSun.xz))*0.5 + 0.5;
-        vec3 zen = vec3(0.13, 0.17, 0.27), mid = vec3(0.52, 0.48, 0.52), hor = mix(vec3(0.92, 0.74, 0.58), vec3(1.7, 1.02, 0.55), side*side);
+        vec3 zen = vec3(0.3, 0.25, 0.27), mid = vec3(0.8, 0.53, 0.36), hor = mix(vec3(1.12, 0.72, 0.44), vec3(1.8, 1.0, 0.5), side*side);
         vec3 c = mix(hor, mid, smoothstep(0.0, 0.18, h));
         c = mix(c, zen, smoothstep(0.15, 0.7, h));
         c = mix(c, hor*0.75, smoothstep(0.0, -0.1, h));
@@ -143,14 +143,17 @@ export async function createMonument(env) {
   const shell = new Batch(), facade = new Batch();
   shell.span(M.mono, [-130, 0, -200], [-128, 150, -6]); shell.span(M.mono, [128, 0, -200], [130, 150, -6]);
   shell.span(M.mono, [-130, 148, -200], [130, 150, -6]); shell.span(M.mono, [-130, 0, -202], [130, 150, -200]);
-  // the face: a tall recess around the door, pilasters every twelve metres, fine ribs between them, a cornice
-  facade.span(M.mono, [-130, 0, -6], [-9, 150, 0], 0.12); facade.span(M.mono, [9, 0, -6], [130, 150, 0], 0.12); facade.span(M.mono, [-9, 64, -6], [9, 150, 0], 0.12);
-  facade.span(M.mono, [-9, 0, -6], [-2.2, 64, -2.2], 0.12); facade.span(M.mono, [2.2, 0, -6], [9, 64, -2.2], 0.12); facade.span(M.mono, [-2.2, 30, -6], [2.2, 64, -2.2], 0.12);
-  for (let x = -126; x <= 126; x += 12) if (Math.abs(x) > 14) facade.box(M.mono, [x, 74, 0.8], [3, 148, 1.6], 0.12);
-  for (let x = -128; x <= 128; x += 2.4) if (Math.abs(x) > 11 && Math.abs(((x + 126) % 12 + 12) % 12) > 2.2 && Math.abs(((x + 126) % 12 + 12) % 12) < 9.8) facade.box(M.mono, [x, 72, 0.25], [0.6, 144, 0.5], 0.12);
-  facade.span(M.mono, [-132, 146, -8], [132, 152, 2.4], 0.12);
-  facade.span(M.mono, [-12, 64, -1], [12, 66, 1.2], 0.12);
-  facade.span(M.mono, [-131, 0, -1], [-9, 1.4, 1.6], 0.12); facade.span(M.mono, [9, 0, -1], [131, 1.4, 1.6], 0.12);
+  // the face: deep fins the low sun rakes across, fine ribs between them, a tall dark slot for the door,
+  // two blades standing out from the face to frame it, and a thin cap over everything
+  const TOP = 146, RH = 92;
+  facade.span(M.mono, [-130, 0, -6], [-9, TOP, 0], 0.12); facade.span(M.mono, [9, 0, -6], [130, TOP, 0], 0.12); facade.span(M.mono, [-9, RH, -6], [9, TOP, 0], 0.12);
+  facade.span(M.mono, [-132, TOP, -8], [132, 150.5, 4.4], 0.12);
+  facade.span(M.mono, [-9, 0, -6], [-2.2, RH, -2.2], 0.12); facade.span(M.mono, [2.2, 0, -6], [9, RH, -2.2], 0.12); facade.span(M.mono, [-2.2, 30, -6], [2.2, RH, -2.2], 0.12);
+  for (let x = -126; x <= 126; x += 12) if (Math.abs(x) > 16) facade.box(M.mono, [x, (1.4 + TOP) / 2, 1.6], [2.4, TOP - 1.4, 3.2], 0.12);
+  for (let x = -128; x <= 128; x += 2.4) { const r = ((x + 126) % 12 + 12) % 12; if (Math.abs(x) > 14 && r > 2.2 && r < 9.8) facade.box(M.mono, [x, (1.4 + TOP) / 2, 0.25], [0.6, TOP - 1.4, 0.5], 0.12); }
+  for (const sx of [-1, 1]) facade.span(M.mono, [sx * 9, 0, -2.2], [sx * 13, TOP, 9], 0.12);
+  facade.span(M.mono, [-9, RH, -1], [9, RH + 2, 1.2], 0.12);
+  facade.span(M.mono, [-131, 0, -1], [-13, 1.4, 1.6], 0.12); facade.span(M.mono, [13, 0, -1], [131, 1.4, 1.6], 0.12);
   const shellMeshes = shell.build(EXT);
   const facadeMeshes = facade.build(BOTH);
   // the door: two slabs that part, and the light behind them
@@ -160,19 +163,30 @@ export async function createMonument(env) {
   const glowM = new THREE.MeshBasicMaterial({ color: new THREE.Color(4, 3, 2), transparent: true });
   const doorGlow = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 30), glowM); doorGlow.position.set(0, 15, -5.8); BOTH.add(doorGlow);
   const seamM = new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 4.4, 2.8), transparent: true, depthWrite: false });
-  const seamDoor = new THREE.Mesh(new THREE.PlaneGeometry(0.5, 30), seamM); seamDoor.position.set(0, 15, -2.37); BOTH.add(seamDoor);
+  const seamDoor = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 30), seamM); seamDoor.position.set(0, 15, -2.37); BOTH.add(seamDoor);
+  const haloM = new THREE.ShaderMaterial({
+    uniforms: { uI: { value: 1 } }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false,
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0); }',
+    fragmentShader: `uniform float uI; varying vec2 vUv;
+      void main(){ vec2 q = (vUv - vec2(0.5, 0.36))*vec2(1.0, 0.42); float r = length(q);
+        float k = exp(-r*r*60.0)*0.9 + exp(-r*14.0)*0.25; k *= smoothstep(0.0, 0.08, vUv.y);
+        gl_FragColor = vec4(vec3(1.0, 0.7, 0.42)*k*uI, 1.0); }`,
+  });
+  const doorHalo = new THREE.Mesh(new THREE.PlaneGeometry(26, 84), haloM); doorHalo.position.set(0, 30, -1.6); doorHalo.renderOrder = 2; BOTH.add(doorHalo);
+  const doorSpill = new THREE.PointLight(0xffb070, 0, 90, 1.6); doorSpill.position.set(0, 6, 6); EXT.add(doorSpill);
   // an avenue of standing stones that leads to the door
   {
     const ab = new Batch();
     for (let i = 0; i < 13; i++) for (const sx of [-1, 1]) {
-      const z = 64 + i * 42, x = sx * 17, h = 20 + ((i * 7 + (sx > 0 ? 3 : 0)) % 5) * 1.4, y0 = dune(x, z) - 1;
-      ab.box(M.mono, [x, y0 + h / 2, z], [3.4, h, 3.4], 0.12);
-      ab.box(M.mono, [x, y0 + 0.5, z], [5, 1, 5], 0.12);
+      const z = 64 + i * 42, x = sx * 17, h = 12 + ((i * 7 + (sx > 0 ? 3 : 0)) % 5) * 0.9, y0 = dune(x, z) - 1;
+      ab.box(M.mono, [x, y0 + h / 2, z], [2.2, h, 2.2], 0.12);
+      ab.box(M.mono, [x, y0 + 0.6, z], [3.6, 1.2, 3.6], 0.12);
+      ab.box(M.mono, [x, y0 + h + 0.25, z], [2.6, 0.5, 2.6], 0.12);
     }
     ab.build(EXT);
   }
   // far monuments in the haze, for scale
-  for (const [x, z, w, h, d] of [[-900, -1400, 120, 260, 60], [1200, -1900, 220, 190, 80], [-1900, -800, 90, 150, 90], [750, -950, 60, 110, 60], [-420, -2400, 300, 120, 80]]) {
+  for (const [x, z, w, h, d] of [[-760, -1050, 110, 240, 50], [980, -1500, 220, 180, 70], [-1500, -500, 80, 150, 80], [620, -700, 50, 120, 50], [-300, -1900, 300, 110, 70], [1450, -300, 60, 90, 60]]) {
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), M.mono); m.position.set(x, h / 2 - 2, z); EXT.add(m);
   }
   // travellers walking to the door
@@ -180,7 +194,7 @@ export async function createMonument(env) {
   const cloakG = new THREE.LatheGeometry([[0, 0], [0.34, 0], [0.3, 0.4], [0.24, 1.0], [0.2, 1.4], [0.15, 1.55], [0.12, 1.68], [0.08, 1.78], [0, 1.8]].map(([x, y]) => new THREE.Vector2(x, y)), 12);
   for (let i = 0; i < 3; i++) {
     const f = new THREE.Mesh(cloakG, M.cloak); f.castShadow = true;
-    f.userData = { x: [-2.6, 1.8, 0.4][i], z0: [62, 71, 86][i], s: [0.55, 0.5, 0.6][i], ph: i * 1.7 };
+    f.userData = { x: [-6.5, 5.4, -4.2][i], z0: [62, 71, 86][i], s: [0.55, 0.5, 0.6][i], ph: i * 1.7 };
     EXT.add(f); figures.push(f);
   }
   // blowing sand
@@ -214,8 +228,8 @@ export async function createMonument(env) {
   scene.add(sunInt, sunInt.target);
   const hemi = new THREE.HemisphereLight(0x9aa6c4, 0xb07848, 1.0); scene.add(hemi);
   const bayLights = [0, 1].map(() => { const l = new THREE.PointLight(0xffc690, 0, 30, 1.4); scene.add(l); return l; });
-  const fillExt = new THREE.DirectionalLight(0xffc896, 1.5); fillExt.position.set(-400, 110, 160); scene.add(fillExt);
-  scene.fog = new THREE.FogExp2(0xd2a27a, 0.0007);
+  const fillExt = new THREE.DirectionalLight(0xd8c4b0, 0.7); fillExt.position.set(400, 160, 260); scene.add(fillExt);
+  scene.fog = new THREE.Fog(0xd2a27a, 40, 2600);
   // a dim environment for reflections on brass and glass: a dark room with bright slits above
   {
     const pm = new THREE.PMREMGenerator(renderer), es = new THREE.Scene();
@@ -291,14 +305,20 @@ export async function createMonument(env) {
   const hatchEdge = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(5.2, 0.01, 6)), new THREE.LineBasicMaterial({ color: new THREE.Color(1.2, 0.9, 0.6), transparent: true, opacity: 0.35 }));
   hatchEdge.position.set(0, 0.012, -118); INT.add(hatchEdge);
   // the bright sky above the roof, seen through every slit
-  const skyIn = new THREE.Mesh(new THREE.PlaneGeometry(120, 184), new THREE.MeshBasicMaterial({ color: new THREE.Color(3.2, 2.7, 2.1), fog: false }));
-  skyIn.rotation.x = Math.PI / 2; skyIn.position.set(0, 54, -98); INT.add(skyIn);
+  const skyInM = new THREE.MeshBasicMaterial({ color: new THREE.Color(3.2, 2.7, 2.1), fog: false });
+  const skyIn = new THREE.Mesh(new THREE.PlaneGeometry(120, 157), skyInM);
+  skyIn.rotation.x = Math.PI / 2; skyIn.position.set(0, 54, -84.5); INT.add(skyIn);
+  const skyIn2 = new THREE.Mesh(new THREE.PlaneGeometry(40, 9), skyInM);
+  skyIn2.rotation.x = Math.PI / 2; skyIn2.position.set(0, 40, ZE - 21.5); INT.add(skyIn2);
 
   // ---------- light: shafts and dust ----------
   const slabs = SLITS.map((z) => ({ x0: -HW, x1: HW, zc: z, w: 1.6, top: HH, gain: 0.55 }));
   BAYS.forEach((b) => slabs.push({ x0: b.s * HW, x1: b.s * (HW + BD), zc: b.z - 6, w: 1.4, top: BHt, gain: 0.8 }));
   slabs.push({ x0: SKY.x0, x1: SKY.x1, zc: (SKY.z0 + SKY.z1) / 2, w: SKY.z1 - SKY.z0, top: HH, gain: 0.22 });
   slabs.push({ x0: -EW, x1: EW, zc: ZE - 20, w: 1.4, top: EH, gain: 0.8 });
+  const SH = 40; // the shaft above the last room
+  const MOONSLAB = slabs.length;
+  slabs.push({ x0: -4, x1: 4, zc: ZE - 12, w: 8, top: EH + SH, gain: 0, vertical: true, color: [0.5, 0.66, 1.0] });
   const shafts = new THREE.Group(); // the light is drawn as a volume in the post pass below
   const DN = tier >= 2 ? 4200 : tier === 1 ? 2200 : 900, dP = new Float32Array(DN * 3), dS = new Float32Array(DN);
   for (let i = 0; i < DN; i++) { dP[i * 3] = (rnd() - 0.5) * 2 * HW; dP[i * 3 + 1] = rnd() * 30; dP[i * 3 + 2] = -6 - rnd() * 154; dS[i] = rnd(); }
@@ -531,18 +551,58 @@ export async function createMonument(env) {
   hotspot('portrait', [AX1 - 0.3, 5.4, BAYS[1].z - 4.5], [0.4, 6.4, 5.2], 'Where I come from', { anchor: [AX1 - 0.5, 9, BAYS[1].z - 4.5], archive: true });
   const archLight = new THREE.PointLight(0xffc28a, 0, 18, 1.6); archLight.position.set(AX0 + 7, 9, BAYS[1].z - 2); INT.add(archLight);
 
-  // ---------- the last room: the sky above can open ----------
-  const lidL = new THREE.Mesh(new THREE.BoxGeometry(4, 2, 8.2), M.wall), lidR = lidL.clone();
-  lidL.position.set(-2, EH + 1, ZE - 12); lidR.position.set(2, EH + 1, ZE - 12); lidL.castShadow = lidR.castShadow = true; INT.add(lidL, lidR);
-  const nightSky = new THREE.Mesh(new THREE.PlaneGeometry(13, 13), new THREE.ShaderMaterial({
-    uniforms: { uTime: { value: 0 } }, fog: false,
-    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position, 1.0); }',
-    fragmentShader: `uniform float uTime; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(41.3, 289.1)))*45758.5); }
-      void main(){ vec2 g = vUv*40.0; vec2 i = floor(g), f = fract(g) - 0.5; float s = step(0.985, h(i)); float tw = 0.6 + 0.4*sin(uTime*2.0 + h(i + 3.0)*40.0);
-        float star = s*smoothstep(0.18, 0.0, length(f))*tw; vec3 c = mix(vec3(0.01, 0.015, 0.04), vec3(0.04, 0.05, 0.12), vUv.y) + vec3(0.9, 0.95, 1.2)*star*3.0; gl_FragColor = vec4(c, 1.0); }`,
+  // ---------- the last room: a dark shaft in the ceiling, capped forty metres up; the cap opens onto the night ----------
+  // the shaft is lit only by what comes down it (no daylight reaches in here): darker below, cold moonlight above once it opens
+  const shaftM = new THREE.MeshBasicMaterial({ map: C1.map, vertexColors: true, color: 0x000000 });
+  {
+    const sb = new Batch();
+    sb.span(shaftM, [-5.5, EH + 2, ZE - 6.5], [-4, EH + SH, ZE - 17.5]); sb.span(shaftM, [4, EH + 2, ZE - 6.5], [5.5, EH + SH, ZE - 17.5]);
+    sb.span(shaftM, [-4, EH + 2, ZE - 8], [4, EH + SH, ZE - 6.5]); sb.span(shaftM, [-4, EH + 2, ZE - 17.5], [4, EH + SH, ZE - 16]);
+    const [m] = sb.build(INT, { cast: false, receive: false });
+    const pp = m.geometry.attributes.position, col = new Float32Array(pp.count * 3);
+    for (let i = 0; i < pp.count; i++) { const t = clamp((pp.getY(i) - EH) / SH, 0, 1); const k = 0.12 + 0.88 * Math.pow(t, 1.8); col.set([k, k, k], i * 3); }
+    m.geometry.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  }
+  const lidM = new THREE.MeshBasicMaterial({ color: 0x0b0908 });
+  const lidL = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.2, 9.6), lidM), lidR = lidL.clone();
+  lidL.position.set(-2.1, EH + SH + 0.6, ZE - 12); lidR.position.set(2.1, EH + SH + 0.6, ZE - 12); INT.add(lidL, lidR);
+  const nightU = { uTime: { value: 0 }, uI: { value: 0 } };
+  const nightSky = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.ShaderMaterial({
+    uniforms: nightU, fog: false, side: THREE.DoubleSide,
+    vertexShader: 'varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position, 1.0); vW = w.xyz; gl_Position = projectionMatrix*viewMatrix*w; }',
+    fragmentShader: `uniform float uTime, uI; varying vec3 vW;
+      float h1(vec3 p){ return fract(sin(dot(p, vec3(127.1, 311.7, 74.7)))*43758.5453); }
+      float n3(vec3 p){ vec3 i = floor(p), f = fract(p); f = f*f*(3.0 - 2.0*f);
+        return mix(mix(mix(h1(i), h1(i + vec3(1,0,0)), f.x), mix(h1(i + vec3(0,1,0)), h1(i + vec3(1,1,0)), f.x), f.y),
+                   mix(mix(h1(i + vec3(0,0,1)), h1(i + vec3(1,0,1)), f.x), mix(h1(i + vec3(0,1,1)), h1(i + vec3(1,1,1)), f.x), f.y), f.z); }
+      vec3 stars(vec3 d, float sc, float thr, float size, float gain){
+        vec3 g = d*sc, id = floor(g), f = fract(g) - 0.5; float r = h1(id + sc);
+        if (r < thr) return vec3(0.0);
+        vec3 o = vec3(h1(id + 1.3), h1(id + 2.7), h1(id + 4.1)) - 0.5;
+        float s = smoothstep(size, 0.0, length(f - o*0.5));
+        float tw = 0.7 + 0.3*sin(uTime*(1.2 + r*3.0) + r*80.0);
+        vec3 col = mix(vec3(0.72, 0.84, 1.3), vec3(1.3, 1.02, 0.78), h1(id + 9.0));
+        return col*s*tw*gain*(0.4 + (r - thr)/(1.0 - thr));
+      }
+      void main(){
+        vec3 d = normalize(vW - cameraPosition);
+        vec3 c = mix(vec3(0.006, 0.008, 0.02), vec3(0.016, 0.022, 0.05), smoothstep(0.7, 1.0, d.y));
+        // the galaxy: a band through the zenith, mottled, with dark lanes of dust
+        vec3 bn = normalize(vec3(0.8, 0.05, 0.6)); float bd = dot(d, bn), band = exp(-bd*bd*26.0);
+        float neb = n3(d*6.0)*0.5 + n3(d*15.0)*0.3 + n3(d*38.0)*0.2, lane = smoothstep(0.5, 0.78, n3(d*9.0 + 4.0))*exp(-bd*bd*120.0);
+        c += vec3(0.2, 0.2, 0.28)*band*neb*neb*1.6*(1.0 - 0.85*lane);
+        c += stars(d, 70.0, 0.86, 0.2, 7.0) + stars(d, 150.0, 0.8 - band*0.1, 0.17, 3.2) + stars(d, 260.0, 0.72 - band*0.3, 0.15, 1.6);
+        // the moon, almost overhead
+        vec3 md = normalize(vec3(0.042, 1.0, 0.036)); float a = acos(clamp(dot(d, md), -1.0, 1.0));
+        float disk = smoothstep(0.026, 0.0235, a);
+        float mare = 0.82 + 0.18*n3(d*140.0) - 0.22*smoothstep(0.45, 0.7, n3(d*60.0 + 2.0));
+        c = mix(c, vec3(2.4, 2.45, 2.6)*mare, disk);
+        c += vec3(0.35, 0.45, 0.7)*exp(-a*45.0)*0.22 + vec3(0.1, 0.13, 0.24)*exp(-a*9.0)*0.1;
+        gl_FragColor = vec4(c*uI, 1.0);
+      }`,
   }));
-  nightSky.rotation.x = Math.PI / 2; nightSky.position.set(0, EH + 14, ZE - 12); INT.add(nightSky);
-  const moon = new THREE.SpotLight(0x9fb6ff, 0, 60, 0.42, 0.6, 1.2); moon.position.set(0, EH + 6, ZE - 12); moon.target.position.set(0, 0, ZE - 12); INT.add(moon, moon.target);
+  nightSky.rotation.x = Math.PI / 2; nightSky.position.set(0, EH + SH + 8, ZE - 12); INT.add(nightSky);
+  const moon = new THREE.SpotLight(0x9fb6ff, 0, 130, 0.09, 0.6, 1.2); moon.position.set(0, EH + SH - 1, ZE - 12); moon.target.position.set(0, 0, ZE - 12); INT.add(moon, moon.target);
   hotspot('sky', [0, EH - 0.2, ZE - 12], [8, 0.4, 8.2], 'Look up · the Night', { anchor: [0, EH - 3, ZE - 12] });
   hotspot('contact', [0, 13, EZ1 + 0.4], [22, 11, 0.6], 'Write to me', { anchor: [-8, 19.6, EZ1 + 0.4] });
 
@@ -569,16 +629,17 @@ export async function createMonument(env) {
   const NS = slabs.length;
   const volU = {
     tDiffuse: { value: null }, tDepth: { value: null }, uInvProj: { value: new THREE.Matrix4() }, uCamWorld: { value: new THREE.Matrix4() }, uCam: { value: new THREE.Vector3() },
-    uA: { value: new THREE.Vector2(LD.x / -LD.y, LD.z / -LD.y) }, uI: { value: 0 }, uTime: { value: 0 }, uColor: { value: new THREE.Color(1.0, 0.8, 0.56) },
+    uI: { value: 0 }, uTime: { value: 0 },
     uSlab: { value: slabs.map((q) => new THREE.Vector4(q.zc, q.w, Math.min(q.x0, q.x1), Math.max(q.x0, q.x1))) },
-    uSlabB: { value: slabs.map((q) => new THREE.Vector2(q.top, q.gain)) },
+    uSlabB: { value: slabs.map((q) => new THREE.Vector4(q.top, q.gain, q.vertical ? 0 : LD.x / -LD.y, q.vertical ? 0 : LD.z / -LD.y)) },
+    uSlabC: { value: slabs.map((q) => new THREE.Vector3(...(q.color || [1.0, 0.8, 0.56]))) },
   };
   const vol = new ShaderPass({
     uniforms: volU,
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
     fragmentShader: `#define NS ${NS}
-      uniform sampler2D tDiffuse, tDepth; uniform mat4 uInvProj, uCamWorld; uniform vec3 uCam, uColor; uniform vec2 uA; uniform float uI, uTime;
-      uniform vec4 uSlab[NS]; uniform vec2 uSlabB[NS]; varying vec2 vUv;
+      uniform sampler2D tDiffuse, tDepth; uniform mat4 uInvProj, uCamWorld; uniform vec3 uCam; uniform float uI, uTime;
+      uniform vec4 uSlab[NS]; uniform vec4 uSlabB[NS]; uniform vec3 uSlabC[NS]; varying vec2 vUv;
       float h3(vec3 p){ return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719)))*43758.5453); }
       float vn3(vec3 p){ vec3 i = floor(p), f = fract(p); f = f*f*(3.0 - 2.0*f);
         return mix(mix(mix(h3(i), h3(i + vec3(1,0,0)), f.x), mix(h3(i + vec3(0,1,0)), h3(i + vec3(1,1,0)), f.x), f.y),
@@ -590,12 +651,13 @@ export async function createMonument(env) {
         float d = texture2D(tDepth, vUv).x;
         vec4 vp = uInvProj*vec4(vUv*2.0 - 1.0, d*2.0 - 1.0, 1.0); vp /= vp.w;
         vec3 wp = (uCamWorld*vp).xyz, ro = uCam, rd = wp - ro; float maxS = length(rd); rd /= maxS; if (d >= 1.0) maxS = 300.0;
-        float acc = 0.0;
+        vec3 acc = vec3(0.0);
         for (int i = 0; i < NS; i++) {
-          vec4 S = uSlab[i]; vec2 T = uSlabB[i];
+          vec4 S = uSlab[i]; vec4 T = uSlabB[i];
+          if (T.y < 0.001) continue;
           float top = T.x;
-          float az = ro.z - (top - ro.y)*uA.y, bz = rd.z + rd.y*uA.y;
-          float ax = ro.x - (top - ro.y)*uA.x, bx = rd.x + rd.y*uA.x;
+          float az = ro.z - (top - ro.y)*T.w, bz = rd.z + rd.y*T.w;
+          float ax = ro.x - (top - ro.y)*T.z, bx = rd.x + rd.y*T.z;
           vec2 sy = span(ro.y, rd.y, 0.0, top), sx = span(ax, bx, S.z, S.w);
           vec2 lim = vec2(max(max(sy.x, sx.x), 0.0), min(min(sy.y, sx.y), maxS));
           if (lim.y <= lim.x) continue;
@@ -607,9 +669,9 @@ export async function createMonument(env) {
           vec3 mp = ro + rd*sm;
           float fall = mix(0.3, 1.0, clamp(mp.y/top, 0.0, 1.0));
           float n = vn3(mp*0.32 + vec3(0.0, -uTime*0.22, uTime*0.1))*0.65 + vn3(mp*1.1 + vec3(uTime*0.15, 0.0, 0.0))*0.35;
-          acc += (lc*0.8 + (lh - lc)*0.1)*T.y*fall*(0.35 + 1.3*n*n);
+          acc += uSlabC[i]*(lc*0.8 + (lh - lc)*0.1)*T.y*fall*(0.35 + 1.3*n*n);
         }
-        gl_FragColor = vec4(base + uColor*acc*0.022*uI, 1.0);
+        gl_FragColor = vec4(base + acc*0.022*uI, 1.0);
       }`,
   });
   vol.uniforms = volU; vol.material.uniforms = volU; // ShaderPass copies uniforms: keep ours live
@@ -631,10 +693,10 @@ export async function createMonument(env) {
 
   // ---------- the way through ----------
   const PATH = [
-    [0, [60, 40, 600], [0, 52, 0]],
+    [0, [0, 44, 480], [0, 40, 0]],
     [0.5, [6, 7.5, 330], [0, 26, 0]],
-    [1, [8, 1.7, 250], [0, 48, 0]],
-    [1.3, [1.5, 1.75, 26], [0, 10, -10]],
+    [1, [0, 1.7, 256], [0, 50, 0]],
+    [1.3, [1.5, 1.75, 28], [0, 12, -10]],
     [1.6, [0, 1.75, 1], [0, 5, -40]],
     [2, [0, 1.75, -12], [0, 10, -70]],
     [2.5, [-3, 1.75, -20], [-20, 8, -32]],
@@ -826,12 +888,13 @@ export async function createMonument(env) {
     setDetour([[24, 1.75, BAYS[1].z - 5.2], [40, 2.5, BAYS[1].z - 5]], [[AX0 + 2.5, 1.75, BAYS[1].z - 1.8], [AX1, 4.8, BAYS[1].z - 2.2]], 'archive');
     achieve('archive');
   }
+  let skyWait = 7200;
   function lookUp() {
     if (Math.round(stage) !== 9 && mode === 'route') { go(9); setTimeout(lookUp, 1700); return; }
     closeDetail(); skyOpen = 1; audio.whoosh?.();
     say('The same sky he grew up under. Step through, into the Night.', []);
-    setDetour(null, [[0, 1.75, ZE - 6], [0, EH + 12, ZE - 12.5]], 'sky');
-    setTimeout(() => { if (skyOpen && on) travel('night', innerWidth / 2, innerHeight * 0.2); }, 5600);
+    setDetour([[0, 1.75, ZE - 8.6], [0, EH + SH, ZE - 12.9]], [[0, 14, ZE - 12.1], [0, EH + SH + 30, ZE - 12.5]], 'sky');
+    setTimeout(() => { if (skyOpen && on) travel('night', innerWidth / 2, innerHeight * 0.45); }, skyWait);
   }
   special['Back to the hall'] = () => leaveDetour();
   function setDetour(via, to, id) {
@@ -959,7 +1022,7 @@ export async function createMonument(env) {
     if (i >= 1) titleEl.classList.add('gone');
   }
 
-  if (/[?&]debug/.test(location.search)) window.__monument = { go: (i) => { go(i); snapT = performance.now() + 1e5; }, get stage() { return stage; }, camera, scene, renderer, H, act: (id) => activate(id), ask: (q) => ask(q), vault: () => openVault(), archive: () => openArchive(), powerAll, openAll, repair, volU, cam: (p, l) => { mode = 'detour'; detour = { id: 'dbg', legs: [{ p: V(p), l: V(l) }], leg: 0 }; P.set(...p); L.set(...l); }, free: (p, yawA) => { mode = 'free'; free = { p: V(p), yaw: yawA, pitch: 0, to: null }; } };
+  if (/[?&]debug/.test(location.search)) window.__monument = { go: (i) => { go(i); snapT = performance.now() + 1e5; }, get stage() { return stage; }, camera, scene, renderer, H, act: (id) => activate(id), ask: (q) => ask(q), vault: () => openVault(), archive: () => openArchive(), powerAll, openAll, repair, volU, cam: (p, l) => { mode = 'detour'; detour = { id: 'dbg', legs: [{ p: V(p), l: V(l) }], leg: 0 }; P.set(...p); L.set(...l); }, free: (p, yawA) => { mode = 'free'; free = { p: V(p), yaw: yawA, pitch: 0, to: null }; }, set skyWait(v) { skyWait = v; } };
 
   let on = false, rtW = 4, rtH = 4, lastAuto = 0;
   const C = new THREE.Color();
@@ -973,7 +1036,7 @@ export async function createMonument(env) {
     cursor() {
       if (drag && drag.moved > 6) return mode === 'free' ? 'Turn' : 'Look around';
       if (hover) return hover.id.startsWith('sys-') ? 'Power on' : hover.id.startsWith('stream-') ? 'Open the source' : hover.id === 'office' ? 'Step in' : hover.id === 'sky' ? 'Look up' : hover.id === 'seam' ? 'Look closer' : hover.id === 'hatch' ? 'Sealed' : 'Open';
-      if (stage < 0.6) return 'Scroll to approach';
+      if (stage < 0.6) return 'Approach';
       return '';
     },
     dragging: () => !!drag && drag.moved > 6,
@@ -1043,12 +1106,12 @@ export async function createMonument(env) {
       const outside = 1 - smooth(1.6, 2.2, stage);
       EXT.visible = outside > 0.001 && P.z > -9; INT.visible = stage > 0.75 || P.z < 60;
       sunExt.castShadow = outside > 0.01; sunInt.castShadow = inside > 0.01;
-      sunExt.intensity = 3.4 * outside; fillExt.intensity = 1.5 * outside; hemi.intensity = lerp(0.24, 1.0, outside);
+      sunExt.intensity = 3.6 * outside; fillExt.intensity = 0.7 * outside; hemi.intensity = lerp(0.24, 1.0, outside);
       BAYS.map((b) => [Math.abs(b.z - P.z), b]).sort((a1, b1) => a1[0] - b1[0]).slice(0, 2).forEach(([dd, b], i) => { bayLights[i].position.set(b.s * (HW + 4), 9, b.z + 2); bayLights[i].intensity = 140 * (1 - outside) * clamp(1 - (dd - 10) / 30, 0, 1); });
       hemi.color.set(0x9aa6c4).lerp(C.set(0x8a7058), 1 - outside); hemi.groundColor.set(0xb07848).lerp(C.set(0x5a4030), 1 - outside);
       sunInt.intensity = 6 * smooth(0.7, 1.6, stage);
-      scene.fog.color.set(0xd2a27a).lerp(C.set(0x1c1510), 1 - outside);
-      scene.fog.density = lerp(0.0045, 0.0007, outside);
+      scene.fog.color.setRGB(0.98, 0.64, 0.41).lerp(C.set(0x1c1510), 1 - outside);
+      scene.fog.near = lerp(20, 40, outside); scene.fog.far = lerp(440, 2600, outside);
       scene.environmentIntensity = lerp(0.35, 0.1, outside);
       this.post.exposure = lerp(1.25, 0.82, outside) * (1 + 0.15 * (1 - smooth(0.8, 2.6, stage)) * inside);
       // exterior: the shadow box follows you; the travellers walk; the door parts
@@ -1057,7 +1120,7 @@ export async function createMonument(env) {
         const span = P.z > 300 ? 520 : 160;
         Object.assign(sunExt.shadow.camera, { left: -span, right: span, top: span, bottom: -span }); sunExt.shadow.camera.updateProjectionMatrix();
         sunExt.target.position.copy(tmp); sunExt.position.copy(tmp).addScaledVector(sunDir, 700); sunExt.target.updateMatrixWorld();
-        figures.forEach((f) => { const u = f.userData; const zz = u.z0 - ((time * u.s) % 60); f.position.set(u.x + Math.sin(time * 0.6 + u.ph) * 0.1, Math.abs(Math.sin(time * 3 + u.ph)) * 0.03, zz); f.rotation.y = Math.sin(time * 3 + u.ph) * 0.04; f.visible = zz > 12; });
+        figures.forEach((f) => { const u = f.userData; const zz = u.z0 - ((time * u.s) % 60); f.position.set(u.x + Math.sin(time * 0.6 + u.ph) * 0.1, Math.abs(Math.sin(time * 3 + u.ph)) * 0.03, zz); f.rotation.y = Math.sin(time * 3 + u.ph) * 0.04; f.visible = zz > 12 && Math.hypot(P.x - f.position.x, P.z - zz) > 16; });
         sandU.uTime.value = time; sandU.uCam.value.copy(P); sandU.uA.value = outside * (P.y < 30 ? 1 : 0);
         sky.position.copy(P); skyU.uTime.value = time;
         // the sun's place on screen, for the rays
@@ -1070,6 +1133,8 @@ export async function createMonument(env) {
       doorL.position.x = -1.1 - doorOpen * 2.25; doorR.position.x = 1.1 + doorOpen * 2.25;
       glowM.opacity = clamp(1 - doorOpen * 1.6, 0, 1) * (stage < 1.5 ? 1 : 0); doorGlow.visible = glowM.opacity > 0.01;
       seamM.opacity = clamp(1 - doorOpen * 3, 0, 1); seamDoor.visible = seamM.opacity > 0.01;
+      haloM.uniforms.uI.value = (0.55 + doorOpen * 1.1) * (1 - smooth(1.2, 1.55, stage)) * clamp((P.z - 4) / 30, 0, 1); doorHalo.visible = haloM.uniforms.uI.value > 0.005;
+      doorSpill.intensity = (40 + doorOpen * 900) * outside;
 
       // inside: shafts breathe, dust drifts, projections flicker like old lamps
       if (INT.visible) {
@@ -1105,7 +1170,8 @@ export async function createMonument(env) {
         seamPanel.position.y = 3 - archT * 6.2; seamLine.material.opacity = (0.35 + 0.25 * Math.sin(time * 1.7)) * (1 - archT);
         archLight.intensity = archT * 40; portraitM.uniforms.uI.value = archT;
         skyT += (skyOpen - skyT) * Math.min(1, dt * 0.6);
-        lidL.position.x = -2 - skyT * 4.2; lidR.position.x = 2 + skyT * 4.2; nightSky.material.uniforms.uTime.value = time; moon.intensity = skyT * 900;
+        lidL.position.x = -2.1 - skyT * 6.4; lidR.position.x = 2.1 + skyT * 6.4; nightU.uTime.value = time; nightU.uI.value = smooth(0.02, 0.5, skyT);
+        nightSky.visible = skyT > 0.01; shaftM.color.setRGB(0.07, 0.06, 0.055).lerp(C.setRGB(0.3, 0.38, 0.58), skyT); moon.intensity = skyT * 2600; volU.uSlabB.value[MOONSLAB].y = 0.09 * skyT;
         steles.forEach((m, i) => (m.material.color.setRGB(1.6, 1.3, 0.9).multiplyScalar(hallOn * (0.85 + 0.15 * Math.sin(time * 0.8 + i)))));
       }
       // NOOR beside you, from the hall on
