@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Abdelkrim Ghebouli</title>
-<meta name="description" content="Abdelkrim Ghebouli, SAP BPC consultant and business intelligence specialist. A real-time portfolio in three worlds: a journey of light, a walk through an Algerian medina, and a desk with a working computer.">
+<meta name="description" content="Abdelkrim Ghebouli, SAP BPC consultant and business intelligence specialist. A real-time portfolio in three worlds: a journey of light, a monument in the Sahara with an AI guide, and a desk with a working computer.">
 <meta name="theme-color" content="#06070d">
-<script>(function(){var d=document.documentElement,w='night';try{var s=localStorage.getItem('ag-world');if(s==='medina'||s==='desk')w=s}catch(e){}d.dataset.world=w;d.dataset.ui=w==='night'?'journey':'own'})()</script>
+<script>(function(){var d=document.documentElement,w='night';try{var s=localStorage.getItem('ag-world');if(s==='monument'||s==='desk')w=s}catch(e){}d.dataset.world=w;d.dataset.ui=w==='night'?'journey':'own'})()</script>
 <meta name="author" content="Abdelkrim Ghebouli">
 <link rel="canonical" href="https://abdelkrim789.github.io/my-portfolio/">
 <meta property="og:type" content="profile">
 <meta property="og:title" content="Abdelkrim Ghebouli · SAP BPC Consultant">
-<meta property="og:description" content="SAP-certified BI and SAP BPC consultant. Three worlds to explore: light, a medina at golden hour, and a desk with a working computer.">
+<meta property="og:description" content="SAP-certified BI and SAP BPC consultant. Three worlds to explore: light, a monument in the Sahara with an AI guide, and a desk with a working computer.">
 <meta property="og:url" content="https://abdelkrim789.github.io/my-portfolio/">
 <meta property="og:image" content="https://abdelkrim789.github.io/my-portfolio/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -43,13 +43,13 @@
   --gutter: clamp(16px, 5vw, 72px);
   color-scheme: dark;
 }
-/* The Medina: limewash and golden hour. Ink on lime, cobalt from the doors, saffron from the lanterns. */
-:root[data-world="medina"] {
-  --ink: #f4ede0; --ink-2: #e9dfcb; --paper: #1b1a2e; --muted: #6b6253;
-  --sand: #1f4fa3; --ice: #1f7a5a; --fault: #b4302a;
-  --bg-rgb: 244, 237, 224; --bg2-rgb: 233, 223, 203; --fg-rgb: 27, 26, 46;
-  --sand-rgb: 31, 79, 163; --ice-rgb: 31, 122, 90; --fault-rgb: 180, 48, 42;
-  color-scheme: light;
+/* The Monument: concrete in the dark, light falling through the roof. Warm white on near-black, amber from the sun. */
+:root[data-world="monument"] {
+  --ink: #0e0c0a; --ink-2: #1a1612; --paper: #efe6d8; --muted: #a99c8a;
+  --sand: #ffcf8a; --ice: #c9b79a; --fault: #ff8f6f;
+  --bg-rgb: 14, 12, 10; --bg2-rgb: 26, 22, 18; --fg-rgb: 239, 230, 216;
+  --sand-rgb: 255, 207, 138; --ice-rgb: 201, 183, 154; --fault-rgb: 255, 143, 111;
+  color-scheme: dark;
 }
 /* The Desk: a sunlit office. Banker's-green blotter, paper, and brass from the desk lamp. */
 :root[data-world="desk"] {
@@ -159,7 +159,7 @@ a { color: inherit; }
 .world-btn.seen::after { animation: none; }
 @keyframes wbping { 0% { opacity: 0.9; transform: scale(1); } 100% { opacity: 0; transform: scale(1.35, 1.7); } }
 :root { --wart: radial-gradient(circle at 62% 38%, #e9ecf5 0 22%, #0e1122 23%); }
-:root[data-world="medina"] { --wart: radial-gradient(circle at 50% 120%, #f7b77c 0 45%, #f4dcb4 46% 60%, #4f86c6 61%); }
+:root[data-world="monument"] { --wart: linear-gradient(90deg, #14100c 0 46%, #ffd9a0 46% 54%, #14100c 54%); }
 :root[data-world="desk"] { --wart: repeating-linear-gradient(180deg, #f3d48a 0 3px, #1f3a2c 3px 5px); }
 @media (max-width: 899px) { .world-btn span { display: none; } }
 
@@ -169,12 +169,12 @@ a { color: inherit; }
   radial-gradient(1.2px 1.2px at 20% 30%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 70% 20%, #fff 50%, transparent 51%),
   radial-gradient(1px 1px at 45% 60%, #e8c07a 50%, transparent 51%), radial-gradient(1.4px 1.4px at 85% 55%, #9fd8e6 50%, transparent 51%),
   radial-gradient(circle at 50% 120%, rgba(232, 192, 122, 0.55) 0 30%, transparent 55%), radial-gradient(circle at 50% 40%, rgba(159, 216, 230, 0.35) 0 12%, transparent 30%), #06070d; }
-.art-medina { background:
-  radial-gradient(circle at 70% 64%, #ffe2a8 0 7%, transparent 8%),
-  linear-gradient(transparent 58%, #f3ecdf 58% 100%) 0 0 / 100% 100%,
-  conic-gradient(from 180deg at 30% 58%, #efe6d4 0 25%, transparent 0) ,
-  linear-gradient(90deg, transparent 18%, #f6f1e7 18% 34%, transparent 34% 52%, #ead6bd 52% 64%, transparent 64%) 0 40% / 100% 30% no-repeat,
-  linear-gradient(180deg, #4f86c6 0%, #f7b77c 55%, #ff9a52 70%); }
+.art-monument { background:
+  linear-gradient(90deg, transparent 47%, rgba(255, 217, 160, 0.95) 47% 53%, transparent 53%) 50% 100% / 100% 46% no-repeat,
+  linear-gradient(#17120d, #17120d) 50% 100% / 76% 62% no-repeat,
+  linear-gradient(180deg, transparent 70%, #c98a52 70%),
+  radial-gradient(circle at 34% 40%, #fff1d6 0 4%, #ffb46e 9%, transparent 30%),
+  linear-gradient(180deg, #1c2236 0%, #6b5352 48%, #f2a35e 70%); }
 .art-desk { background:
   linear-gradient(#103a22, #103a22) 50% 44% / 30% 34% no-repeat, linear-gradient(#ddd0b2, #ddd0b2) 50% 42% / 40% 50% no-repeat,
   linear-gradient(#1f3a2c, #1f3a2c) 50% 100% / 100% 26% no-repeat,
@@ -359,7 +359,7 @@ p { margin: 0 0 14px; color: rgba(var(--fg-rgb), 0.86); max-width: 62ch; }
 .link-btn { all: unset; cursor: pointer; color: var(--sand); border-bottom: 1px solid currentColor; font-weight: 500; }
 .link-btn:hover, .link-btn:focus-visible { color: var(--ice); }
 .guide-card dl div[class^="g-"] { opacity: 0.45; }
-:root[data-world="night"] .guide-card .g-night, :root[data-world="medina"] .guide-card .g-medina, :root[data-world="desk"] .guide-card .g-desk { opacity: 1; }
+:root[data-world="night"] .guide-card .g-night, :root[data-world="monument"] .guide-card .g-monument, :root[data-world="desk"] .guide-card .g-desk { opacity: 1; }
 #email { font: 800 clamp(1.5rem, 4.2vw, 2.6rem)/1 var(--display); letter-spacing: 0.01em; user-select: all; overflow-wrap: anywhere; }
 .contact-row { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn { font: 500 0.74rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; padding: 13px 18px; border-radius: 999px; cursor: pointer; text-decoration: none;
@@ -517,11 +517,11 @@ footer p { color: var(--muted); font-size: inherit; }
     <dl>
       <div class="g-night"><dt>Scroll · <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Night: travel through the story, chapter by chapter</dd></div>
       <div class="g-night"><dt>Click a label</dt><dd>Night: fly to that point and open its story. Drag to orbit, click empty space for a shockwave</dd></div>
-      <div class="g-medina"><dt>Scroll · <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Medina: walk from the city gate to the rooftop, one place at a time</dd></div>
-      <div class="g-medina"><dt>Click a label · drag</dt><dd>Medina: knock on doors, light lanterns, open fountains. Drag to look around</dd></div>
+      <div class="g-monument"><dt>Scroll · <kbd>↑</kbd> <kbd>↓</kbd></dt><dd>Monument: arrive across the dunes, then walk the hall one chapter at a time</dd></div>
+      <div class="g-monument"><dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> · click the floor</dt><dd>Monument: roam freely. Ask NOOR anything, and look for the two hidden rooms</dd></div>
       <div class="g-desk"><dt>Click an object</dt><dd>Desk: everything is clickable. Scroll for a guided tour of the room</dd></div>
       <div class="g-desk"><dt>The computer</dt><dd>Desk: boot AG/OS, open my files, or type <kbd>HELP</kbd> in the terminal. SAP people: try <kbd>SM37</kbd></dd></div>
-      <div><dt><kbd>W</kbd> · World button</dt><dd>Change world: Night, the Medina or the Desk. Or just ask me in the chat</dd></div>
+      <div><dt><kbd>W</kbd> · World button</dt><dd>Change world: Night, the Monument or the Desk (in the Monument, W walks, so use the button). Or just ask me in the chat</dd></div>
       <div><dt><kbd>P</kbd> · <kbd>F</kbd></dt><dd>Take a postcard of the view · show live performance</dd></div>
       <div><dt><kbd>Esc</kbd></dt><dd>Close whatever is open</dd></div>
     </dl>
@@ -609,7 +609,7 @@ footer p { color: var(--muted); font-size: inherit; }
         <li tabindex="0" data-glyph="S4C03"><code>S4C03</code>Implementation Consultant · S/4HANA Cloud PE</li>
         <li tabindex="0" data-glyph="ABAP"><code>C_ABAPD_2309</code>Back-End Developer · ABAP Cloud</li>
       </ul>
-      <p class="other-worlds">This story is also a walk through the medina, and a desk with a working computer. <button type="button" class="link-btn" data-worlds>See the other worlds</button></p>
+      <p class="other-worlds">This story is also a monument in the Sahara with an AI guide, and a desk with a working computer. <button type="button" class="link-btn" data-worlds>See the other worlds</button></p>
       <div class="contact">
         <span id="email" data-glyph="@">abdelkrimghebouli.34@gmail.com</span>
         <div class="contact-row">

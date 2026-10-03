@@ -1,6 +1,6 @@
 // Three worlds, one person. Each one tells the same story in a different way:
 //   night · a journey you scroll through, made of light
-//   medina · a walk through an old town at golden hour, where every place is a chapter
+//   monument · a slab of concrete in the Sahara at dawn; inside, light falls on the story and NOOR answers questions
 //   desk  · a room you explore, with a computer that runs my CV
 export const WORLDS = {
   night: {
@@ -13,16 +13,16 @@ export const WORLDS = {
     orb: { color: [0.86, 0.88, 0.95], fill: 0.35, rim: 1, cross: 0, alpha: 1 },
     ring: [1.0, 0.85, 0.6], back: 0x05060b, mode: 0,
   },
-  medina: {
-    name: 'The Medina', short: 'Medina', tag: 'A walk through my story', how: 'Walk, knock, light the lanterns', pitch: 'An old Algerian town at golden hour. Every door, shop and lantern on the walk is a chapter.',
-    theme: '#f4ede0', ring: [1.0, 0.72, 0.38], mode: 1,
+  monument: {
+    name: 'The Monument', short: 'Monument', tag: 'Enter the light', how: 'Walk, explore, ask NOOR', pitch: 'A monument in the Sahara at dawn. Inside, light falls on my story, two rooms are hidden, and an AI guide answers your questions.',
+    theme: '#0e0c0a', ring: [1.0, 0.82, 0.55], mode: 1,
   },
   desk: {
     name: 'The Desk', short: 'Desk', tag: 'Where the work happens', how: 'Click anything, boot the computer', pitch: 'My workstation. Every object is clickable, and the computer runs my CV.',
     theme: '#2a1f17', ring: [1.0, 0.8, 0.5], mode: 2,
   },
 };
-export const WORLD_ORDER = ['night', 'medina', 'desk'];
+export const WORLD_ORDER = ['night', 'monument', 'desk'];
 export const worldName = (w) => WORLDS[w].short || WORLDS[w].name;
 
 export function savedWorld() {

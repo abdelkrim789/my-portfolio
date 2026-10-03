@@ -14,8 +14,8 @@ import { POINTS, MILESTONES, STAGES } from './content.js';
 import { createComposite } from './transition.js';
 import { createGuide } from './guide.js';
 
-// Night is a journey through the page scroll; Cold Storage and the Desk run their own interface and input.
-const UI = { night: 'journey', medina: 'own', desk: 'own' };
+// Night is a journey through the page scroll; the Monument and the Desk run their own interface and input.
+const UI = { night: 'journey', monument: 'own', desk: 'own' };
 const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const coarse = matchMedia('(pointer: coarse)').matches;
 const root = document.documentElement;
@@ -43,11 +43,12 @@ const ACH = [
   ['points', 'Every point', 'Open all 33 stories in the Night'],
   ['finale', 'The decision', 'Reach the last chapter of the Night'],
   ['tremor', 'Seismic', 'Send ten shockwaves through the Night'],
-  ['lanterns', 'Lamplighter', 'Light every lantern in the souk'],
+  ['systems', 'Power on', 'Light all twelve systems in the Monument'],
   ['repair', 'Fixer', 'Repair the corrupted stock at Géant'],
-  ['consolidate', 'Consolidated', 'Open all six streams in the riad'],
-  ['cat', 'Friend of cats', 'Pet the medina’s cat'],
-  ['pigeon', 'Carrier pigeon', 'Send a pigeon from the rooftop'],
+  ['consolidate', 'Consolidated', 'Open all six streams into the core'],
+  ['archive', 'Explorer', 'Find the hidden archive'],
+  ['vault', 'Keyholder', 'Open the vault beneath the floor'],
+  ['noor', 'Curious', 'Ask NOOR five questions'],
   ['tcode', 'Power user', 'Run a transaction code on my computer'],
   ['floppy', 'Disk jockey', 'Change world with a floppy disk'],
   ['postcard', 'Wish you were here', 'Take a postcard (P)'],
@@ -197,7 +198,7 @@ function setActive(i) {
   if (world === 'night') {
     if (i === sections.length - 1) { achieve('finale'); setTimeout(() => guide?.event('night-end'), 2600); }
     if (i === 3) setTimeout(() => guide?.event('night-tease'), 1800);
-    if (i >= 6) { warm('medina'); warm('desk'); }
+    if (i >= 6) { warm('monument'); warm('desk'); }
   }
   listeners.forEach((fn) => fn(i));
 }
@@ -335,7 +336,7 @@ addEventListener('keydown', (e) => {
   if (e.key === 'f' || e.key === 'F') { worldGL?.toggleHUD(); return; }
   if (e.key === 'p' || e.key === 'P') { worldGL?.postcard(); return; }
   if (e.key === '?') { e.preventDefault(); setGuide(guideDlg.hidden); return; }
-  if (e.key === 'w' || e.key === 'W') { worldBtn?.classList.add('seen'); guide?.openPicker(); return; }
+  if ((e.key === 'w' || e.key === 'W') && world !== 'monument') { worldBtn?.classList.add('seen'); guide?.openPicker(); return; } // in the Monument, W walks
   if (UI[world] !== 'journey') return;
   if (focusHS && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) { e.preventDefault(); stepDetail(e.key === 'ArrowRight' ? 1 : -1); return; }
   if (e.target.closest?.('#detail')) return;
@@ -375,7 +376,7 @@ function detectTier(renderer) {
 
 const LOADERS = {
   night: () => import('./worlds/night.js').then((m) => m.createNight),
-  medina: () => import('./worlds/medina.js').then((m) => m.createMedina),
+  monument: () => import('./worlds/monument.js').then((m) => m.createMonument),
   desk: () => import('./worlds/desk.js').then((m) => m.createDesk),
 };
 const DTMAX = Math.min(1, +new URLSearchParams(location.search).get('dtmax') || 0.05);
@@ -413,7 +414,7 @@ async function start() {
     renderer, small, coarse, reduced, tier, fontFam, meURL, canv, shotFor, goChapter, achieve, audio, guide, isUI, overlayOpen,
     travel: (w, x, y) => travelTo(w, x, y), warm: (w) => warm(w), scramble, PROJECTS,
   };
-  const LOGS = { night: 'Waking the desert particles', medina: 'Raising the medina walls', desk: 'Dusting off the desk' };
+  const LOGS = { night: 'Waking the desert particles', monument: 'Raising the monument', desk: 'Dusting off the desk' };
   const made = {}, making = {};
   // code arrives early (idle prefetch); a world is only built once someone shows intent: the picker, a card, a click
   const mods = {};

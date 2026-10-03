@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Final composite: finishes the active world (A) and, during a world change, carries the previous one (B)
 // through a transition chosen by the destination:
 //   0 shatter (Night) · the old world cracks along Voronoi faults and falls away in shards
-//   1 zellige (Medina) · the old world turns over tile by tile from your click, glazed like zellige as it flips
+//   1 doors (Monument) · a seam of light opens where you clicked and the old world parts like two slabs of stone
 //   2 power   (Desk)  · the old world switches off like a CRT tube; the new one powers on, line first
 // It also tone-maps HDR worlds, and applies a liquid cursor field and a tilt-shift band per world.
 const FLUID_W = 192, FLUID_H = 120;
@@ -131,34 +131,32 @@ export function createComposite(renderer, opts = {}) {
         return mix(col, uCrack*1.4, clamp(crack, 0.0, 1.0));
       }
 
-      // zellige: the old world turns over tile by tile from your click, each tile glazed with a star as it flips
-      vec3 tiles(vec2 uv){
-        vec2 asp = vec2(uAspect, 1.0), p = uv*asp, o = uOrigin*asp;
-        float S = 9.0; vec2 g = p*S, id = floor(g), f = fract(g) - 0.5;
-        vec2 c = (id + 0.5)/S;
-        float delay = length(c - o)*0.8 + h1(id)*0.2;
-        float t = clamp((uT*2.1 - delay)/0.6, 0.0, 1.0);
-        float e = t*t*(3.0 - 2.0*t);
-        float w = abs(cos(PI*e));
-        vec2 q = (vec2(c.x + f.x/max(w, 0.02)/S, c.y + f.y/S))/asp;
-        vec3 grout = vec3(0.07, 0.1, 0.2);
+      // the monument's door: a seam of light opens down the old world where you clicked, and its two halves
+      // slide apart like slabs of stone, with dust in the light between them
+      vec3 doors(vec2 uv){
+        float t = uT, seam = uOrigin.x;
+        float grow = smoothstep(0.0, 0.2, t);
+        float open = smoothstep(0.16, 0.92, t); open = open*open*(3.0 - 2.0*open);
+        float hw = open*0.62;
+        float dx = uv.x - seam;
+        float vy = abs(uv.y - uOrigin.y);
+        float tall = grow*1.2;
         vec3 col;
-        if (t <= 0.0) col = OLD(uv);
-        else if (t >= 1.0) col = NEW(uv);
-        else if (abs(f.x) > 0.5*w) col = grout*(0.6 + 0.4*(1.0 - w));
-        else {
-          col = e < 0.5 ? OLD(q) : NEW(q);
-          float r = length(vec2(f.x/max(w, 0.02), f.y)), a = atan(f.y, f.x/max(w, 0.02));
-          float star = step(r, 0.33 + 0.09*cos(a*8.0));
-          float pick = h1(id + 1.3);
-          vec3 glaze = pick < 0.4 ? vec3(0.12, 0.31, 0.64) : pick < 0.7 ? vec3(0.12, 0.48, 0.35) : vec3(0.88, 0.64, 0.13);
-          float k = sin(PI*e);
-          col = mix(col, mix(glaze, vec3(0.96, 0.94, 0.88), star*0.7), k*0.7);
-          col += vec3(1.0, 0.86, 0.55)*pow(k, 6.0)*0.35*(0.6 + f.y);
+        if (abs(dx) < hw) {
+          col = NEW(uv);
+          float spill = exp(-(hw - abs(dx))*26.0)*(1.0 - open*0.7);
+          col += vec3(1.0, 0.82, 0.55)*spill*1.4;
+        } else {
+          float sgn = sign(dx);
+          vec2 q = vec2(uv.x - sgn*hw, uv.y);
+          col = OLD(clamp(q, 0.0, 1.0))*(1.0 - open*0.55);
+          float shade = exp(-(abs(dx) - hw)*14.0)*open;
+          col *= 1.0 - shade*0.5;
         }
-        float edge = max(abs(f.x), abs(f.y));
-        float wave = smoothstep(0.0, 0.15, t)*(1.0 - smoothstep(0.85, 1.0, t));
-        col = mix(col, grout, step(0.475, edge)*wave);
+        float line = exp(-abs(abs(dx) - hw)*uRes.x*0.012)*step(vy, tall)*(1.0 - open*0.6);
+        col += vec3(1.0, 0.86, 0.62)*line*(1.6 - grow*0.4);
+        float dust = step(abs(dx), hw + 0.01)*pow(h1(floor(uv*uRes/3.0) + floor(uTime*8.0)), 40.0)*(1.0 - open)*2.0;
+        col += vec3(1.0, 0.85, 0.6)*dust;
         return col;
       }
 
@@ -201,7 +199,7 @@ export function createComposite(renderer, opts = {}) {
         vec3 col;
         if (uT < 0.0) col = NEW(uv);
         else if (uMode < 0.5) col = shatter(uv);
-        else if (uMode < 1.5) col = tiles(uv);
+        else if (uMode < 1.5) col = doors(uv);
         else col = power(uv);
         gl_FragColor = vec4(col, 1.0);
       }`,

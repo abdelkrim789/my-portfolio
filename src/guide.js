@@ -34,10 +34,10 @@ export function createGuide(o) {
   const here = () => worldName(getWorld());
   const HOW = {
     night: ['Scroll and I’ll take you through my story, chapter by chapter.', 'The glowing labels open each part. Drag to look around.'],
-    medina: ['Scroll to walk through the medina, from the city gate to the rooftop.', 'Knock on doors, light the lanterns, open the fountains: anything with a label opens.'],
+    monument: ['Scroll to cross the dunes and walk the hall, one chapter at a time. W A S D or a click on the floor lets you roam.', 'Inside, NOOR answers anything about me. And two rooms are hidden.'],
     desk: ['Everything on this desk is clickable, or just scroll for a tour.', 'Start with the computer: it runs my CV.'],
   };
-  const ICON = { night: '✦', medina: '✷', desk: '▣' };
+  const ICON = { night: '✦', monument: '◆', desk: '▣' };
 
   // ---------- the script ----------
   const NODES = {
@@ -55,17 +55,15 @@ export function createGuide(o) {
     bye: () => ({ say: [['Enjoy! I’m here if you need me.', 'Have fun. Click my face any time.', 'Okay! I’ll be in the corner.'][(Math.random() * 3) | 0]], quiet: 2600 }),
     // arrivals
     'enter-night': () => ({ say: ['Back in the desert, at night. ✦', HOW.night[0]] }),
-    'enter-medina': () => ({ say: ['Ahlan! Welcome to my medina. ✷', HOW.medina[0], HOW.medina[1]] }),
+    'enter-monument': () => ({ say: ['This is the Monument. ◆', HOW.monument[0]] }),
     'enter-desk': () => ({ say: ['Welcome to my desk. Make yourself at home.', HOW.desk[0], HOW.desk[1]] }),
     // invitations
-    'night-tease': () => ({ say: ['Psst. The same story is also a walk through an old Algerian town at golden hour.', 'Want to take that walk?'],
-      replies: [['Take the walk ✷', { travel: 'medina' }], ['Later', 'bye']] }),
+    'night-tease': () => ({ say: ['Psst. The same story stands as a monument in the Sahara, with an AI guide inside.', 'Want to see it?'],
+      replies: [['Enter the Monument ◆', { travel: 'monument' }], ['Later', 'bye']] }),
     'night-end': () => ({ say: ['That’s the end of the night story.', 'Two more worlds are waiting:'], cards: 'others' }),
-    'medina-souk': () => ({ say: ['This is my favourite part. Every lantern is a skill: click one to light it.'] }),
-    'medina-lanterns': () => ({ say: ['You lit the whole souk. 🔥', 'One more world: my desk, where my CV runs on an old computer. Boot it?'],
-      replies: [['Boot it ▣', { travel: 'desk' }], ['Keep walking', 'bye']] }),
-    'medina-end': () => ({ say: ['You made it to the rooftop. 🌅', 'The pigeons on the ledge carry messages to me. The telescope opens the Night, and the room with the light on, down there, is my desk.'], replies: [['How do I contact you?', 'contact'], ['Show the worlds', 'worlds']] }),
-    'desk-tease': () => ({ say: ['Now you know my system. 😄', 'Want the same story as light in the desert, or as a walk through the medina?'], cards: 'others' }),
+    'monument-hall': () => ({ say: ['NOOR will guide you from here. Ask it anything. I’ll be in the corner if you want another world.'], quiet: 6000 }),
+    'monument-end': () => ({ say: ['You reached the last room. ◆', 'Look up and the ceiling opens onto the Night. The office door in the fourth bay leads to my desk.'], replies: [['How do I contact you?', 'contact'], ['Show the worlds', 'worlds']] }),
+    'desk-tease': () => ({ say: ['Now you know my system. 😄', 'Want the same story as light in the desert, or as a monument in the Sahara?'], cards: 'others' }),
     'desk-floppy': () => ({ say: ['Nice find. Those floppy disks are worlds.', 'Click one and the computer loads it.'] }),
     idle: () => {
       const w = pickOther();
