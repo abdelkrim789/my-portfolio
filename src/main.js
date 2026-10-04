@@ -6,7 +6,8 @@ import '@fontsource/ibm-plex-sans/latin-600';
 import '@fontsource/ibm-plex-mono/latin-400';
 import '@fontsource/ibm-plex-mono/latin-500';
 import * as THREE from 'three';
-import meURL from './assets/me.jpg?inline';
+import meReal from './assets/me.jpg?inline';
+const meURL = /[?&]nome/.test(location.search) ? 'data:,' : meReal; // capture mode: no photo anywhere
 import { WORLDS, WORLD_ORDER, savedWorld, saveWorld } from './worlds.js';
 import { createAudio } from './audio.js';
 import { PROJECTS, projectCanvas } from './screens.js';
@@ -96,6 +97,7 @@ function showToast(w) {
   clearTimeout(toastT); toastT = setTimeout(() => toast.classList.remove('on'), 1900);
 }
 const PORTAL_MS = [2100, 2400, 2200];
+if (/[?&]debug/.test(location.search)) window.__travel = (w) => travelTo(w);
 let portalBusy = false;
 async function travelTo(w, x = innerWidth / 2, y = innerHeight / 2) {
   if (!WORLDS[w] || w === world || portalBusy || !worldGL) return;

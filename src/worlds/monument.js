@@ -357,8 +357,8 @@ export async function createMonument(env) {
   ];
   const bayProj = BAYS.map((b, i) => project(projection({ ...PJ[i], fonts }), [bayWall(b), 13, b.z], 15, 7.5, b.s < 0 ? Math.PI / 2 : -Math.PI / 2));
   const geantFixedTex = projection({ year: '2025', eyebrow: 'Chapter five · repaired', title: 'Accurate stock, company-wide', lines: ['4–6 Power BI dashboards · ~30% faster platform', '30–50 users supported · 10–20 staff onboarded'], fonts });
-  project(projection({ eyebrow: 'Today · CNPC / Beijing Richfit International', title: 'SAP BPC consultant · Sonatrach SHONE', lines: ['Planning, consolidation and reporting.', 'Six streams of work, one consolidated view.'], align: 'center', fonts }), [0, 32, ZE + 0.05], 20, 10, 0, 1.5);
-  project(projection({ eyebrow: 'Next', title: 'Open to SAP roles worldwide', lines: [EMAIL, 'LinkedIn · abdelkrim-ghebouli'], align: 'center', fonts }), [0, 13, EZ1 + 0.05], 22, 11, 0, 1.7);
+  const coreProj = project(projection({ eyebrow: 'Today · CNPC / Beijing Richfit International', title: 'SAP BPC consultant · Sonatrach SHONE', lines: ['Planning, consolidation and reporting.', 'Six streams of work, one consolidated view.'], align: 'center', fonts }), [0, 32, ZE + 0.05], 20, 10, 0, 1.5);
+  const contactProj = project(projection({ eyebrow: 'Next', title: 'Open to SAP roles worldwide', lines: [EMAIL, 'LinkedIn · abdelkrim-ghebouli'], align: 'center', fonts }), [0, 13, EZ1 + 0.05], 22, 11, 0, 1.7);
 
   // ---------- the bays ----------
   const IB = new Batch();
@@ -1022,7 +1022,7 @@ export async function createMonument(env) {
     if (i >= 1) titleEl.classList.add('gone');
   }
 
-  if (/[?&]debug/.test(location.search)) window.__monument = { go: (i) => { go(i); snapT = performance.now() + 1e5; }, get stage() { return stage; }, camera, scene, renderer, H, act: (id) => activate(id), ask: (q) => ask(q), vault: () => openVault(), archive: () => openArchive(), powerAll, openAll, repair, volU, cam: (p, l) => { mode = 'detour'; detour = { id: 'dbg', legs: [{ p: V(p), l: V(l) }], leg: 0 }; P.set(...p); L.set(...l); }, free: (p, yawA) => { mode = 'free'; free = { p: V(p), yaw: yawA, pitch: 0, to: null }; }, set skyWait(v) { skyWait = v; }, set noorHidden(v) { noorHidden = v; }, setStage(v) { stage = stageT = v; }, get P() { return P; }, composer, bloom, rays, vol, mirror: () => mirror };
+  if (/[?&]debug/.test(location.search)) window.__monument = { go: (i) => { go(i); snapT = performance.now() + 1e5; }, get stage() { return stage; }, camera, scene, renderer, H, act: (id) => activate(id), ask: (q) => ask(q), vault: () => openVault(), archive: () => openArchive(), powerAll, openAll, repair, volU, cam: (p, l) => { mode = 'detour'; detour = { id: 'dbg', legs: [{ p: V(p), l: V(l) }], leg: 0 }; P.set(...p); L.set(...l); }, free: (p, yawA) => { mode = 'free'; free = { p: V(p), yaw: yawA, pitch: 0, to: null }; }, set skyWait(v) { skyWait = v; }, set noorHidden(v) { noorHidden = v; }, setStage(v) { stage = stageT = v; }, get P() { return P; }, composer, bloom, rays, vol, mirror: () => mirror, hideSAP() { coreProj.visible = contactProj.visible = bayProj[2].visible = false; } };
 
   let on = false, rtW = 4, rtH = 4, lastAuto = 0;
   const C = new THREE.Color();
