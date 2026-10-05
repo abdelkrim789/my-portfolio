@@ -403,7 +403,7 @@ export async function createDesk(env) {
   if (/[?&]debug/.test(location.search)) window.__desk = { tour, focusOn, click, enterOS, exitOS, get camPos() { return camPos; }, camera };
   return {
     id: 'desk', ui: 'own', camera,
-    precompile() { try { renderer.compileAsync?.(scene, camera).catch(() => {}); } catch {} },
+    precompile() { try { return renderer.compileAsync?.(scene, camera).catch(() => {}); } catch {} },
     post: { conv: 1, grain: 0.025, vig: 0.32, ab: 0.0008, light: 0, tilt: 0, exposure: 1.05 },
     get noFluid() { return mode === 'os'; },
     enter() {

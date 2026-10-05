@@ -79,6 +79,10 @@
 .agos-files button:hover span, .agos-files button:focus-visible span { background: var(--brass); }
 .agos-url { padding: 4px 8px; background: var(--paper2); border-bottom: 1px solid #b9ae93; }
 .agos-url span { display: block; padding: 2px 8px; background: #fffdf6; border: 2px inset #b9ae93; font: 400 12px/1.3 var(--read); }
+.app-lab .agos-url { display: flex; gap: 8px; align-items: center; }
+.app-lab .agos-url span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-lab .agos-url a { font: 400 12px/1 var(--read); color: var(--g0); padding: 4px 8px; background: var(--paper); border: 2px outset #b9ae93; text-decoration: none; white-space: nowrap; }
+.agos-frame { flex: 1; width: 100%; min-height: 0; border: 0; background: #edf0e8; }
 .agos-page img { display: block; width: 100%; height: auto; border-bottom: 2px solid var(--g0); }
 .agos-cert { margin: 14px; padding: 18px 16px; text-align: center; background: #fbf8ef; border: 6px double #b08a3a; display: grid; gap: 4px; justify-items: center; }
 .agos-cert p { margin: 0; font: 400 18px/1 var(--sys); color: #5a5446; }

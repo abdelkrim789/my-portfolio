@@ -15,6 +15,7 @@ const ICONS = {
   term: '<rect x="3" y="5" width="26" height="22" fill="#0e1f17" stroke="#c9a24a" stroke-width="2"/><path d="M8 12l4 4-4 4M15 21h8" stroke="#9cff9c" stroke-width="2" fill="none"/>',
   disk: '<rect x="5" y="4" width="22" height="24" fill="#18181d" stroke="#c9a24a" stroke-width="1.5"/><rect x="10" y="4" width="11" height="8" fill="#b8bec6"/><rect x="8" y="17" width="16" height="9" fill="#f4efe0"/>',
   bin: '<path d="M8 9h16l-2 19H10z" fill="#9aa39a" stroke="#0e1f17" stroke-width="2"/><path d="M6 9h20M13 6h6" stroke="#0e1f17" stroke-width="2"/><path d="M13 13v11M19 13v11" stroke="#0e1f17" stroke-width="1.5"/>',
+  lab: '<rect x="4" y="4" width="24" height="24" fill="#edf0e8" stroke="#0e1f17" stroke-width="2"/><path d="M4 11h24M4 17h24M4 23h24M12 4v24" stroke="#9fb39a" stroke-width="1.2"/><path d="M14 18l4 4 8-11" fill="none" stroke="#b4302a" stroke-width="2.6"/>',
   web: '<circle cx="16" cy="16" r="12" fill="#bfe0f2" stroke="#0e1f17" stroke-width="2"/><path d="M4 16h24M16 4c-5 6-5 18 0 24M16 4c5 6 5 18 0 24" fill="none" stroke="#0e1f17" stroke-width="1.5"/>',
 };
 const icon = (k, s = 32) => `<svg viewBox="0 0 32 32" width="${s}" height="${s}" aria-hidden="true">${ICONS[k]}</svg>`;
@@ -52,7 +53,7 @@ const CERTS = [
   ['S4C03', 'SAP Certified', 'Implementation Consultant · S/4HANA Cloud Private Edition'],
   ['C_ABAPD_2309', 'SAP Certified Associate', 'Back-End Developer · ABAP Cloud'],
 ];
-const TCODES = { SU01: 'about', SM37: 'career', SE16: 'skills', SE16N: 'skills', SBWP: 'mail', ZPROJ: 'projects', ZCERT: 'certs', ZWORLD: 'worlds', ZTERM: 'terminal' };
+const TCODES = { UJKT: 'lab', ZCONS: 'lab', SU01: 'about', SM37: 'career', SE16: 'skills', SE16N: 'skills', SBWP: 'mail', ZPROJ: 'projects', ZCERT: 'certs', ZWORLD: 'worlds', ZTERM: 'terminal' };
 
 export function createOS(o) {
   const { audio, achieve, travel, shotFor, PROJECTS, onExit } = o;
@@ -89,13 +90,14 @@ export function createOS(o) {
     career: { title: 'SM37 · Job overview', icon: 'jobs', w: 560, h: 380, body: career, label: 'Career' },
     skills: { title: 'SE16 · Data browser: ZSKILLS', icon: 'table', w: 560, h: 400, body: skills, label: 'Skills' },
     projects: { title: 'C:\\PROJECTS', icon: 'folder', w: 420, h: 220, body: projects, label: 'Projects' },
+    lab: { title: 'UJKT · Consolidation Lab', icon: 'lab', w: 690, h: 500, body: lab, label: 'Conso Lab' },
     certs: { title: 'C:\\CERTIFICATES', icon: 'cert', w: 470, h: 300, body: certs, label: 'Certificates' },
     mail: { title: 'SBWP · Business Workplace', icon: 'mail', w: 540, h: 340, body: mail, label: 'Mail' },
     terminal: { title: 'Terminal', icon: 'term', w: 520, h: 330, body: terminal },
     worlds: { title: 'A:\\WORLDS', icon: 'disk', w: 400, h: 220, body: worlds, label: 'Worlds' },
     bin: { title: 'Recycle Bin', icon: 'bin', w: 440, h: 230, body: bin, label: 'Recycle Bin' },
   };
-  const ICON_ORDER = ['about', 'career', 'skills', 'projects', 'certs', 'mail', 'terminal', 'worlds', 'bin'];
+  const ICON_ORDER = ['about', 'career', 'lab', 'skills', 'projects', 'certs', 'mail', 'terminal', 'worlds', 'bin'];
   $('.agos-icons').innerHTML = ICON_ORDER.map((id) => `<li><button type="button" data-app="${id}">${icon(APPS[id].icon, 34)}<span>${APPS[id].label || APPS[id].title}</span></button></li>`).join('');
   el.querySelectorAll('.agos-icons button').forEach((b) => b.addEventListener('click', () => { audio.click(); launch(b.dataset.app); }));
   start.innerHTML = `<p>Abdelkrim Ghebouli</p>${ICON_ORDER.map((id) => `<button type="button" role="menuitem" data-app="${id}">${icon(APPS[id].icon, 20)}${APPS[id].label || APPS[id].title}</button>`).join('')}<hr><button type="button" role="menuitem" data-off>${icon('term', 20)}Shut down</button>`;
@@ -104,6 +106,7 @@ export function createOS(o) {
   $('.agos-startbtn').addEventListener('click', () => { start.hidden = !start.hidden; audio.click(); });
   desk.addEventListener('pointerdown', (e) => { if (!e.target.closest('.agos-start, .agos-startbtn')) start.hidden = true; });
   $('.agos-exit').addEventListener('click', () => onExit());
+  el.addEventListener('click', (e) => { const a = e.target.closest('a[data-lab]'); if (a) { e.preventDefault(); launch('lab'); } });
   cmd.addEventListener('submit', (e) => { e.preventDefault(); runT(cmdIn.value); cmdIn.value = ''; });
   el.addEventListener('keydown', (e) => { e.stopPropagation(); if (e.key === 'Escape') { if (!start.hidden) start.hidden = true; else onExit(); } else if (e.target.matches('input') && e.key.length === 1) audio.key(); });
 
@@ -217,6 +220,11 @@ Looking for: SAP consultant roles, internationally.</pre>
       if (t) b.querySelector('.agos-doc').appendChild(t.content.cloneNode(true));
     } };
   }
+  // a real program on the fake computer: the Consolidation Lab, running in its own page
+  function lab(b) {
+    b.innerHTML = `<div class="agos-url"><span>https://abdelkrim789.github.io/my-portfolio/lab/</span><a href="./lab/" target="_blank" rel="noopener">Full screen</a></div><iframe class="agos-frame" src="./lab/?embed" title="The Consolidation Lab"></iframe>`;
+    achieve?.('lab');
+  }
   function certs(b) {
     b.innerHTML = `<ul class="agos-files">${CERTS.map((c, i) => `<li><button type="button" data-c="${i}">${icon('cert', 40)}<span>${c[0]}.cer</span></button></li>`).join('')}</ul>`;
     b.querySelectorAll('[data-c]').forEach((x) => x.addEventListener('click', () => launch('cert', x.dataset.c)));
@@ -255,11 +263,12 @@ Looking for: SAP consultant roles, internationally.</pre>
     const s = v.trim(), w = s.toLowerCase();
     if (!s) return;
     const say = termPrint;
-    if (w === 'help') say('HELP       this list\nWHOAMI     who built this\nDIR        list files\nTYPE ABOUT.TXT\nCAREER  SKILLS  PROJECTS  CERTS  MAIL\nCV         download my CV\nWORLDS     other worlds  ·  NIGHT  ICE  load one\nDATE       time in Bordj Bou Arreridj\nCLS        clear  ·  EXIT  step away\nSAP people: SU01 SM37 SE16 SBWP ST22 SE38');
+    if (w === 'help') say('HELP       this list\nWHOAMI     who built this\nDIR        list files\nTYPE ABOUT.TXT\nCAREER  SKILLS  PROJECTS  CERTS  MAIL\nLAB        run a group consolidation\nCV         download my CV\nWORLDS     other worlds  ·  NIGHT  ICE  load one\nDATE       time in Bordj Bou Arreridj\nCLS        clear  ·  EXIT  step away\nSAP people: SU01 SM37 SE16 SBWP ST22 SE38 UJKT');
     else if (w === 'whoami') say('abdelkrim ghebouli · SAP BPC consultant · Bordj Bou Arreridj, DZ');
     else if (w === 'dir' || w === 'ls') say(' ABOUT.TXT      CAREER.SM37    SKILLS.ZTAB\n <PROJECTS>     <CERTS>        CV.PDF\n <WORLDS>       BIN');
     else if (/^(type|cat) about(\.txt)?$/.test(w)) { launch('about'); say('Opened ABOUT.TXT'); }
     else if (['career', 'skills', 'projects', 'certs', 'mail', 'worlds'].includes(w)) { launch(w); say(`Opened ${w.toUpperCase()}`); }
+    else if (w === 'lab' || w === 'consolidate' || w === 'conso') { launch('lab'); say('Opened the Consolidation Lab. Press Run the close.'); }
     else if (w === 'cv') { const a = document.createElement('a'); a.href = CV; a.download = ''; document.body.appendChild(a); a.click(); a.remove(); say('Downloading CV.PDF ...'); }
     else if (w === 'date' || w === 'time') say(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Algiers', dateStyle: 'full', timeStyle: 'short' }) + ' · Bordj Bou Arreridj');
     else if (w === 'cls' || w === 'clear') termOut.innerHTML = '';

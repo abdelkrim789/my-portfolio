@@ -822,6 +822,7 @@ export async function createMonument(env) {
     if (a.worlds) guide?.openPicker?.();
     if (a.streams) openAll();
     if (a.power) powerAll();
+    if (a.lab) location.href = './lab/';
   }
   async function copyEmail() { try { await navigator.clipboard.writeText(EMAIL); say(`Copied: ${EMAIL}. He usually answers quickly.`, ['Download the CV']); } catch { say(`His email is ${EMAIL}.`, ['Download the CV']); } achieve('hello'); }
   function downloadCV() { const a = document.createElement('a'); a.href = './Abdelkrim-Ghebouli-CV.pdf'; a.download = ''; document.body.appendChild(a); a.click(); a.remove(); }
@@ -1029,7 +1030,7 @@ export async function createMonument(env) {
   return {
     id: 'monument', ui: 'own', camera,
     post: { conv: 1, grain: 0.03, vig: 0.42, ab: 0.0008, light: 0, tilt: 0, exposure: 0.85 },
-    precompile() { try { renderer.compileAsync?.(scene, camera).catch(() => {}); } catch {} },
+    precompile() { try { return renderer.compileAsync?.(scene, camera).catch(() => {}); } catch {} },
     enter() { if (on) return; on = true; ui.classList.add('on'); ui.setAttribute('aria-hidden', 'false'); attach(true); if (shown < 0) setStop(0); lastAuto = performance.now(); },
     exit() { if (!on) return; on = false; ui.classList.remove('on'); ui.setAttribute('aria-hidden', 'true'); attach(false); drag = null; hover = null; keys.clear(); audio.sea?.(0); try { speechSynthesis?.cancel(); } catch {} },
     caption() { return STOPS[clamp(Math.round(stage), 0, N)].label; },

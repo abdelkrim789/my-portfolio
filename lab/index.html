@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Consolidation Lab · Abdelkrim Ghebouli</title>
+<meta name="description" content="A working group consolidation in your browser: three companies, three currencies, translation, intercompany matching and elimination, goodwill and minority interests. Built by SAP BPC consultant Abdelkrim Ghebouli.">
+<meta name="theme-color" content="#edf0e8">
+<meta name="author" content="Abdelkrim Ghebouli">
+<link rel="canonical" href="https://abdelkrim789.github.io/my-portfolio/lab/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="The Consolidation Lab · Abdelkrim Ghebouli">
+<meta property="og:description" content="Three companies, three currencies, one set of numbers. Run a group close step by step, then try to break it.">
+<meta property="og:url" content="https://abdelkrim789.github.io/my-portfolio/lab/">
+<meta property="og:image" content="https://abdelkrim789.github.io/my-portfolio/og-lab.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://abdelkrim789.github.io/my-portfolio/og-lab.jpg">
+<script>if (/[?&]embed\b/.test(location.search)) document.documentElement.classList.add('embed');</script>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23edf0e8'/%3E%3Cpath d='M14 20h36M14 32h36M14 44h36' stroke='%23c9d3c4' stroke-width='3'/%3E%3Cpath d='M18 33l8 8 20-22' fill='none' stroke='%23c23b2e' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+</head>
+<body>
+<a class="skip" href="#grid">Skip to the statements</a>
+<header class="bar">
+  <a class="home" href="../">Abdelkrim Ghebouli</a>
+  <nav aria-label="Site">
+    <a href="../">Portfolio</a>
+    <a href="../cv/">CV</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="h1">
+    <div class="hero-text">
+      <p class="lead-in">The Consolidation Lab</p>
+      <h1 id="h1">Three companies, three currencies, one set of numbers.</h1>
+      <p class="sub">I'm an SAP BPC consultant. This is a group close in miniature: translate, match, eliminate, consolidate. The data is made up; the logic is the real thing. Run it, then try to break it.</p>
+    </div>
+    <div class="run" role="group" aria-label="Run the close">
+      <button class="btn primary" id="run-all" type="button">Run the close</button>
+      <button class="btn" id="run-one" type="button">Run one step</button>
+      <button class="btn quiet" id="reset" type="button">Start over</button>
+    </div>
+  </section>
+
+  <section class="desk" aria-label="Consolidation">
+    <aside class="bpf" aria-label="Business process flow">
+      <h2>Business process flow</h2>
+      <ol id="steps" aria-label="Steps of the close">
+        <li class="next"><button type="button" data-step="0" aria-current="step"><span class="n">1</span><span class="t">Load</span><span class="d">Trial balances, local currency</span></button></li>
+        <li class="todo"><button type="button" data-step="1"><span class="n">2</span><span class="t">Validate</span><span class="d">Every entity balances</span></button></li>
+        <li class="todo"><button type="button" data-step="2"><span class="n">3</span><span class="t">Translate</span><span class="d">Into USD</span></button></li>
+        <li class="todo"><button type="button" data-step="3"><span class="n">4</span><span class="t">Match</span><span class="d">Intercompany reconciliation</span></button></li>
+        <li class="todo"><button type="button" data-step="4"><span class="n">5</span><span class="t">Eliminate</span><span class="d">Intercompany out of the group</span></button></li>
+        <li class="todo"><button type="button" data-step="5"><span class="n">6</span><span class="t">Consolidate</span><span class="d">Investments, goodwill, NCI</span></button></li>
+        <li class="todo"><button type="button" data-step="6"><span class="n">7</span><span class="t">Report</span><span class="d">Consolidated statements</span></button></li>
+      </ol>
+      <div class="group">
+        <h2>The group</h2>
+        <ul id="entities"></ul>
+      </div>
+    </aside>
+
+    <section class="paper" aria-label="Statements">
+      <div class="tabs" role="tablist" aria-label="Statement">
+        <button role="tab" id="tab-pl" aria-controls="grid" aria-selected="true" data-tab="pl" type="button">Income statement</button>
+        <button role="tab" id="tab-bs" aria-controls="grid" aria-selected="false" data-tab="bs" type="button">Balance sheet</button>
+        <button role="tab" id="tab-ic" aria-controls="grid" aria-selected="false" data-tab="ic" type="button">Intercompany</button>
+        <span class="unit" id="unit"></span>
+      </div>
+      <div class="scroll" id="grid" tabindex="-1"></div>
+      <p class="hint" id="hint">Select any figure to see where it comes from.<span class="swipe"> Swipe the table sideways for the group column.</span></p>
+    </section>
+
+    <aside class="inspector" aria-label="Explanation" aria-live="polite">
+      <div id="inspect"></div>
+    </aside>
+  </section>
+
+  <section class="levers" aria-labelledby="h-break">
+    <div class="levers-head">
+      <h2 id="h-break">Try to break it</h2>
+      <p>Move a currency, change the ownership, lose a payment. The statements re-run, and the ones that changed light up.</p>
+    </div>
+    <div class="lever">
+      <label for="l-eur">Euro against the dollar</label>
+      <input id="l-eur" type="range" min="-12" max="12" step="1" value="0" data-key="eur">
+      <output for="l-eur" id="o-eur">unchanged</output>
+    </div>
+    <div class="lever">
+      <label for="l-cny">Yuan against the dollar</label>
+      <input id="l-cny" type="range" min="-12" max="12" step="1" value="0" data-key="cny">
+      <output for="l-cny" id="o-cny">unchanged</output>
+    </div>
+    <div class="lever">
+      <label for="l-dzd">Dinar against the dollar</label>
+      <input id="l-dzd" type="range" min="-12" max="12" step="1" value="0" data-key="dzd">
+      <output for="l-dzd" id="o-dzd">unchanged</output>
+    </div>
+    <div class="lever">
+      <label for="l-own">Group's share of Atlas Shanghai</label>
+      <input id="l-own" type="range" min="51" max="100" step="1" value="70" data-key="own">
+      <output for="l-own" id="o-own">70%</output>
+    </div>
+    <div class="lever check">
+      <input id="l-miss" type="checkbox" data-key="miss">
+      <label for="l-miss">A 3.6 k€ payment from Atlas France hasn't reached Atlas Algérie yet</label>
+    </div>
+  </section>
+
+  <section class="notes" aria-labelledby="h-notes">
+    <h2 id="h-notes">What's simplified</h2>
+    <p>One period, acquisitions at incorporation, no unrealised profit in inventory, no deferred tax. A real close in SAP BPC adds those as more steps in the same flow; the shape of the work is what you see here.</p>
+    <p class="by">Built by <a href="../">Abdelkrim Ghebouli</a>, SAP BPC consultant. <a href="../cv/">Read my CV</a> or write to <a href="mailto:abdelkrimghebouli.34@gmail.com">abdelkrimghebouli.34@gmail.com</a>.</p>
+  </section>
+</main>
+<script type="module" src="../src/lab/main.js"></script>
+</body>
+</html>

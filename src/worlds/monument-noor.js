@@ -35,6 +35,7 @@ const SYN = {
   vault: 'vault', archive: 'archive', origin: 'archive', roots: 'archive', grew: 'archive', born: 'archive', family: 'archive',
   s4: 's4hana', 's/4hana': 's4hana', s4hana: 's4hana', hana: 's4hana', analytics: 'sac', cloud: 'sac',
   queries: 'bw', query: 'bw', warehouse: 'bw',
+  laboratory: 'lab', demo: 'lab', simulation: 'lab', simulate: 'lab', playground: 'lab', eliminate: 'elimination', eliminations: 'elimination', minorities: 'minority', nci: 'minority', ic: 'intercompany',
 };
 const stem = (w) => (w.length > 4 ? w.replace(/(ings|ing|ed|es|s)$/, '') : w);
 export function tokens(text) {
@@ -56,7 +57,7 @@ const KB = [
   { id: 'thanks', k: ['thanks'], a: 'You’re welcome. I’m here if anything else comes to mind.' },
   { id: 'bye', k: ['bye'], a: 'Safe travels. The door is always open.' },
   { id: 'whoami', k: ['whoami', 'noor'], a: 'I’m NOOR, which means light in Arabic. I’m the guide built into this portfolio, and I answer from what Abdelkrim has written about his own work. For anything I can’t answer, he’s one email away.' },
-  { id: 'help', k: ['help', 'ask', 'question', 'options'], a: 'You can ask about his current role on SHONE, his SAP certifications, the systems he works with, his projects, the Géant Electronics incident, his education, languages, or how to contact him. You can also say “take me to the core”.' },
+  { id: 'help', k: ['help', 'ask', 'question', 'options'], a: 'You can ask about his current role on SHONE, his SAP certifications, the systems he works with, his projects, the Géant Electronics incident, his education, languages, or how to contact him. You can also say “take me to the core”, or “how does a consolidation work?”' },
   { id: 'who', k: ['who', 'introduce', 'summary', 'profile', 'person', 'career'], a: 'Abdelkrim Ghebouli is an SAP BPC consultant from Bordj Bou Arreridj, Algeria. Today he works for CNPC / Beijing Richfit International on Sonatrach’s SHONE project, in planning, consolidation and reporting. Before that he was a data analyst and ERP support specialist at Géant Electronics, led a remote team of developers as a freelancer, and completed a master 1 in business intelligence.', chips: ['What does he do on SHONE?', 'Which certifications?', 'How do I contact him?'] },
   { id: 'now', k: ['now', 'role', 'shone'], w: { shone: 3 }, a: 'Since June 2026 he has been an SAP BPC consultant with CNPC / Beijing Richfit International on Sonatrach’s SHONE project. He configures Business Process Flows, builds reporting in the EPM Add-in and Analysis for Office, and trained in BW query and security design. Everything he does there feeds one consolidated view.', act: { go: 8, label: 'Take me to the core' } },
   { id: 'bpc', k: ['bpc', 'planning', 'bpf', 'epm'], a: 'SAP BPC is his daily system: planning, consolidation and reporting. He configures Business Process Flows to structure and monitor the cycle, and builds reports in the EPM Add-in, the Excel front end for BPC.', act: { go: 8, label: 'See the six streams' } },
@@ -89,6 +90,7 @@ const KB = [
   { id: 'strength', k: ['strength', 'unique', 'different', 'stand'], a: 'He works on both sides of SAP: the finance processes, planning, consolidation and reporting, and the technical layer, ABAP, SQL, Python and backends. At Géant he didn’t just report a company-wide data failure, he built the tool that repaired it.' },
   { id: 'hidden', k: ['hidden', 'explore', 'surprise'], a: 'Some walls here are not walls. Look closely in the room of the degrees. And the vault beneath the core opens for those who ask.' },
   { id: 'worlds', k: ['worlds'], a: 'This portfolio has three worlds. The Night tells the same story as a journey of light in the desert, and the Desk is his workspace, with a computer that runs his CV. There’s a way to each of them from here.', act: { worlds: true, label: 'Show the worlds' } },
+  { id: 'lab', k: ['lab', 'elimination', 'intercompany', 'goodwill', 'minority', 'translation', 'currency', 'try'], w: { lab: 4, elimination: 3, intercompany: 3, goodwill: 3, minority: 3 }, a: 'You can run one yourself. The Consolidation Lab is a group close in miniature: three companies in dinars, euros and yuan, translated, matched, eliminated and consolidated, one step at a time. Then you can try to break it.', act: { lab: true, label: 'Open the Lab' } },
   { id: 'age', k: ['age', 'old', 'birthday'], a: 'That’s one thing I keep to myself. His work says more: ask me about it.' },
   { id: 'nav-core', k: ['go', 'take', 'core', 'center'], w: { core: 3 }, need: ['core', 'center'], a: 'This way.', act: { go: 8, auto: true } },
   { id: 'nav-end', k: ['go', 'take', 'end', 'last'], need: ['end', 'last'], a: 'To the last room.', act: { go: 9, auto: true } },
@@ -102,6 +104,7 @@ const RULES = [
   [/\b(who|what) are you\b|\byour name\b|\bare you (an? )?(ai|bot|robot|human|real|chatgpt)\b/, 'whoami'],
   [/\bwhat (does|do) (he|abdelkrim|ghebouli) do\b|\bwhat is (his|the) (role|job|position)\b|\bwhere does he work\b/, 'now'],
   [/\bwhy (should|would) (i|we|someone) hire\b/, 'strength'],
+  [/\bhow (does|do|is) .*consolidat|\bwhat is (a )?consolidation\b|\bconsolidation lab\b|\b(try|run) (a |the )?(consolidation|close)\b/, 'lab'],
 ];
 const byId = (id) => KB.find((k) => k.id === id);
 export function answer(q) {
