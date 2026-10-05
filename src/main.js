@@ -51,6 +51,7 @@ const ACH = [
   ['vault', 'Keyholder', 'Open the vault beneath the floor'],
   ['noor', 'Curious', 'Ask NOOR five questions'],
   ['tcode', 'Power user', 'Run a transaction code on my computer'],
+  ['lab', 'Group close', 'Open the Consolidation Lab on my computer'],
   ['floppy', 'Disk jockey', 'Change world with a floppy disk'],
   ['postcard', 'Wish you were here', 'Take a postcard (P)'],
   ['hello', 'Hello', 'Meet the person behind it'],
@@ -391,6 +392,7 @@ async function start() {
   const { tier, gpu } = detectTier(renderer);
   root.dataset.tier = tier;
   const DPR_MAX = tier >= 2 ? Math.min(devicePixelRatio || 1, 1.75) : tier === 1 ? Math.min(devicePixelRatio || 1, 1.3) : 0.75;
+  const DPR_MIN = tier === 0 ? 0.45 : 0.6;
   let dpr = DPR_MAX;
   renderer.setPixelRatio(dpr);
   renderer.setSize(innerWidth, innerHeight);
@@ -431,12 +433,14 @@ async function start() {
   bootLog(`Detected ${['a light', 'a standard', 'a strong'][tier]} graphics device`);
   bootLog(LOGS[world]);
   let active = await ensure(world);
+  await Promise.race([active.precompile?.(), new Promise((r) => setTimeout(r, 2500))]);
   bootLog('World ready');
   active.enter?.();
 
   const composite = createComposite(renderer, { fluid: tier > 0 && !reduced });
   audio.setWorld(world);
-  let glitch = 0, trans = null, shocks = 0, wantShot = false, hudOn = false, thumbAt = performance.now() + 4000;
+  // the world-picker thumbnail reads pixels back from the GPU, which stalls a frame: not during the first impression
+  let glitch = 0, trans = null, shocks = 0, wantShot = false, hudOn = false, thumbAt = performance.now() + 20000;
   document.getElementById('postcard-btn')?.addEventListener('click', () => { setGuide(false); wantShot = true; });
   document.getElementById('perf-btn')?.addEventListener('click', () => { setGuide(false); toggleHUD(); });
   const hud = document.getElementById('perf');
@@ -644,6 +648,7 @@ async function start() {
   }
 
   function frame(now) {
+    const rawDt = Math.min(0.25, (now - last) / 1000);   // what the frame really cost (a tab coming back from the background counts once); the animation clock, dt, is clamped harder
     const dt = Math.min(DTMAX, (now - last) / 1000); last = now;
     const time = (now - t0) / 1000;
     if (document.hidden) { requestAnimationFrame(frame); return; }
@@ -742,14 +747,15 @@ async function start() {
     if (!booted) bootDone();
 
     // resolution governor: trade pixels for frame rate, continuously
-    ema += (dt - ema) * 0.08;
-    govT += dt;
-    if (!NOGOV && !trans && introT >= 1 && govT > 1.2) {
+    // it measures real frame time, so a device that can only manage a few frames a second is rescued in seconds, even mid-intro
+    ema += (rawDt - ema) * 0.08;
+    govT += rawDt;
+    if (!NOGOV && !trans && (introT >= 1 || ema > 0.1) && govT > 1.2) {
       govT = 0;
-      if (ema > 1 / 46 && dpr > 0.6) { dpr = Math.max(0.6, +(dpr - 0.15).toFixed(2)); govUp = 0; resize(); }
+      if (ema > 1 / 46 && dpr > DPR_MIN) { dpr = Math.max(DPR_MIN, +(dpr - (ema > 0.1 ? 0.25 : 0.15)).toFixed(2)); govUp = 0; resize(); }
       else if (ema < 1 / 57 && dpr < DPR_MAX) { if (++govUp >= 3) { govUp = 0; dpr = Math.min(DPR_MAX, +(dpr + 0.1).toFixed(2)); resize(); } }
       else govUp = 0;
-      if (dpr <= 0.6 && ema > 1 / 30) Object.values(made).forEach((w) => w.quality(2));
+      if (dpr <= DPR_MIN && ema > 1 / 30) Object.values(made).forEach((w) => w.quality(2));
     }
     hudFrames++; hudT += dt;
     if (hudOn && hudT > 0.5) {

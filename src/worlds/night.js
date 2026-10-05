@@ -70,7 +70,10 @@ export async function createNight(env) {
   const N = small || coarse ? 24000 : cores <= 4 ? 38000 : 60000;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 900);
+  // the heavy geometry is built in slices, handing the main thread back between them so the page stays responsive while it loads
+  const breathe = () => new Promise((r) => setTimeout(r, 0));
   const shapes = buildShapes(N);
+  await breathe();
 
   const fit = () => {
     const aspect = innerWidth / innerHeight, mobile = aspect < 0.9;
@@ -83,7 +86,9 @@ export async function createNight(env) {
   let path = buildPath(F.mobile);
   const pathD = buildPath(false);
 
-  const attrs = sharedGeometry(N, shapes, buildName(N, F.nameW, fontFam));
+  const nameAttr = buildName(N, F.nameW, fontFam);
+  await breathe();
+  const attrs = sharedGeometry(N, shapes, nameAttr);
   const objs = SCENES.map((d, k) => {
     const o = createScene(attrs, k, Math.floor(N * d.n), d.s);
     o.position.set(...d.pos); o.rotation.set(...d.rot); o.scale.setScalar(d.s);
@@ -91,11 +96,14 @@ export async function createNight(env) {
     scene.add(o);
     return o;
   });
+  await breathe();
   const ground = createGround(small || coarse ? 18000 : 42000, [-85, 45, -290, 35]);
   const trail = createTrail(pathD.pos, small || coarse ? 3500 : 7000);
   const sky = createSky(small ? 1400 : 2600);
   const orb = createOrb(small || coarse ? 2600 : 5200);
-  orb.position.set(60, 112, -430); orb.scale.setScalar(48);
+  // the moon rises above the name in a landscape frame instead of sitting on it; portrait keeps its old place
+  const placeOrb = () => { if (F.mobile) { orb.position.set(60, 112, -430); orb.scale.setScalar(48); } else { orb.position.set(0, 151, -430); orb.scale.setScalar(33); } };
+  placeOrb();
   scene.add(orb, ground, trail, sky);
   const screen = createScreen(small || coarse ? 120 : 190, small || coarse ? 75 : 118);
   screen.setTexture('d-olive', canv['d-olive'].canvas);
@@ -203,10 +211,12 @@ export async function createNight(env) {
       objs.forEach((o) => { o.material.uniforms.uAspect.value = F.aspect; o.material.uniforms.uPixelRatio.value = pr; });
       [ground, trail, sky, orb].forEach((o) => (o.material.uniforms.uPixelRatio.value = pr));
       finalPass.uniforms.uResolution.value.set(w * pr, h * pr);
-      if (oldM !== F.mobile) path = buildPath(F.mobile);
+      if (oldM !== F.mobile) { path = buildPath(F.mobile); placeOrb(); }
       if (Math.abs(oldW - F.nameW) / oldW > 0.08) { attrs.position.array.set(buildName(N, F.nameW, fontFam)); attrs.position.needsUpdate = true; glyphCache.clear(); }
     },
     quality(tier) { if (tier >= 2) bloom.enabled = false; },
+    // shaders compile off the main thread where the browser allows it, before the first frame needs them
+    precompile() { try { return renderer.compileAsync?.(scene, camera).catch(() => {}); } catch {} },
     update(c) {
       const { dt, time, stage, vel, mouse, mouseActive, introT, glyphKey, focusD, portalW } = c;
       ms += ((mouseActive ? 1 : 0) - ms) * Math.min(1, dt * 3);
